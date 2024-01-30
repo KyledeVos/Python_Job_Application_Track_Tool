@@ -15,5 +15,9 @@ class DatabaseController():
         self.cursor = self.connection.cursor()
 
         self.db_initializer.create_all_tables(self.connection, self.cursor)
+        self.db_initializer.set_default_values(self.connection, self.cursor)
+
+        # testing population
+        # print(self.db_initializer.retrieve_all_single_col(self.cursor, "employment_types", "type"))
 
         self.connection.close()
