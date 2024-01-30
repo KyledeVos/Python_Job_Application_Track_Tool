@@ -142,12 +142,12 @@ class DbInitializer():
         return cursor.execute(f"Select {column} from {table_name}").fetchall() 
 
 
-connection = sqlite3.connect('test.db')
-cursor = connection.cursor()
-initial = DbInitializer()
-# initial.create_all_tables(connection, cursor)
-initial.set_default_values(connection, cursor)
-print(initial.retrieve_all_single_col(cursor, "employment_types", "type"))
+# connection = sqlite3.connect('test.db')
+# cursor = connection.cursor()
+# initial = DbInitializer()
+# # initial.create_all_tables(connection, cursor)
+# initial.set_default_values(connection, cursor)
+# print(initial.retrieve_all_single_col(cursor, "employment_types", "type"))
 
 
 
