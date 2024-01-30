@@ -9,7 +9,6 @@ from persistence_modules.db_initializer import DbInitializer
 class ApplicationController():
 
     def __init__(self, database) -> None:
-        print("application controller initialize")
         self.db_initializer = DbInitializer()
         
         # initialize controllers

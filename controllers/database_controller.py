@@ -1,5 +1,4 @@
 import sqlite3
-from persistence_modules.parents.initialize_db_parent import InitializeDbParent
 
 class DatabaseController():
 
