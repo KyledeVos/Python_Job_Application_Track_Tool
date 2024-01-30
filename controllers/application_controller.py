@@ -11,9 +11,13 @@ class ApplicationController():
     def __init__(self, database) -> None:
         self.db_initializer = DbInitializer()
         
-        # initialize controllers
-        self.screen_controller = ScreenController()
+        # initialize database controller and perform database configuration
         self.database_controller = DatabaseController(database, self.db_initializer)
+        self.database_controller.initialize_database()
+
+        # initialize application controller - creates main app screen
+        self.screen_controller = ScreenController()
 
     def start_app(self):
-        self.database_controller.initialize_database()
+        # start application
+        self.screen_controller.start_main_screen()
