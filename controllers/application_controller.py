@@ -16,4 +16,4 @@ class ApplicationController():
         self.database_controller = DatabaseController(database, self.db_initializer)
 
     def start_app(self):
-        self.database_controller.create_all_tables()
+        self.database_controller.initialize_database()

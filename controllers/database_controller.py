@@ -8,7 +8,7 @@ class DatabaseController():
         self.cursor = None
         self.db_initializer = InitializeDbParent
 
-    def create_all_tables(self):
+    def initialize_database(self):
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
