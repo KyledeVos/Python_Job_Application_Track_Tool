@@ -7,3 +7,6 @@ class InitializeDbParent():
 
     def create_all_tables():
         pass
+
+    def set_default_values():
+        pass
