@@ -1,5 +1,3 @@
-from tkinter import *
-
 from controllers.application_controller import ApplicationController
 
 def start_application():
