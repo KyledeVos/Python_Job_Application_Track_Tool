@@ -1,5 +1,5 @@
 from tkinter import *
-from parent_screens import FullScreen
+from .parent_screens import FullScreen
 
 class HomeScreen(FullScreen):
 
