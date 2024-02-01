@@ -1,7 +1,12 @@
 from tkinter import *
+
+# Main Screens
 from screens.home_screen import HomeScreen
-# from screens.job_applications_screen import JobApplicationsScreen
+from screens.job_applications_screen import JobApplicationsScreen
 from screens.gen_notes import GeneralNotesScreen
+
+# Sub Menu Screens
+
 class ScreenController():
 
     def __init__(self) -> None:
@@ -61,8 +66,10 @@ class ScreenController():
 
     def configure_main_screens(self):
         self.screen_dict = {'Home': HomeScreen(self.app_screen),
+                            'Job Applications': JobApplicationsScreen(self.app_screen),
                            'Notes': GeneralNotesScreen(self.app_screen)}
         
+
     def change_main_screen(self, menu_option):
         # Clear Application Screen
         for screen in self.app_screen.grid_slaves():
@@ -81,46 +88,5 @@ class ScreenController():
     def start_main_screen(self):
         self.root_window.mainloop()
 
-
-        # Main Menu Option Button
-
-        # menu_option = StringVar()
-        # menu_option.set("Menu")
-
-
-
-        # # Initialize Application Screen Windows
-        # home_screen_window = HomeScreen(app_screen)
-        # job_applications_window = JobApplicationsScreen(app_screen)
-        # gen__notes_window = GeneralNotesScreen(app_screen)
-
-
-# # Home Screen - loadup
-# home_screen_window.load_window()
-
-# # Add Application Windows to Menu Option
-# selection_options = {
-#     "Home": home_screen_window,
-#     "Job Applications": job_applications_window,
-#     "General Notes": gen__notes_window
-# }
-
-# def change_app_screen(menu_option):
-#     # Clear Application Screen
-#     for screen in app_screen.grid_slaves():
-#         screen.grid_forget()
-
-#     selection_options[menu_option].load_window()
-    
-#     # Keep Menu Dropdown text as Menu
-#     menu_option = StringVar()
-#     menu_option.set('Menu')
-#     main_menu = OptionMenu(page_title_frame, menu_option, command=change_app_screen, *selection_options)
-#     main_menu.config(width = 4)
-#     main_menu.grid(row=0, column=0, sticky=W+E, padx=5)
-
-# main_menu = OptionMenu(page_title_frame, menu_option, command=change_app_screen, *selection_options)
-# main_menu.config(width = 4)
-# main_menu.grid(row=0, column=0, sticky=W+E, padx=5)
 
 
