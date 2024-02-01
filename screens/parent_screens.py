@@ -31,18 +31,18 @@ class SectionedLeftMinor():
         self.window_title = Label(self.enclosing_window, text = frame_title )
         self.window_title.grid(row=0, column=0, columnspan=2, sticky="NEWS")
 
+    def load_left_minor(self):
         self.left_minor_window.grid(row = 1, column= 0, sticky="NEWS")
-        self.right_major_window.grid(row = 1, column = 1, sticky="NEWS")
 
+    def load_right_major(self):
+        self.right_major_window.grid(row = 1, column = 1, sticky="NEWS")
 
     def get_enclosing_window(self):
         return self.enclosing_window
 
-
     def get_left_minor(self):
         return self.left_minor_window
     
-
     def get_right_major(self):
         return self.right_major_window
     
