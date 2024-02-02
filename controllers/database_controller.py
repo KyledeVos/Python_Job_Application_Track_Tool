@@ -2,11 +2,12 @@ import sqlite3
 
 class DatabaseController():
 
-    def __init__(self, database, InitializeDbParent) -> None:
+    def __init__(self, database, InitializeDbParent, DbReader) -> None:
         self.database = database
         self.connection = None
         self.cursor = None
         self.db_initializer = InitializeDbParent
+        self.db_reader = DbReader
 
     def initialize_database(self):
 
@@ -20,3 +21,6 @@ class DatabaseController():
         # print(self.db_initializer.retrieve_all_single_col(self.cursor, "employment_types", "type"))
 
         self.connection.close()
+
+    def get_db_reader(self):
+        return self.db_reader

@@ -9,16 +9,17 @@ from screens.gen_notes import GeneralNotesScreen
 
 class ScreenController():
 
-    def __init__(self) -> None:
+    def __init__(self, db_reader) -> None:
         self.root_window = Tk()
         self.page_title_frame = None
         self.page_title = None
         self.app_screen = None
         self.menu_option = None
         self.current_screen = None
+        self.db_reader = db_reader
 
         # list containing application main screens
-        screen_dict = None
+        self.screen_dict = None
 
         self.configure_root_window()
         self.configure_root_sections()
@@ -66,7 +67,7 @@ class ScreenController():
 
     def configure_main_screens(self):
         self.screen_dict = {'Home': HomeScreen(self.app_screen),
-                            'Job Applications': JobApplicationsScreen(self.app_screen),
+                            'Job Applications': JobApplicationsScreen(self.app_screen, self.db_reader),
                            'Notes': GeneralNotesScreen(self.app_screen)}
         
 

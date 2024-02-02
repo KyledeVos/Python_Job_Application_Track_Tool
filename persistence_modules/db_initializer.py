@@ -1,10 +1,9 @@
-import sqlite3
 
 class DbInitializer():
 
     def __init__(self):
-        pass
-
+       pass
+    
     def create_all_tables(self, connection, cursor):
 
         # ===========================================================================
