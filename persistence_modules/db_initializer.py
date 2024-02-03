@@ -128,7 +128,7 @@ class DbInitializer():
         self.def_table_populate(connection, cursor, "employment_types", emp_columns, emp_values)
 
         cont_duration_cols = ["duration"]
-        cont_duration_vals = [('3 months',), ('6 months',), ('12 months',), ('24 months',), ('permanent',)]
+        cont_duration_vals = [('3 months',), ('6 months',), ('12 months',), ('24 months',), ('permanent',), ('not specified',)]
         self.def_table_populate(connection, cursor, "contract_period", cont_duration_cols, cont_duration_vals)
 
         app_status_cols = ["status"]
