@@ -114,13 +114,23 @@ class NewApplicationScreen(FullScreen):
         # Contract Duration
 
         self.contract_duration_lbl = Label(container, text="Contract Duration")
-
         current_options = self.db_controller.retrieve_single_col("duration" ,"contract_period")
 
         self.contract_duration = StringVar()
         self.contract_duration.set("3 Months")
         self.contract_duration_menu = OptionMenu(container, self.contract_duration, *current_options)
         self.contract_duration_menu.config(anchor=W)
+
+        # ----------------------------------------------------------------
+        # Application Status
+
+        self.app_status_lbl = Label(container, text="Application Status")
+        current_options = self.db_controller.retrieve_single_col("status" ,"application_status")
+
+        self.app_status = StringVar()
+        self.app_status.set("Applied")
+        self.app_status_menu = OptionMenu(container, self.contract_duration, *current_options)
+        self.app_status_menu.config(anchor=W)
         
 
 
@@ -146,6 +156,8 @@ class NewApplicationScreen(FullScreen):
         self.emp_type_menu.grid(row=6, column=1, sticky=W)
         self.contract_duration_lbl.grid(row = 7, column=0, padx=2, pady=2, sticky=W+E)
         self.contract_duration_menu.grid(row=7, column=1, sticky=W)
+        self.app_status_lbl.grid(row = 8, column=0, padx=2, pady=2, sticky=W+E)
+        self.app_status_menu.grid(row=8, column=1, sticky=W)
 
 
 
