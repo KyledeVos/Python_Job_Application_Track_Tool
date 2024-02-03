@@ -109,6 +109,18 @@ class NewApplicationScreen(FullScreen):
         self.emp_type.set("Full Time")
         self.emp_type_menu = OptionMenu(container, self.emp_type, *current_options)
         self.emp_type_menu.config(anchor=W)
+
+        # ----------------------------------------------------------------
+        # Contract Duration
+
+        self.contract_duration_lbl = Label(container, text="Contract Duration")
+
+        current_options = self.db_controller.retrieve_single_col("duration" ,"contract_period")
+
+        self.contract_duration = StringVar()
+        self.contract_duration.set("3 Months")
+        self.contract_duration_menu = OptionMenu(container, self.contract_duration, *current_options)
+        self.contract_duration_menu.config(anchor=W)
         
 
 
@@ -132,6 +144,8 @@ class NewApplicationScreen(FullScreen):
         self.description.grid(row=5, column=1, sticky=W+E)
         self.emp_type_label.grid(row = 6, column=0, padx=2, pady=2, sticky=W+E)
         self.emp_type_menu.grid(row=6, column=1, sticky=W)
+        self.contract_duration_lbl.grid(row = 7, column=0, padx=2, pady=2, sticky=W+E)
+        self.contract_duration_menu.grid(row=7, column=1, sticky=W)
 
 
 
