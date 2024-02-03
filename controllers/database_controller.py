@@ -22,5 +22,10 @@ class DatabaseController():
 
         self.connection.close()
 
-    def get_db_reader(self):
-        return self.db_reader
+    def retrieve_single_col(self, column_name, table_name):
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        data = self.db_reader.retrieve_single_col_list(self.cursor, column_name, table_name)
+        self.connection.close()
+
+        return data

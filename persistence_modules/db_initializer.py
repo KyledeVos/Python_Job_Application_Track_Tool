@@ -3,7 +3,7 @@ class DbInitializer():
 
     def __init__(self):
        pass
-    
+
     def create_all_tables(self, connection, cursor):
 
         # ===========================================================================
@@ -124,7 +124,7 @@ class DbInitializer():
 
     def set_default_values(self, connection, cursor):
         emp_columns = ["type"]
-        emp_values = [('part-time',), ('temporary',), ('full time',), ('contractor',), ('freelance',)]
+        emp_values = [('Full Time',), ('Part Time',), ('Temporary',), ('Contractor',), ('Freelance',)]
         self.def_table_populate(connection, cursor, "employment_types", emp_columns, emp_values)
 
         cont_duration_cols = ["duration"]
@@ -132,13 +132,13 @@ class DbInitializer():
         self.def_table_populate(connection, cursor, "contract_period", cont_duration_cols, cont_duration_vals)
 
         app_status_cols = ["status"]
-        app_status_vals = [('applied',), ('testing',), ('first interview',), ('second_interview',),
-                                ('received offer',), ("declined", ), ("rejected", ), ("accepted", )]
+        app_status_vals = [('Applied',), ('Testing',), ('First Interview',), ('Second Interview',),
+                                ('Received Offer',), ("Declined", ), ("Rejected", ), ("Accepted", )]
         self.def_table_populate(connection, cursor, "application_status", app_status_cols, app_status_vals)
 
 
-    def retrieve_all_single_col(self, cursor, table_name, column):
-        return cursor.execute(f"Select {column} from {table_name}").fetchall() 
+    # def retrieve_all_single_col(self, cursor, table_name, column):
+    #     return cursor.execute(f"Select {column} from {table_name}").fetchall() 
 
 
 # connection = sqlite3.connect('test.db')

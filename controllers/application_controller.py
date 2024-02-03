@@ -20,7 +20,7 @@ class ApplicationController():
         self.database_controller.initialize_database()
 
         # initialize application controller - creates main app screen
-        self.screen_controller = ScreenController(self.database_controller.get_db_reader())
+        self.screen_controller = ScreenController(self.database_controller)
 
     def start_app(self):
         # start application

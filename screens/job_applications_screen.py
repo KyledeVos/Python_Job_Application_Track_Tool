@@ -3,9 +3,9 @@ from .parent_screens import FullScreen, SectionedLeftMinor
 
 class JobApplicationsScreen(FullScreen):
 
-    def __init__(self, container, db_reader):
+    def __init__(self, container, db_controller):
         super().__init__(container)
-        self.db_reader = db_reader
+        self.db_controller = db_controller
         self.left_sub = SectionedLeftMinor(container, "Job Applications")
         self.enclosing_window = self.left_sub.get_enclosing_window()
 
@@ -27,7 +27,7 @@ class JobApplicationsScreen(FullScreen):
         
 
     def right_screens_initialize(self, container):
-        return {'New Application': NewApplicationScreen(container, self.db_reader)}
+        return {'New Application': NewApplicationScreen(container, self.db_controller)}
     
 
     def change_right_screen(self, selected_option, parent_container):
@@ -58,9 +58,9 @@ class JobApplicationsScreen(FullScreen):
 # New Job Application Sub-Screen
 class NewApplicationScreen(FullScreen):
 
-    def __init__(self, container, db_reader):
+    def __init__(self, container, db_controller):
         super().__init__(container)
-        self.db_reader = db_reader
+        self.db_controller = db_controller
 
         # ----------------------------------------------------------------
         # company name
@@ -103,10 +103,16 @@ class NewApplicationScreen(FullScreen):
 
         self.emp_type_label = Label(container, text="Employment Type")
 
+        current_options = self.db_controller.retrieve_single_col("type" ,"employment_types")
+
         self.emp_type = StringVar()
         self.emp_type.set("Full Time")
-        self.emp_type_menu = OptionMenu(container, self.emp_type, "Full Time", "Part-Time" )
+        self.emp_type_menu = OptionMenu(container, self.emp_type, *current_options)
         self.emp_type_menu.config(anchor=W)
+        
+
+
+        
         
         
 
