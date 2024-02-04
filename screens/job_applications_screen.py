@@ -61,7 +61,6 @@ class NewApplicationScreen(FullScreen):
     def __init__(self, container, db_controller):
         super().__init__(container)
         self.db_controller = db_controller
-
         self.all_options = {}
 
         # ----------------------------------------------------------------
@@ -137,10 +136,6 @@ class NewApplicationScreen(FullScreen):
         # Submit Button
 
         self.save_new_application = Button(container, text="Save", command=self.save_new_data)
-        # print(db_controller.retrieve_id_single_col("status" ,"application_status"))
-        print(self.all_options)
-        
-
 
     def save_new_data(self):
         data_values = [self.company_name.get(),
@@ -153,7 +148,8 @@ class NewApplicationScreen(FullScreen):
                         self.find_match(self.contract_duration.get(), self.all_options['contract_period']),
                         self.find_match(self.app_status.get(), self.all_options['application_status']),
                        ]
-        print(data_values)
+
+        self.db_controller.write_single_row("job_applications", data_values)
 
     def find_match(self, description, val_list):
         for item in val_list:
