@@ -2,12 +2,13 @@ import sqlite3
 
 class DatabaseController():
 
-    def __init__(self, database, InitializeDbParent, DbReader) -> None:
+    def __init__(self, database, InitializeDbParent, DbReader, DbWriter) -> None:
         self.database = database
         self.connection = None
         self.cursor = None
         self.db_initializer = InitializeDbParent
         self.db_reader = DbReader
+        self.db_writer = DbWriter
 
     def initialize_database(self):
 
@@ -22,13 +23,6 @@ class DatabaseController():
 
         self.connection.close()
 
-    def retrieve_single_col(self, column_name, table_name):
-        self.connection = sqlite3.connect(self.database)
-        self.cursor = self.connection.cursor()
-        data = self.db_reader.retrieve_single_col_list(self.cursor, column_name, table_name)
-        self.connection.close()
-
-        return data
     
     def retrieve_single_col(self, column_name, table_name):
         self.connection = sqlite3.connect(self.database)
@@ -46,3 +40,16 @@ class DatabaseController():
 
         return data
     
+
+    def write_single_row(self, table_name, value_list):
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+
+        # retrieve all column names (except id) for table
+        column_names = self.db_reader.retrieve_all_column_names(self.cursor, table_name)
+
+        self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, value_list )
+        self.connection.close()
+
+        
