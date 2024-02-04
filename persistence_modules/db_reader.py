@@ -13,3 +13,7 @@ class DbReader():
 
     def retrieve_id_single_col(self, cursor, column, table_name):
          return cursor.execute(f"Select id, {column} from {table_name}").fetchall()
+    
+    def retrieve_all_column_names(self, cursor, table_name):
+        cursor.execute(F"SELECT * FROM {table_name}")
+        return [name[0] for name in cursor.description][1:]
