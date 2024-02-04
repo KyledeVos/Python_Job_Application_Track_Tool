@@ -62,82 +62,104 @@ class NewApplicationScreen(FullScreen):
         super().__init__(container)
         self.db_controller = db_controller
 
+        self.all_options = {}
+
         # ----------------------------------------------------------------
         # company name
         self.company_name_lbl = Label(container, text="'Company:")
         self.company_name = Entry(container, width=50, borderwidth=1)
-        self.company_name.insert(0, "Company")
         
         # ----------------------------------------------------------------
         # Job Position
         self.position_lbl = Label(container, text="Position")
         self.position = Entry(container, width=50, borderwidth=2)
-        self.position.insert(0, "Position")
 
         # ----------------------------------------------------------------
         # Salary
         self.salary_lbl = Label(container, text="Salary")
         self.salary = Entry(container, width=50, borderwidth=2)
-        self.salary.insert(0, "Salary")
 
         # ----------------------------------------------------------------
         # Date Applied
         self.application_date_lbl = Label(container, text="Date Applied")
         self.application_date = Entry(container, width=50, borderwidth=2)
-        self.application_date.insert(0, "Application Date")
         
         # ----------------------------------------------------------------
         # Location
         self.location_lbl = Label(container, text="Location")
         self.location = Entry(container, width=50, borderwidth=2)
-        self.location.insert(0, "Location")
 
         # ----------------------------------------------------------------
         # Description
         self.description_lbl = Label(container, text="Description")
         self.description = Entry(container, width=50, borderwidth=2)
-        self.description.insert(0, "Description")
 
         # ----------------------------------------------------------------
         # Employment Type
 
         self.emp_type_label = Label(container, text="Employment Type")
-
-        current_options = self.db_controller.retrieve_single_col("type" ,"employment_types")
+        
+        current_options = self.db_controller.retrieve_id_single_col("type" ,"employment_types")
+        self.all_options['employment_types'] = current_options
 
         self.emp_type = StringVar()
         self.emp_type.set("Full Time")
-        self.emp_type_menu = OptionMenu(container, self.emp_type, *current_options)
+        self.emp_type_menu = OptionMenu(container, self.emp_type, *[item[1] for item in current_options])
         self.emp_type_menu.config(anchor=W)
 
         # ----------------------------------------------------------------
         # Contract Duration
 
         self.contract_duration_lbl = Label(container, text="Contract Duration")
-        current_options = self.db_controller.retrieve_single_col("duration" ,"contract_period")
+
+        current_options = self.db_controller.retrieve_id_single_col("duration" ,"contract_period")
+        self.all_options['contract_period'] = current_options
 
         self.contract_duration = StringVar()
         self.contract_duration.set("3 Months")
-        self.contract_duration_menu = OptionMenu(container, self.contract_duration, *current_options)
+        self.contract_duration_menu = OptionMenu(container, self.contract_duration, *[item[1] for item in current_options])
         self.contract_duration_menu.config(anchor=W)
 
         # ----------------------------------------------------------------
         # Application Status
 
         self.app_status_lbl = Label(container, text="Application Status")
-        current_options = self.db_controller.retrieve_single_col("status" ,"application_status")
+
+        current_options = self.db_controller.retrieve_id_single_col("status" ,"application_status")
+        self.all_options['application_status'] = current_options
 
         self.app_status = StringVar()
         self.app_status.set("Applied")
-        self.app_status_menu = OptionMenu(container, self.contract_duration, *current_options)
+        self.app_status_menu = OptionMenu(container, self.app_status , *[item[1] for item in current_options])
         self.app_status_menu.config(anchor=W)
+
+        # ----------------------------------------------------------------
+        # Submit Button
+
+        self.save_new_application = Button(container, text="Save", command=self.save_new_data)
+        # print(db_controller.retrieve_id_single_col("status" ,"application_status"))
+        print(self.all_options)
         
 
 
-        
-        
-        
+    def save_new_data(self):
+        data_values = [self.company_name.get(),
+                        self.position.get(),
+                        self.salary.get(),
+                        self.application_date.get(),
+                        self.location.get(),
+                        self.description.get(),
+                        self.find_match(self.emp_type.get(), self.all_options['employment_types']),
+                        self.find_match(self.contract_duration.get(), self.all_options['contract_period']),
+                        self.find_match(self.app_status.get(), self.all_options['application_status']),
+                       ]
+        print(data_values)
 
+    def find_match(self, description, val_list):
+        for item in val_list:
+            if item[1] == description:
+                return item[0]
+    
     def load_window(self):
         
         self.company_name_lbl.grid(row=0, column=0, padx=2, pady=2, sticky=W+E)
@@ -158,6 +180,8 @@ class NewApplicationScreen(FullScreen):
         self.contract_duration_menu.grid(row=7, column=1, sticky=W)
         self.app_status_lbl.grid(row = 8, column=0, padx=2, pady=2, sticky=W+E)
         self.app_status_menu.grid(row=8, column=1, sticky=W)
+
+        self.save_new_application.grid(row=9, column=0, sticky=W+E)
 
 
 

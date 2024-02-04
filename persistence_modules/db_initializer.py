@@ -1,3 +1,4 @@
+import sqlite3
 
 class DbInitializer():
 
@@ -128,7 +129,7 @@ class DbInitializer():
         self.def_table_populate(connection, cursor, "employment_types", emp_columns, emp_values)
 
         cont_duration_cols = ["duration"]
-        cont_duration_vals = [('3 months',), ('6 months',), ('12 months',), ('24 months',), ('permanent',), ('not specified',)]
+        cont_duration_vals = [('3 Months',), ('6 Months',), ('12 Months',), ('24 Months',), ('Permanent',), ('Not Specified',)]
         self.def_table_populate(connection, cursor, "contract_period", cont_duration_cols, cont_duration_vals)
 
         app_status_cols = ["status"]
@@ -143,10 +144,15 @@ class DbInitializer():
 
 # connection = sqlite3.connect('test.db')
 # cursor = connection.cursor()
-# initial = DbInitializer()
-# # initial.create_all_tables(connection, cursor)
-# initial.set_default_values(connection, cursor)
-# print(initial.retrieve_all_single_col(cursor, "employment_types", "type"))
+
+
+# print(cursor.execute(f"Select id, type  from employment_types").fetchall())
+# # initial = DbInitializer()
+# # # initial.create_all_tables(connection, cursor)
+# # initial.set_default_values(connection, cursor)
+# # print(initial.retrieve_all_single_col(cursor, "employment_types", "type"))
+
+# connection.close()
 
 
 
