@@ -6,6 +6,7 @@ from .database_controller import DatabaseController
 # -------------------------------------------------
 from persistence_modules.db_initializer import DbInitializer
 from persistence_modules.db_reader import DbReader
+from persistence_modules.db_writer import DbWriter
 
 class ApplicationController():
 
@@ -14,9 +15,10 @@ class ApplicationController():
         # initialize Database Controller Components
         self.db_initializer = DbInitializer()
         self.db_reader = DbReader()
+        self.db_writer = DbWriter()
         
         # initialize database controller and perform database configuration
-        self.database_controller = DatabaseController(database, self.db_initializer, self.db_reader)
+        self.database_controller = DatabaseController(database, self.db_initializer, self.db_reader, self.db_writer)
         self.database_controller.initialize_database()
 
         # initialize application controller - creates main app screen
