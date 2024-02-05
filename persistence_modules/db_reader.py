@@ -15,7 +15,7 @@ class DbReader():
          return cursor.execute(f"Select id, {column} from {table_name}").fetchall()
     
     def retrieve_col_specific(self, cursor, columns, table_name):
-        return cursor.execute(f"Select {', '.join(columns)} from {table_name}").fetchall()
+        return cursor.execute(f"Select id, {', '.join(columns)} from {table_name}").fetchall()
     
     def retrieve_all_column_names(self, cursor, table_name):
         cursor.execute(F"SELECT * FROM {table_name}")
