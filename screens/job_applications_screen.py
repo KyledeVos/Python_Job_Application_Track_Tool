@@ -142,6 +142,8 @@ class NewApplicationScreen(FullScreen):
 
         self.save_new_application = Button(container, text="Save", command=self.save_new_data)
 
+
+
     def save_new_data(self):
         data_values = [self.company_name.get(),
                         self.position.get(),
@@ -155,6 +157,14 @@ class NewApplicationScreen(FullScreen):
                        ]
 
         self.db_controller.write_single_row("job_applications", data_values)
+
+        # reset input fields
+        self.company_name.delete(0, END)
+        self.position.delete(0, END)
+        self.salary.delete(0, END)
+        self.application_date.delete(0, END)
+        self.location.delete(0, END)
+        self.description.delete(0, END)
 
     def find_match(self, description, val_list):
         for item in val_list:
@@ -183,6 +193,8 @@ class NewApplicationScreen(FullScreen):
         self.app_status_menu.grid(row=8, column=1, sticky=W)
 
         self.save_new_application.grid(row=9, column=0, sticky=W+E)
+
+
 
 
 
