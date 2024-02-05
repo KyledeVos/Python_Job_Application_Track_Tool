@@ -10,6 +10,9 @@ class DatabaseController():
         self.db_reader = DbReader
         self.db_writer = DbWriter
 
+    # -----------------------------------------------------------------
+    # Database and/or Table Initialization
+
     def initialize_database(self):
 
         self.connection = sqlite3.connect(self.database)
@@ -23,6 +26,9 @@ class DatabaseController():
 
         self.connection.close()
 
+    # -----------------------------------------------------------------
+    # Database Reading
+
     
     def retrieve_single_col(self, column_name, table_name):
         self.connection = sqlite3.connect(self.database)
@@ -31,7 +37,8 @@ class DatabaseController():
         self.connection.close()
 
         return data
-    
+
+
     def retrieve_id_single_col(self, column_name, table_name): 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
@@ -40,6 +47,30 @@ class DatabaseController():
 
         return data
     
+    def retrieve_col_specific(self, columns, table_name):
+        
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        data = self.db_reader.retrieve_col_specific(self.cursor, columns, table_name)
+        self.connection.close()
+
+        return data
+
+
+    def retrieve_all_data(self, table_name):
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        data = self.db_reader.retrieve_all_data(self.cursor, table_name)
+        self.connection.close()
+
+        return data
+
+
+
+    
+    # -----------------------------------------------------------------
+    # Database Writing
 
     def write_single_row(self, table_name, value_list):
 

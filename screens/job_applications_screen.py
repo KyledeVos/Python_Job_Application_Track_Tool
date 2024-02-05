@@ -20,14 +20,17 @@ class JobApplicationsScreen(FullScreen):
         self.new_application_btn = Button(left_minor_window, text="New Application", 
                                           command=lambda: self.change_right_screen("New Application", self.left_sub.get_right_major()))
         
-        self.view_all_btn = Button(left_minor_window, text = "View All Applications")
+        self.view_all_btn = Button(left_minor_window, text = "View All Applications", 
+                                   command=lambda: self.change_right_screen("View All Applications", self.left_sub.get_right_major()))
+        
         self.search_btn = Button(left_minor_window, text="Search Application")
         self.edit_application_btn = Button(left_minor_window, text="Edit Application")
         self.delete_application_btn = Button(left_minor_window, text = "Delete Application")
         
 
     def right_screens_initialize(self, container):
-        return {'New Application': NewApplicationScreen(container, self.db_controller)}
+        return {'New Application': NewApplicationScreen(container, self.db_controller),
+                'View All Applications': ViewAllApplicationsScreen(container, self.db_controller)}
     
 
     def change_right_screen(self, selected_option, parent_container):
@@ -38,6 +41,8 @@ class JobApplicationsScreen(FullScreen):
 
         self.screen_options[selected_option].load_window()
         self.left_sub.load_right_major()
+
+        self.left_sub.window_title.config(text=selected_option)
 
     
     def load_window(self):
@@ -181,7 +186,33 @@ class NewApplicationScreen(FullScreen):
 
 
 
+# View All Applications Screen
+class ViewAllApplicationsScreen(FullScreen):
 
+    def get_data(self):
+        print(self.db_controller.retrieve_all_data("job_applications"))
+
+    def __init__(self, container, db_controller):
+        super().__init__(container)
+        self.db_controller = db_controller
+        self.applications_data = {}
+        self.empty_label = Label(container)
+
+        # self.test_btn = Button(container, text="Test Print", command=self.get_data)
+        
+        
+
+    def load_window(self):
+        # self.test_btn.grid(row=0, column=0)
+        current_applications = self.db_controller.retrieve_col_specific(['company, position'], 'job_applications')
+        
+        if len(current_applications) == 0:
+            self.empty_label.config(text="No Job Applications")
+        else:
+             self.empty_label.config(text="Job Applications")
+
+        self.empty_label.grid(row=0, column=0)
+        
 
 
 
