@@ -166,6 +166,7 @@ class NewApplicationScreen(FullScreen):
         self.location.delete(0, END)
         self.description.delete(0, END)
 
+
     def find_match(self, description, val_list):
         for item in val_list:
             if item[1] == description:
@@ -195,9 +196,6 @@ class NewApplicationScreen(FullScreen):
         self.save_new_application.grid(row=9, column=0, sticky=W+E)
 
 
-
-
-
 # View All Applications Screen
 class ViewAllApplicationsScreen(FullScreen):
 
@@ -206,6 +204,7 @@ class ViewAllApplicationsScreen(FullScreen):
 
     def __init__(self, container, db_controller):
         super().__init__(container)
+        self.container = container
         self.db_controller = db_controller
         self.applications_data = {}
         self.empty_label = Label(container)
@@ -221,8 +220,21 @@ class ViewAllApplicationsScreen(FullScreen):
         if len(current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
         else:
-             self.empty_label.config(text="Job Applications")
+             
+             for count, application in enumerate(current_applications):
+                 
+                 # Need to add button function to view application specific to ID
 
+                 self.job_count = Label(self.container, text=f"{count + 1}")
+                 self.company = Label(self.container, text=application[1])
+                 self.position = Label(self.container, text=application[2])
+                 self.view_button = Button(self.container, text="View")
+
+                 self.job_count.grid(row = count, column=0, padx=2, pady=2)
+                 self.company.grid(row=count, column=1, padx=2, pady=2)
+                 self.position.grid(row=count, column=2, padx=2, pady=2)
+                 self.view_button.grid(row=count, column=3, padx=2, pady=2)
+                 
         self.empty_label.grid(row=0, column=0)
         
 
