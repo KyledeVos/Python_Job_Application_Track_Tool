@@ -216,27 +216,60 @@ class ViewAllApplicationsScreen(FullScreen):
     def load_window(self):
         # self.test_btn.grid(row=0, column=0)
         current_applications = self.db_controller.retrieve_col_specific(['company, position'], 'job_applications')
-        
+
         if len(current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
         else:
-             
-             for count, application in enumerate(current_applications):
-                 
-                 # Need to add button function to view application specific to ID
+            application_dict = {}
 
-                 self.job_count = Label(self.container, text=f"{count + 1}")
-                 self.company = Label(self.container, text=application[1])
-                 self.position = Label(self.container, text=application[2])
-                 self.view_button = Button(self.container, text="View")
+            class ClickedButton():
 
-                 self.job_count.grid(row = count, column=0, padx=2, pady=2)
-                 self.company.grid(row=count, column=1, padx=2, pady=2)
-                 self.position.grid(row=count, column=2, padx=2, pady=2)
-                 self.view_button.grid(row=count, column=3, padx=2, pady=2)
+                def __init__(self, count, application, container):
+                    self.job_count = Label(container, text=f"{count + 1}", width=5, anchor=W)
+                    self.company = Label(container, text=application[1], width=20,anchor=W)
+                    self.position = Label(container, text=application[2], width=20, anchor=W)
+                    self.view_button = Button(container, text="View", command=lambda: self.open_job_application(application[0]))
+
+                def open_job_application(self, id):
+                    print(f"id {id}" )
+
+                def place_on_screen(self, row_count):
+                    self.job_count.grid(row = row_count, column=0, pady=2)
+                    self.company.grid(row=row_count, column=1, pady=2)
+                    self.position.grid(row=row_count, column=2, pady=2)
+                    self.view_button.grid(row=count, column=3, padx=2, pady=2)
+
+                             
+            for count, application in enumerate(current_applications):
+                current_object = ClickedButton(count, application, self.container)
+                application_dict[application[0]] = current_object
+                current_object.place_on_screen(count)
+
                  
-        self.empty_label.grid(row=0, column=0)
-        
+                # Need to add button function to view application specific to ID
+
+            
+                # job_count = Label(self.container, text=f"{count + 1}", width=5, anchor=W)
+                # company = Label(self.container, text=application[1], width=20, anchor=W)
+                # position = Label(self.container, text=application[2], width=20, anchor=W)
+                # view_button = Button(self.container, text="View", command=lambda: job_display(application))
+
+
+                #  self.job_count.bind("<Button-1>", lambda: label_clicked(count))
+                #  self.company.bind("<Button-1>", lambda: label_clicked(count))
+                #  self.position.bind("<Button-1>",lambda: label_clicked(count))
+                #  self.view_button = Button(self.container, text="View", command=lambda: view_application(application[0]))
+
+                # job_count.grid(row = count, column=0, pady=2)
+                # company.grid(row=count, column=1, pady=2)
+                # position.grid(row=count, column=2, pady=2)
+                # view_button.grid(row=count, column=3, pady=2)
+
+
+                                    
+                # self.empty_label.grid(row=0, column=0)
+
+
 
 
 
