@@ -84,6 +84,17 @@ class DatabaseController():
         self.connection.close()
 
         return data
+    
+    def retrieve_job_data(self, id):
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        data = self.db_reader.retrieve_and_config_job_data(self.cursor, id)
+        self.connection.close()
+
+        return data
+    
+
 
 
 
