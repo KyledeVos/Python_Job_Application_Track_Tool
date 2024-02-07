@@ -246,6 +246,7 @@ class ViewAllApplicationsScreen(FullScreen):
                 current_job = Job_Instance(count, application, self.container, self.left_sub_window, self.db_controller)
                 current_job.place_on_screen(count)
 
+
 # View Specific Job
 class JobView(FullScreen):
 
@@ -256,10 +257,15 @@ class JobView(FullScreen):
         self.job_id = job_id
 
 
+    def retrieve_job_data(self):
+        return self.db_controller.retrieve_single_row(self.job_id, 'job_applications')
+
+
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
         test_label = Label(self.container, text= self.job_id)
         test_label.grid(row=0, column=0)
+        print(self.retrieve_job_data())
     
 
 
