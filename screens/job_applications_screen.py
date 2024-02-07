@@ -18,10 +18,10 @@ class JobApplicationsScreen(FullScreen):
     def left_minor_initialize(self, left_minor_window):
         self.application_home_btn = Button(left_minor_window, text = "Applications Home")
         self.new_application_btn = Button(left_minor_window, text="New Application", 
-                                          command=lambda: self.change_right_screen("New Application", self.left_sub.get_right_major()))
+                                          command=lambda: self.change_right_screen("New Application"))
         
         self.view_all_btn = Button(left_minor_window, text = "View All Applications", 
-                                   command=lambda: self.change_right_screen("View All Applications", self.left_sub.get_right_major()))
+                                   command=lambda: self.change_right_screen("View All Applications"))
         
         self.search_btn = Button(left_minor_window, text="Search Application")
         self.edit_application_btn = Button(left_minor_window, text="Edit Application")
@@ -30,10 +30,10 @@ class JobApplicationsScreen(FullScreen):
 
     def right_screens_initialize(self, container):
         return {'New Application': NewApplicationScreen(container, self.db_controller),
-                'View All Applications': ViewAllApplicationsScreen(container, self.db_controller)}
+                'View All Applications': ViewAllApplicationsScreen(container, self.db_controller, self.left_sub)}
     
 
-    def change_right_screen(self, selected_option, parent_container):
+    def change_right_screen(self, selected_option):
 
         # Clear Application Screen
         self.left_sub.clear_right_major()
@@ -198,14 +198,16 @@ class NewApplicationScreen(FullScreen):
 # View All Applications Screen
 class ViewAllApplicationsScreen(FullScreen):
 
-    def get_data(self):
-        print(self.db_controller.retrieve_all_data("job_applications"))
 
-    def __init__(self, container, db_controller):
+    def __init__(self, container, db_controller, left_sub_window):
         super().__init__(container)
         self.container = container
         self.db_controller = db_controller
         self.empty_label = Label(container)
+        self.left_sub_window = left_sub_window
+
+    def get_data(self):
+        print(self.db_controller.retrieve_all_data("job_applications"))
 
         
     def load_window(self):
@@ -218,7 +220,9 @@ class ViewAllApplicationsScreen(FullScreen):
 
             class Job_Instance():
 
-                def __init__(self, count, application, container):
+                def __init__(self, count, application, container, left_sub_window, db_controller):
+                    self.left_sub_window = left_sub_window
+                    self.db_controller = db_controller
                     self.id = application[0]
 
                     self.job_count = Label(container, text=f"{count + 1}", width=5, anchor=W)
@@ -231,7 +235,7 @@ class ViewAllApplicationsScreen(FullScreen):
                     self.position.bind("<Button-1>", self.open_job_application)
 
                 def open_job_application(self, event):
-                    print(self.id)
+                    JobView(self.left_sub_window.get_right_major(), self.left_sub_window, self.db_controller, self.id).load_window()
 
                 def place_on_screen(self, row_count):
                     self.job_count.grid(row = row_count, column=0, pady=2)
@@ -239,13 +243,24 @@ class ViewAllApplicationsScreen(FullScreen):
                     self.position.grid(row=row_count, column=2, pady=2)
  
             for count, application in enumerate(current_applications):
-                current_job = Job_Instance(count, application, self.container)
+                current_job = Job_Instance(count, application, self.container, self.left_sub_window, self.db_controller)
                 current_job.place_on_screen(count)
 
-class JobView():
+# View Specific Job
+class JobView(FullScreen):
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, container, left_minor_subscreen, db_controller, job_id) -> None:
+        self.left_minor_subscreen = left_minor_subscreen
+        self.container = container
+        self.db_controller = db_controller
+        self.job_id = job_id
+
+
+    def load_window(self):
+        self.left_minor_subscreen.clear_right_major()
+        test_label = Label(self.container, text= self.job_id)
+        test_label.grid(row=0, column=0)
+    
 
 
 
