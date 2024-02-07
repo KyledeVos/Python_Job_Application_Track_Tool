@@ -37,6 +37,14 @@ class SectionedLeftMinor():
     def load_right_major(self):
         self.right_major_window.grid(row = 1, column = 1, sticky="NEWS")
 
+    def clear_left_minor(self):
+        for screen in self.left_minor_window.grid_slaves():
+            screen.grid_forget()
+
+    def clear_right_major(self):
+        for screen in self.right_major_window.grid_slaves():
+            screen.grid_forget()
+
     def get_enclosing_window(self):
         return self.enclosing_window
 
