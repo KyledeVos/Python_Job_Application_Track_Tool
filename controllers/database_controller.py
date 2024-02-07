@@ -56,7 +56,16 @@ class DatabaseController():
 
         return data
     
+
+    def retrieve_col_names(self, table_name):
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        data = self.db_reader.retrieve_col_names(self.cursor, table_name)
+        self.connection.close()
+
+        return data
     
+
     def retrieve_col_specific(self, columns, table_name):
         
         self.connection = sqlite3.connect(self.database)
