@@ -36,8 +36,7 @@ class JobApplicationsScreen(FullScreen):
     def change_right_screen(self, selected_option, parent_container):
 
         # Clear Application Screen
-        for screen in parent_container.grid_slaves():
-            screen.grid_forget()
+        self.left_sub.clear_right_major()
 
         self.screen_options[selected_option].load_window()
         self.left_sub.load_right_major()
@@ -238,12 +237,15 @@ class ViewAllApplicationsScreen(FullScreen):
                     self.job_count.grid(row = row_count, column=0, pady=2)
                     self.company.grid(row=row_count, column=1, pady=2)
                     self.position.grid(row=row_count, column=2, pady=2)
-
-
-                             
+ 
             for count, application in enumerate(current_applications):
                 current_job = Job_Instance(count, application, self.container)
                 current_job.place_on_screen(count)
+
+class JobView():
+
+    def __init__(self) -> None:
+        pass
 
 
 
