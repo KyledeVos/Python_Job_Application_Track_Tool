@@ -24,7 +24,6 @@ class JobApplicationsScreen(FullScreen):
                                    command=lambda: self.change_right_screen("View All Applications"))
         
         self.search_btn = Button(left_minor_window, text="Search Application")
-        self.edit_application_btn = Button(left_minor_window, text="Edit Application")
         self.delete_application_btn = Button(left_minor_window, text = "Delete Application")
         
 
@@ -52,8 +51,7 @@ class JobApplicationsScreen(FullScreen):
         self.new_application_btn.grid(row=1, column=0, sticky=W+E)
         self.view_all_btn.grid(row=2, column=0, sticky=W+E)
         self.search_btn.grid(row=3, column=0, sticky=W+E)
-        self.edit_application_btn.grid(row=4, column=0, sticky=W+E)
-        self.delete_application_btn.grid(row=5, column=0, sticky=W+E)
+        self.delete_application_btn.grid(row=4, column=0, sticky=W+E)
         
 
         self.left_sub.load_left_minor()
@@ -255,17 +253,25 @@ class JobView(FullScreen):
         self.container = container
         self.db_controller = db_controller
         self.job_id = job_id
-
-
-    def retrieve_job_data(self):
-        return self.db_controller.retrieve_single_row(self.job_id, 'job_applications')
+        self.job_data = db_controller.retrieve_job_data(job_id)
 
 
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
-        test_label = Label(self.container, text= self.job_id)
-        test_label.grid(row=0, column=0)
-        print(self.retrieve_job_data())
+        
+        for count, job_attribute in enumerate(self.job_data):
+
+            label = Label(self.container, text=job_attribute[0])
+            input = Entry(self.container)
+            input.insert(0, job_attribute[1])
+            label.grid(row=count, column=0, pady=2, padx=2, sticky=W+E)
+            input.grid(row=count, column=1, pady=2, padx=2, sticky=W+E)
+
+        # load data from other tables using job_id
+        
+
+        # test_label = Label(self.container, text= self.job_id)
+        # test_label.grid(row=0, column=0)
     
 
 
