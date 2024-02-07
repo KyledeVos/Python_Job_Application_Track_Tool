@@ -15,7 +15,7 @@ class DbReader():
          return cursor.execute(f"SELECT id, {column} FROM {table_name}").fetchall()
     
     def retrieve_single_row(self, cursor, id, table_name):
-        return cursor.execute(f"SELECT * FROM {table_name} WHERE id={id}").fetchall()
+        return cursor.execute(f"SELECT * FROM {table_name} WHERE id={id}").fetchone()
     
     def retrieve_col_specific(self, cursor, columns, table_name):
         return cursor.execute(f"SELECT id, {', '.join(columns)} FROM {table_name}").fetchall()
