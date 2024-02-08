@@ -43,17 +43,21 @@ class DbReader():
     # ----------------------------------------------------------------------------------
     # Data Specific Functions
 
-    def retrieve_and_config_job_data(self, cursor, id):
+    def retrieve_and_config_job_data(self, cursor, id=None):
         
         # retrieve all column names and raw job data incl. id's of linked tables
         job_columns = [name.title().replace("_", " ") for name in self.retrieve_col_names(cursor, 'job_applications')]
-        job_data_raw = list(self.retrieve_single_row(cursor, id, 'job_applications'))
+        if id != None:
+            job_data_raw = list(self.retrieve_single_row(cursor, id, 'job_applications'))
 
         # set end of single data
         single_end = 7
 
         # list holding single data (not based on Foreign Key)
-        single_data = list(zip(job_columns[1:single_end], job_data_raw[1:single_end]))
+        if id != None:
+            single_data = list(zip(job_columns[1:single_end], job_data_raw[1:single_end]))
+        else:
+            single_data = job_columns[1: single_end]
 
         # names of tables linked with foreign key
         fk_tables = ['employment_types', 'contract_period', 'application_status']
@@ -62,16 +66,20 @@ class DbReader():
         menu_data = []
         current_data = []
         for name in fk_tables:
+            # get menu option values
             current_data = [val[1] for val in self.retrieve_all_data(cursor, name)]
-            set_value = self.retrieve_single_row(cursor, job_data_raw[single_end], name)[1]
-            menu_data.append((name.title().replace("_", " "), current_data, set_value))
-            single_end += 1
+
+            if id != None:
+                set_value = self.retrieve_single_row(cursor, job_data_raw[single_end], name)[1]
+                menu_data.append((name.title().replace("_", " "), current_data, set_value))
+                single_end += 1
+            else:
+                menu_data.append((name.title().replace("_", " "), current_data))
 
         job_data = {'single_data': single_data, 'menu_data':menu_data}
         print(job_data)
-
         
-        # NEEDS TO BE REMOVED FROM HERE
+        # NEEDS TO BE REMOVED FROM HERE AFTER MODIFICATIONS TO NEW APPLICATION CLASS
 
         # correct data in job data from foreign key id to correct data name
         job_data_raw[7] = list(self.retrieve_single_col(cursor, job_data_raw[7], 'type', 'employment_types'))[0]
