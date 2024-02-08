@@ -46,7 +46,7 @@ class DbReader():
     def retrieve_and_config_job_data(self, cursor, id):
         
         # retrieve all column names and raw job data incl. id's of linked tables
-        job_columns = self.retrieve_col_names(cursor, 'job_applications')
+        job_columns = [name.title().replace("_", " ") for name in self.retrieve_col_names(cursor, 'job_applications')]
         job_data_raw = list(self.retrieve_single_row(cursor, id, 'job_applications'))
 
         # set end of single data
@@ -71,7 +71,7 @@ class DbReader():
         print(job_data)
 
         
-
+        # NEEDS TO BE REMOVED FROM HERE
 
         # correct data in job data from foreign key id to correct data name
         job_data_raw[7] = list(self.retrieve_single_col(cursor, job_data_raw[7], 'type', 'employment_types'))[0]
