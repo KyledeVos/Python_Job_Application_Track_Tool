@@ -67,7 +67,7 @@ class DbReader():
         current_data = []
         for name in fk_tables:
             # get menu option values
-            current_data = [val[1] for val in self.retrieve_all_data(cursor, name)]
+            current_data = [val for val in self.retrieve_all_data(cursor, name)]
 
             if id != None:
                 set_value = self.retrieve_single_row(cursor, job_data_raw[single_end], name)[1]
@@ -77,7 +77,7 @@ class DbReader():
                 menu_data.append((name.title().replace("_", " "), current_data))
 
         job_data = {'single_data': single_data, 'menu_data':menu_data}
-        print(job_data)
+        return job_data
         
         # NEEDS TO BE REMOVED FROM HERE AFTER MODIFICATIONS TO NEW APPLICATION CLASS
 
