@@ -29,7 +29,6 @@ class DatabaseController():
     # -----------------------------------------------------------------
     # Database Reading
 
-    
     def retrieve_single_col(self, column_name, table_name):
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
@@ -85,7 +84,7 @@ class DatabaseController():
 
         return data
     
-    def retrieve_job_data(self, id):
+    def retrieve_job_data_configured(self, id=None):
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
@@ -93,12 +92,8 @@ class DatabaseController():
         self.connection.close()
 
         return data
-    
 
 
-
-
-    
     # -----------------------------------------------------------------
     # Database Writing
 
@@ -108,7 +103,7 @@ class DatabaseController():
         self.cursor = self.connection.cursor()
 
         # retrieve all column names (except id) for table
-        column_names = self.db_reader.retrieve_all_column_names(self.cursor, table_name)
+        column_names = self.db_reader.retrieve_all_column_names(self.cursor, table_name) 
 
         self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, value_list )
         self.connection.close()
