@@ -1,6 +1,7 @@
 from tkinter import *
 from .parent_screens import FullScreen, SectionedLeftMinor
 
+
 class JobApplicationsScreen(FullScreen):
 
     def __init__(self, container, db_controller):
@@ -63,136 +64,88 @@ class NewApplicationScreen(FullScreen):
     def __init__(self, container, db_controller):
         super().__init__(container)
         self.db_controller = db_controller
-        self.all_options = {}
 
-        # ----------------------------------------------------------------
-        # company name
-        self.company_name_lbl = Label(container, text="'Company:")
-        self.company_name = Entry(container, width=50, borderwidth=1)
-        
-        # ----------------------------------------------------------------
-        # Job Position
-        self.position_lbl = Label(container, text="Position")
-        self.position = Entry(container, width=50, borderwidth=2)
+        self.single_data_inputs = []
+        self.menu_data_inputs = []
 
-        # ----------------------------------------------------------------
-        # Salary
-        self.salary_lbl = Label(container, text="Salary")
-        self.salary = Entry(container, width=50, borderwidth=2)
+        self.job_attributes_titles = self.db_controller.retrieve_job_data_configured()
+        # print(job_attributes_titles)
 
-        # ----------------------------------------------------------------
-        # Date Applied
-        self.application_date_lbl = Label(container, text="Date Applied")
-        self.application_date = Entry(container, width=50, borderwidth=2)
-        
-        # ----------------------------------------------------------------
-        # Location
-        self.location_lbl = Label(container, text="Location")
-        self.location = Entry(container, width=50, borderwidth=2)
+        for val_name in self.job_attributes_titles['single_data']:
+            self.single_data_inputs.append((Label(container, text=val_name), Entry(container, width=50, borderwidth=1)))
 
-        # ----------------------------------------------------------------
-        # Description
-        self.description_lbl = Label(container, text="Description")
-        self.description = Entry(container, width=50, borderwidth=2)
+        # Menu Option Configuration
+        class MenuInput():
 
-        # ----------------------------------------------------------------
-        # Employment Type
+            def __init__(self, default_value):
+                self.input_val = StringVar()
+                self.input_val.set(default_value)
 
-        self.emp_type_label = Label(container, text="Employment Type")
-        
-        current_options = self.db_controller.retrieve_id_single_col("type" ,"employment_types")
-        self.all_options['employment_types'] = current_options
+            def get_input_val(self):
+                return self.input_val
+            
 
-        self.emp_type = StringVar()
-        self.emp_type.set("Full Time")
-        self.emp_type_menu = OptionMenu(container, self.emp_type, *[item[1] for item in current_options])
-        self.emp_type_menu.config(anchor=W)
+        for menu_option in self.job_attributes_titles['menu_data']:
+            
+            value_holder = MenuInput(menu_option[1][0][1]).get_input_val()
+            menu_options = [val[1] for val in menu_option[1]]
 
-        # ----------------------------------------------------------------
-        # Contract Duration
+            # Form: (Label, input_holder, OptionMenu)
+            self.menu_data_inputs.append((Label(container, text=menu_option[0]), 
+                                     value_holder,
+                                     OptionMenu(container, value_holder, *menu_options)))
+            
+        self.save_new_application = Button(container, text="Save", command=self.save_data)
 
-        self.contract_duration_lbl = Label(container, text="Contract Duration")
+    
+    def return_id_from_name(self, description, label_name, val_list):
+        # for item in val_list:
+        #     if item[1] == description:
+        #         return item[0]
 
-        current_options = self.db_controller.retrieve_id_single_col("duration" ,"contract_period")
-        self.all_options['contract_period'] = current_options
+        for val in val_list:
+            if val[0] == label_name:
+                for inner_tup in val[1]:
+                    if inner_tup[1] == description:
+                        return inner_tup[0]
+                    
+        return None
 
-        self.contract_duration = StringVar()
-        self.contract_duration.set("3 Months")
-        self.contract_duration_menu = OptionMenu(container, self.contract_duration, *[item[1] for item in current_options])
-        self.contract_duration_menu.config(anchor=W)
+    def save_data(self):
+        data_values = []
+        for single_input in self.single_data_inputs:
+            data_values.append(single_input[1].get())
 
-        # ----------------------------------------------------------------
-        # Application Status
-
-        self.app_status_lbl = Label(container, text="Application Status")
-
-        current_options = self.db_controller.retrieve_id_single_col("status" ,"application_status")
-        self.all_options['application_status'] = current_options
-
-        self.app_status = StringVar()
-        self.app_status.set("Applied")
-        self.app_status_menu = OptionMenu(container, self.app_status , *[item[1] for item in current_options])
-        self.app_status_menu.config(anchor=W)
-
-        # ----------------------------------------------------------------
-        # Submit Button
-
-        self.save_new_application = Button(container, text="Save", command=self.save_new_data)
-
-
-
-    def save_new_data(self):
-        data_values = [self.company_name.get(),
-                        self.position.get(),
-                        self.salary.get(),
-                        self.application_date.get(),
-                        self.location.get(),
-                        self.description.get(),
-                        self.find_match(self.emp_type.get(), self.all_options['employment_types']),
-                        self.find_match(self.contract_duration.get(), self.all_options['contract_period']),
-                        self.find_match(self.app_status.get(), self.all_options['application_status']),
-                       ]
+        for menu_input in self.menu_data_inputs:
+            menu_title = menu_input[0].cget('text')
+            selected_option = menu_input[1].get()
+            
+            data_values.append(self.return_id_from_name(selected_option, menu_title, self.job_attributes_titles['menu_data']))
 
         self.db_controller.write_single_row("job_applications", data_values)
 
-        # reset input fields
-        self.company_name.delete(0, END)
-        self.position.delete(0, END)
-        self.salary.delete(0, END)
-        self.application_date.delete(0, END)
-        self.location.delete(0, END)
-        self.description.delete(0, END)
+        # clear input fields after save
+        for input_field in self.single_data_inputs:
+            input_field[1].delete(0, END)
 
 
-    def find_match(self, description, val_list):
-        for item in val_list:
-            if item[1] == description:
-                return item[0]
-    
     def load_window(self):
+
+        row_count = 0
+
+        for single_tup in self.single_data_inputs:
+            single_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
+            single_tup[1].grid(row = row_count, column = 1 , sticky=W+E)
+            row_count += 1
         
-        self.company_name_lbl.grid(row=0, column=0, padx=2, pady=2, sticky=W+E)
-        self.company_name.grid(row=0, column=1, sticky=W+E)
-        self.position_lbl.grid(row=1, column=0, padx=2, pady=2, sticky=W+E)
-        self.position.grid(row=1, column=1, sticky=W+E)
-        self.salary_lbl.grid(row=2, column=0, padx=2, pady=2, sticky=W+E)
-        self.salary.grid(row=2, column=1, sticky=W+E)
-        self.application_date_lbl.grid(row=3, column=0, padx=2, pady=2, sticky=W+E)
-        self.application_date.grid(row=3, column=1, sticky=W+E)
-        self.location_lbl.grid(row=4, column=0, padx=2, pady=2, sticky=W+E)
-        self.location.grid(row=4, column=1, sticky=W+E)
-        self.description_lbl.grid(row=5, column=0, padx=2, pady=2, sticky=W+E)
-        self.description.grid(row=5, column=1, sticky=W+E)
-        self.emp_type_label.grid(row = 6, column=0, padx=2, pady=2, sticky=W+E)
-        self.emp_type_menu.grid(row=6, column=1, sticky=W)
-        self.contract_duration_lbl.grid(row = 7, column=0, padx=2, pady=2, sticky=W+E)
-        self.contract_duration_menu.grid(row=7, column=1, sticky=W)
-        self.app_status_lbl.grid(row = 8, column=0, padx=2, pady=2, sticky=W+E)
-        self.app_status_menu.grid(row=8, column=1, sticky=W)
+        for menu_tup in self.menu_data_inputs:
+            menu_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
+            menu_tup[2].grid(row = row_count, column = 1 , sticky=W)
+            row_count += 1
+        
+        self.save_new_application.grid(row=row_count, column=0, sticky=W+E)
 
-        self.save_new_application.grid(row=9, column=0, sticky=W+E)
-
-
+        
 # View All Applications Screen
 class ViewAllApplicationsScreen(FullScreen):
 
@@ -253,26 +206,20 @@ class JobView(FullScreen):
         self.container = container
         self.db_controller = db_controller
         self.job_id = job_id
-        self.job_data = db_controller.retrieve_job_data(job_id)
+        self.job_data = db_controller.retrieve_job_data_configured(job_id)
 
 
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
         
+        # add each job column name and corresponding data (as input) to screen
         for count, job_attribute in enumerate(self.job_data):
-
             label = Label(self.container, text=job_attribute[0])
             input = Entry(self.container)
             input.insert(0, job_attribute[1])
             label.grid(row=count, column=0, pady=2, padx=2, sticky=W+E)
             input.grid(row=count, column=1, pady=2, padx=2, sticky=W+E)
 
-        # load data from other tables using job_id
-        
-
-        # test_label = Label(self.container, text= self.job_id)
-        # test_label.grid(row=0, column=0)
-    
 
 
 
