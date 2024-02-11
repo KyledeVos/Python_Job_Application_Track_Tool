@@ -91,7 +91,6 @@ class NewApplicationScreen(FullScreen):
         self.menu_data_inputs = []
 
         self.job_attributes_titles = self.db_controller.retrieve_job_data_configured()
-        # print(job_attributes_titles)
 
         for val_name in self.job_attributes_titles['single_data']:
             self.single_data_inputs.append((Label(container, text=val_name), Entry(container, width=50, borderwidth=1)))
@@ -110,8 +109,6 @@ class NewApplicationScreen(FullScreen):
         self.save_new_application = Button(container, text="Save", command=self.save_data)
 
     
-
-
     def save_data(self):
         data_values = []
         for single_input in self.single_data_inputs:
@@ -123,7 +120,7 @@ class NewApplicationScreen(FullScreen):
             
             data_values.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.job_attributes_titles['menu_data']))
 
-        self.db_controller.write_single_row("job_applications", data_values)
+        self.db_controller.write_single_row_no_id("job_applications", data_values)
 
         # clear input fields after save
         for input_field in self.single_data_inputs:
@@ -238,7 +235,7 @@ class JobView(FullScreen):
     def update_data(self):
 
         data_values = []
-        column_names = self.db_controller.retrieve_col_names('job_applications')[1:]
+        column_names = self.db_controller.retrieve_column_names_no_id('job_applications')
 
         for single_input in self.single_data_inputs:
             data_values.append(single_input[1].get())
@@ -263,7 +260,7 @@ class JobView(FullScreen):
 
         row_count = 0
 
-        for single_tup in self.single_data_inputs:
+        for single_tup in self.single_data_inputs[1:]:
             single_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
             single_tup[1].grid(row = row_count, column = 1 , sticky=W+E)
             row_count += 1
