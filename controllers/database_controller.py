@@ -56,10 +56,10 @@ class DatabaseController():
         return data
     
 
-    def retrieve_col_names(self, table_name):
+    def retrieve_column_names_no_id(self, table_name):
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
-        data = self.db_reader.retrieve_col_names(self.cursor, table_name)
+        data = self.db_reader.retrieve_column_names(self.cursor, table_name)
         self.connection.close()
 
         return data
@@ -97,13 +97,13 @@ class DatabaseController():
     # -----------------------------------------------------------------
     # Database Writing
 
-    def write_single_row(self, table_name, value_list):
+    def write_single_row_no_id(self, table_name, value_list):
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
 
         # retrieve all column names (except id) for table
-        column_names = self.db_reader.retrieve_all_column_names(self.cursor, table_name) 
+        column_names = self.db_reader.retrieve_column_names(self.cursor, table_name)[1:]
 
         self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, value_list )
         self.connection.close()
