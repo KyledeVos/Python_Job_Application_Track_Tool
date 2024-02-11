@@ -20,3 +20,17 @@ class DbWriter():
 
         cursor.execute(query, value_list)
         connection.commit()
+
+    def update_row(self, connection, cursor, table_name, column_list, values):
+        
+        # construct column name section of query
+        column_query = ""
+        for index in range(len(column_list)):
+            if index != len(column_list) - 1:
+                column_query += column_list[index] + "= ?, "
+            else:
+                column_query += column_list[index] + "= ? "
+
+        update_query = f"UPDATE {table_name} SET {column_query} WHERE id = ?"
+        cursor.execute(update_query, values)
+        connection.commit()
