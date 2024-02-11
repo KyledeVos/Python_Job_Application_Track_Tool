@@ -57,6 +57,27 @@ class JobApplicationsScreen(FullScreen):
 
         self.left_sub.load_left_minor()
 
+# HELPER CLASS FOR MENU BASED DATA
+class MenuInput():
+
+    def __init__(self, default_value):
+        self.input_val = StringVar()
+        self.input_val.set(default_value)
+
+    def get_input_val(self):
+        return self.input_val
+    
+# HELPER CLASS FOR DESCRIPTION TO ID CONVERSION
+class DataConverter():
+
+    def return_id_from_name(self, description, label_name, val_list):
+        for val in val_list:
+            if val[0] == label_name:
+                for inner_tup in val[1]:
+                    if inner_tup[1] == description:
+                        return inner_tup[0]     
+        return None
+
 
 # New Job Application Sub-Screen
 class NewApplicationScreen(FullScreen):
@@ -64,6 +85,7 @@ class NewApplicationScreen(FullScreen):
     def __init__(self, container, db_controller):
         super().__init__(container)
         self.db_controller = db_controller
+        self.data_converter = DataConverter()
 
         self.single_data_inputs = []
         self.menu_data_inputs = []
@@ -74,16 +96,6 @@ class NewApplicationScreen(FullScreen):
         for val_name in self.job_attributes_titles['single_data']:
             self.single_data_inputs.append((Label(container, text=val_name), Entry(container, width=50, borderwidth=1)))
 
-        # Menu Option Configuration
-        class MenuInput():
-
-            def __init__(self, default_value):
-                self.input_val = StringVar()
-                self.input_val.set(default_value)
-
-            def get_input_val(self):
-                return self.input_val
-            
 
         for menu_option in self.job_attributes_titles['menu_data']:
             
@@ -98,18 +110,7 @@ class NewApplicationScreen(FullScreen):
         self.save_new_application = Button(container, text="Save", command=self.save_data)
 
     
-    def return_id_from_name(self, description, label_name, val_list):
-        # for item in val_list:
-        #     if item[1] == description:
-        #         return item[0]
 
-        for val in val_list:
-            if val[0] == label_name:
-                for inner_tup in val[1]:
-                    if inner_tup[1] == description:
-                        return inner_tup[0]
-                    
-        return None
 
     def save_data(self):
         data_values = []
@@ -120,7 +121,7 @@ class NewApplicationScreen(FullScreen):
             menu_title = menu_input[0].cget('text')
             selected_option = menu_input[1].get()
             
-            data_values.append(self.return_id_from_name(selected_option, menu_title, self.job_attributes_titles['menu_data']))
+            data_values.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.job_attributes_titles['menu_data']))
 
         self.db_controller.write_single_row("job_applications", data_values)
 
@@ -148,7 +149,6 @@ class NewApplicationScreen(FullScreen):
         
 # View All Applications Screen
 class ViewAllApplicationsScreen(FullScreen):
-
 
     def __init__(self, container, db_controller, left_sub_window):
         super().__init__(container)
@@ -207,18 +207,74 @@ class JobView(FullScreen):
         self.db_controller = db_controller
         self.job_id = job_id
         self.job_data = db_controller.retrieve_job_data_configured(job_id)
+        self.data_converter = DataConverter()
+
+        self.single_data_inputs = []
+        self.menu_data_inputs = []
+
+        self.job_attributes_titles = self.db_controller.retrieve_job_data_configured(job_id)
+        # print(self.job_attributes_titles)
+
+        # Retrieve single data input labels and assigned value
+        for data_tup in self.job_attributes_titles['single_data']:
+            new_Entry = Entry(container, width = 50, borderwidth=1)
+            new_Entry.insert(0, data_tup[1])
+            self.single_data_inputs.append((Label(container, text=data_tup[0]), new_Entry))
+
+
+        for menu_option in self.job_attributes_titles['menu_data']:
+            
+            value_holder = MenuInput(menu_option[2]).get_input_val()
+            menu_options = [val[1] for val in menu_option[1]]
+
+            # Form: (Label, input_holder, OptionMenu)
+            self.menu_data_inputs.append((Label(container, text=menu_option[0]), 
+                                     value_holder,
+                                     OptionMenu(container, value_holder, *menu_options)))
+            
+        self.update_application_btn = Button(container, text="Save Changes", command=self.update_data)
+
+
+    def update_data(self):
+
+        data_values = []
+        column_names = self.db_controller.retrieve_col_names('job_applications')[1:]
+
+        for single_input in self.single_data_inputs:
+            data_values.append(single_input[1].get())
+
+        for menu_input in self.menu_data_inputs:
+            menu_title = menu_input[0].cget('text')
+            selected_option = menu_input[1].get()
+            
+            data_values.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.job_attributes_titles['menu_data']))
+
+        data_values.append(self.job_id)
+        data_values = tuple(data_values)
+
+        self.db_controller.update_row("job_applications",column_names, data_values)
+        
+        
+        # print(column_names)
 
 
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
+
+        row_count = 0
+
+        for single_tup in self.single_data_inputs:
+            single_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
+            single_tup[1].grid(row = row_count, column = 1 , sticky=W+E)
+            row_count += 1
         
-        # add each job column name and corresponding data (as input) to screen
-        for count, job_attribute in enumerate(self.job_data):
-            label = Label(self.container, text=job_attribute[0])
-            input = Entry(self.container)
-            input.insert(0, job_attribute[1])
-            label.grid(row=count, column=0, pady=2, padx=2, sticky=W+E)
-            input.grid(row=count, column=1, pady=2, padx=2, sticky=W+E)
+        for menu_tup in self.menu_data_inputs:
+            menu_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
+            menu_tup[2].grid(row = row_count, column = 1 , sticky=W)
+            row_count += 1
+        
+        self.update_application_btn.grid(row=row_count, column=0, sticky=W+E)
+        
 
 
 
