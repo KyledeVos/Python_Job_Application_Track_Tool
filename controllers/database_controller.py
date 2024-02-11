@@ -108,4 +108,11 @@ class DatabaseController():
         self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, value_list )
         self.connection.close()
 
+    def update_row(self, table_name, column_list, values):
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        self.db_writer.update_row(self.connection, self.cursor, table_name, column_list, values)
+        self.connection.close()
+
         
