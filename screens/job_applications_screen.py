@@ -120,7 +120,7 @@ class NewApplicationScreen(FullScreen):
             
             data_values.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.job_attributes_titles['menu_data']))
 
-        self.db_controller.write_single_row_no_id("job_applications", data_values)
+        self.db_controller.write_single_job_no_id( data_values)
 
         # clear input fields after save
         for input_field in self.single_data_inputs:
