@@ -154,13 +154,17 @@ class ViewAllApplicationsScreen(FullScreen):
         self.empty_label = Label(container)
         self.left_sub_window = left_sub_window
 
+        # retrieve column names adding 'number' column (ignoring id column)
+        self.column_titles = ['Number']
+
     def get_data(self):
-        print(self.db_controller.retrieve_all_data("job_applications"))
+        print(self.db_controller.retrieve_all_job_data())
 
         
     def load_window(self):
-        # self.test_btn.grid(row=0, column=0)
-        current_applications = self.db_controller.retrieve_col_specific(['company, position'], 'job_applications')
+        current_applications = self.db_controller.retrieve_job_display_cols()
+
+        self.column_titles += [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names_no_id()[1:len(current_applications[0])]]
 
         if len(current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
@@ -171,28 +175,45 @@ class ViewAllApplicationsScreen(FullScreen):
                 def __init__(self, count, application, container, left_sub_window, db_controller):
                     self.left_sub_window = left_sub_window
                     self.db_controller = db_controller
+                    # retrieve id of application needed to load specific job data
                     self.id = application[0]
+                    # new list with current job count and remaining columns to be displayed
+                    self.job_data_columns = [count] + list(application)[1:]
+                    # list to hold Label attributes
+                    self.job_data_values = []
 
-                    self.job_count = Label(container, text=f"{count + 1}", width=5, anchor=W)
-                    self.job_count.bind("<Button-1>", self.open_job_application)
+                    for count, column in enumerate(self.job_data_columns):
+                        
+                        if count == 0:
+                            # reduce label width for row count
+                            current_label = Label(container, text=column, width=8, anchor=W)
+                        else:
+                            current_label = Label(container, text=column, width=20, anchor=W)
 
-                    self.company = Label(container, text=application[1], width=20,anchor=W)
-                    self.company.bind("<Button-1>", self.open_job_application)
-
-                    self.position = Label(container, text=application[2], width=20, anchor=W)
-                    self.position.bind("<Button-1>", self.open_job_application)
+                        current_label.bind("<Button-1>", self.open_job_application)
+                        self.job_data_values.append(current_label)
 
                 def open_job_application(self, event):
                     JobView(self.left_sub_window.get_right_major(), self.left_sub_window, self.db_controller, self.id).load_window()
 
                 def place_on_screen(self, row_count):
-                    self.job_count.grid(row = row_count, column=0, pady=2)
-                    self.company.grid(row=row_count, column=1, pady=2)
-                    self.position.grid(row=row_count, column=2, pady=2)
+                    for col_count, job_instance in enumerate(self.job_data_values):
+                        job_instance.grid(row = row_count, column=col_count, pady=2)
+                        job_instance.grid(row=row_count, column=col_count, pady=2)
+                        job_instance.grid(row=row_count, column=col_count, pady=2)
  
             for count, application in enumerate(current_applications):
-                current_job = Job_Instance(count, application, self.container, self.left_sub_window, self.db_controller)
-                current_job.place_on_screen(count)
+                # Add Column Titles
+                if count == 0:
+                    for col_count, title in enumerate(self.column_titles):
+                        if col_count == 0:
+                            current_label = Label(self.container, text=title, width=8, anchor=W)
+                        else:
+                            current_label = Label(self.container, text=title, width=20, anchor=W)
+                        current_label.grid(row=0, column=col_count, pady=2)
+                else:
+                    current_job = Job_Instance(count, application, self.container, self.left_sub_window, self.db_controller)
+                    current_job.place_on_screen(count)
 
 
 # View Specific Job
