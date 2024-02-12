@@ -34,24 +34,18 @@ class DbReader():
     # ----------------------------------------------------------------------------------
     # Data Specific Functions
 
-    def retrieve_and_config_job_data(self, cursor, id=None):
+    def retrieve_and_config_data(self, cursor, table_name, fk_tables, single_end_index, id=None):
         
-        # retrieve all column names and raw job data incl. id's of linked tables
-        job_columns = [name.title().replace("_", " ") for name in self.retrieve_column_names(cursor, 'job_applications')]
+        # retrieve all column names and raw data incl. id's of linked tables
+        column_names = [name.title().replace("_", " ") for name in self.retrieve_column_names(cursor, table_name)]
         if id != None:
-            job_data_raw = list(self.retrieve_single_row(cursor, id, 'job_applications'))
-
-        # set end of single data
-        single_end = 7
+            raw_data = list(self.retrieve_single_row(cursor, id, table_name))
 
         # list holding single data (not based on Foreign Key)
         if id != None:
-            single_data = list(zip(job_columns[:single_end], job_data_raw[:single_end]))
+            single_data = list(zip(column_names[:single_end_index], raw_data[:single_end_index]))
         else:
-            single_data = job_columns[1:single_end]
-
-        # names of tables linked with foreign key
-        fk_tables = ['employment_types', 'contract_period', 'application_status']
+            single_data = column_names[1:single_end_index]
 
         # list holding data based on Foreign Key (Used for Option Menus)
         menu_data = []
@@ -61,14 +55,14 @@ class DbReader():
             current_data = [val for val in self.retrieve_all_data(cursor, table_name)]
 
             if id != None:
-                set_value = self.retrieve_single_row(cursor, job_data_raw[single_end], table_name)[1]
+                set_value = self.retrieve_single_row(cursor, raw_data[single_end_index], table_name)[1]
                 menu_data.append((table_name.title().replace("_", " "), current_data, set_value))
-                single_end += 1
+                single_end_index += 1
             else:
                 menu_data.append((table_name.title().replace("_", " "), current_data))
 
-        job_data = {'single_data': single_data, 'menu_data':menu_data}
-        return job_data
+        combined_data = {'single_data': single_data, 'menu_data':menu_data}
+        return combined_data
         
 
         
