@@ -56,7 +56,11 @@ class DatabaseController():
         return data
     
 
-    def retrieve_column_names_no_id(self, table_name):
+    def retrieve_job_column_names_no_id(self):
+
+        # Set Default Values
+        table_name = "job_applications"
+
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
         data = self.db_reader.retrieve_column_names(self.cursor, table_name)
