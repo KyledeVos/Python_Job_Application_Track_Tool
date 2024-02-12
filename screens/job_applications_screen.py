@@ -235,7 +235,7 @@ class JobView(FullScreen):
     def update_data(self):
 
         data_values = []
-        column_names = self.db_controller.retrieve_column_names_no_id('job_applications')
+        column_names = self.db_controller.retrieve_job_column_names_no_id()
 
         for single_input in self.single_data_inputs:
             data_values.append(single_input[1].get())
