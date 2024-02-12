@@ -84,11 +84,19 @@ class DatabaseController():
 
         return data
     
-    def retrieve_job_data_configured(self, id=None):
+    def retrieve_job_data_configured(self, job_id=None):
+        
+        # Set Default Values
+        table_name = 'job_applications'
+        # set end of number of columns containing single data (not menu option)
+        single_end_index = 7
+
+        # names of tables linked with foreign key
+        fk_tables = ['employment_types', 'contract_period', 'application_status']
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
-        data = self.db_reader.retrieve_and_config_job_data(self.cursor, id)
+        data = self.db_reader.retrieve_and_config_data(self.cursor, table_name, fk_tables, single_end_index, job_id,)
         self.connection.close()
 
         return data
