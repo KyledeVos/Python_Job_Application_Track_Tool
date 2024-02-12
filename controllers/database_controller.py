@@ -69,17 +69,25 @@ class DatabaseController():
         return data
     
 
-    def retrieve_col_specific(self, columns, table_name):
+    def retrieve_job_display_cols(self):
+
+        # Set Default Values
+        # Specify columns to be displayed when displaying all applications (summary)
+        title_columns = ['company, position']
+        table_name = 'job_applications'
         
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
-        data = self.db_reader.retrieve_col_specific(self.cursor, columns, table_name)
+        data = self.db_reader.retrieve_col_specific(self.cursor, title_columns, table_name)
         self.connection.close()
 
         return data
 
 
-    def retrieve_all_data(self, table_name):
+    def retrieve_all_job_data(self):
+
+        # Set Default Values
+        table_name = "job_applications"
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
