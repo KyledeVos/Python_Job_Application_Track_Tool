@@ -109,7 +109,10 @@ class DatabaseController():
     # -----------------------------------------------------------------
     # Database Writing
 
-    def write_single_row_no_id(self, table_name, value_list):
+    def write_single_job_no_id(self, value_list):
+
+        # Set Default Values
+        table_name = "job_applications"
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
