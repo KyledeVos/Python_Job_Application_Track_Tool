@@ -155,16 +155,19 @@ class ViewAllApplicationsScreen(FullScreen):
         self.left_sub_window = left_sub_window
 
         # retrieve column names adding 'number' column (ignoring id column)
-        self.column_titles = ['Number']
+        self.column_titles = None
 
     def get_data(self):
         print(self.db_controller.retrieve_all_job_data())
 
         
     def load_window(self):
+        
         current_applications = self.db_controller.retrieve_job_display_cols()
+        self.column_titles = ['Number']
 
         self.column_titles += [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names_no_id()[1:len(current_applications[0])]]
+        print(self.column_titles)
 
         if len(current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
