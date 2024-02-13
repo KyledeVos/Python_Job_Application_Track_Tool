@@ -56,7 +56,7 @@ class DatabaseController():
         return data
     
 
-    def retrieve_job_column_names_no_id(self):
+    def retrieve_job_column_names(self):
 
         # Set Default Values
         table_name = "job_applications"

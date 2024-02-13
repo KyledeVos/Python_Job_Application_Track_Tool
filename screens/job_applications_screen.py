@@ -166,7 +166,7 @@ class ViewAllApplicationsScreen(FullScreen):
         current_applications = self.db_controller.retrieve_job_display_cols()
         self.column_titles = ['Number']
 
-        self.column_titles += [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names_no_id()[1:len(current_applications[0])]]
+        self.column_titles += [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names()[1:len(current_applications[0])]]
         print(self.column_titles)
 
         if len(current_applications) == 0:
@@ -259,7 +259,7 @@ class JobView(FullScreen):
     def update_data(self):
 
         data_values = []
-        column_names = self.db_controller.retrieve_job_column_names_no_id()
+        column_names = self.db_controller.retrieve_job_column_names()
 
         for single_input in self.single_data_inputs:
             data_values.append(single_input[1].get())
