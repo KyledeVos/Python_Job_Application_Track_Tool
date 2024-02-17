@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 
 class FullScreen():
 
@@ -15,14 +16,15 @@ class FullScreen():
 class SectionedLeftMinor():
 
     def __init__(self, container, frame_title) -> None:
+        
         self.enclosing_window = LabelFrame(container)
         self.left_minor_window = LabelFrame(self.enclosing_window, bg='red')
-        self.right_major_window = LabelFrame(self.enclosing_window, bg='purple')
+        self.scrollable_screen = ScrollableScreen(self.enclosing_window, 1, 1)
+        self.right_major_window = self.scrollable_screen.get_container()
 
         self.configure_sub_windows(frame_title)
 
     def configure_sub_windows(self, frame_title):
-        
         
         self.enclosing_window.grid_columnconfigure(0, weight = 1)
         self.enclosing_window.grid_columnconfigure(1, weight=3)
@@ -36,6 +38,7 @@ class SectionedLeftMinor():
 
     def load_right_major(self):
         self.right_major_window.grid(row = 1, column = 1, sticky="NEWS")
+        self.scrollable_screen.load_screen()
 
     def clear_left_minor(self):
         for screen in self.left_minor_window.grid_slaves():
@@ -54,6 +57,50 @@ class SectionedLeftMinor():
     def get_right_major(self):
         return self.right_major_window
     
+class ScrollableScreen():
+
+    def __init__(self, container, row_placement=0, column_placement=0) -> None:
+
+        # 1) Create the Main Frame
+        self.main_frame = Frame(container, bg="yellow")
+        # Make the frame expand to the full size of the window
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight = 1)
+        self.main_frame.grid(row=row_placement, column=column_placement, sticky="NEWS", padx=5, pady=5)
+
+        # 2) Create the Canvas
+        self.my_canvas = Canvas(self.main_frame)
+        self.my_canvas.grid_rowconfigure(0, weight=1)
+        self.my_canvas.grid_columnconfigure(0, weight=1)
+        self.my_canvas.grid(row = 0, column=0, sticky="NEWS")
+
+        # 3) Add the Scrollbar to the Canvas (it goes to the mainframe)
+        self.my_scrollbar = ttk.Scrollbar(self.main_frame, orient=VERTICAL, command=self.my_canvas.yview)
+        self.my_scrollbar.grid(row = 0, column=0, sticky='NSE')
+
+        # 5) Create another frame within the Canvas
+        self.second_frame = Frame(self.my_canvas)
+        # self.second_frame.grid_rowconfigure(0, weight=1)
+        # self.second_frame.grid_columnconfigure(0, weight = 1)
+        
+
+        
+
+    def get_container(self):
+        return self.second_frame
+    
+    def load_screen(self):
+
+        # move scroll window back to top for each page load
+        self.my_canvas.update_idletasks()
+        self.my_canvas.yview_moveto(0)
+                                    
+        # 4) Configure the Canvas
+        self.my_canvas.configure(yscrollcommand=self.my_scrollbar.set)
+        self.my_canvas.bind('<Configure>', lambda e: self.my_canvas.configure(scrollregion=self.my_canvas.bbox("all")))
+        self.my_canvas.bind_all('<MouseWheel>', lambda e: self.my_canvas.yview_scroll(-1 * int(e.delta / 60), "units"))
+        # 6) Add a new window to the canvas
+        self.my_canvas.create_window((0, 0), window=self.second_frame, anchor="nw")
 
 
     

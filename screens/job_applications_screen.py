@@ -14,10 +14,10 @@ class JobApplicationsScreen(FullScreen):
         self.left_minor_window = self.left_sub.get_left_minor()
         self.left_minor_initialize(self.left_minor_window)
         self.screen_options = self.right_screens_initialize(self.left_sub.get_right_major())
+        
 
 
     def left_minor_initialize(self, left_minor_window):
-        self.application_home_btn = Button(left_minor_window, text = "Applications Home")
         self.new_application_btn = Button(left_minor_window, text="New Application", 
                                           command=lambda: self.change_right_screen("New Application"))
         
@@ -29,6 +29,7 @@ class JobApplicationsScreen(FullScreen):
         
 
     def right_screens_initialize(self, container):
+        
         return {'New Application': NewApplicationScreen(container, self.db_controller),
                 'View All Applications': ViewAllApplicationsScreen(container, self.db_controller, self.left_sub)}
     
@@ -38,23 +39,24 @@ class JobApplicationsScreen(FullScreen):
         # Clear Application Screen
         self.left_sub.clear_right_major()
 
-        self.screen_options[selected_option].load_window()
         self.left_sub.load_right_major()
-
+        self.screen_options[selected_option].load_window()
+        
         self.left_sub.window_title.config(text=selected_option)
 
     
     def load_window(self):
 
+        # CHANGE TO APPLICATION HOME PAGE WHEN CREATED
+        self.change_right_screen("View All Applications")
+
         # need to add window loads for left and right screens here
         self.enclosing_window.grid(row=0, column=0, sticky="NEWS")
-        self.application_home_btn.grid(row=0, column=0, sticky=W+E)
-        self.new_application_btn.grid(row=1, column=0, sticky=W+E)
-        self.view_all_btn.grid(row=2, column=0, sticky=W+E)
-        self.search_btn.grid(row=3, column=0, sticky=W+E)
-        self.delete_application_btn.grid(row=4, column=0, sticky=W+E)
+        self.new_application_btn.grid(row=0, column=0, sticky=W+E)
+        self.view_all_btn.grid(row=1, column=0, sticky=W+E)
+        self.search_btn.grid(row=2, column=0, sticky=W+E)
+        self.delete_application_btn.grid(row=3, column=0, sticky=W+E)
         
-
         self.left_sub.load_left_minor()
 
 # HELPER CLASS FOR MENU BASED DATA
@@ -167,7 +169,6 @@ class ViewAllApplicationsScreen(FullScreen):
         self.column_titles = ['Number']
 
         self.column_titles += [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names()[1:len(current_applications[0])]]
-        print(self.column_titles)
 
         if len(current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
