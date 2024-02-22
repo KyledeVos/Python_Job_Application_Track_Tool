@@ -27,7 +27,7 @@ class SectionedLeftMinor():
     def configure_sub_windows(self, frame_title):
         
         self.enclosing_window.grid_columnconfigure(0, weight = 1)
-        self.enclosing_window.grid_columnconfigure(1, weight=3)
+        self.enclosing_window.grid_columnconfigure(1, weight=2)
         self.enclosing_window.grid_rowconfigure(1, weight = 1)
             
         self.window_title = Label(self.enclosing_window, text = frame_title )
@@ -80,11 +80,7 @@ class ScrollableScreen():
 
         # 5) Create another frame within the Canvas
         self.second_frame = Frame(self.my_canvas)
-        # self.second_frame.grid_rowconfigure(0, weight=1)
-        # self.second_frame.grid_columnconfigure(0, weight = 1)
-        
 
-        
 
     def get_container(self):
         return self.second_frame

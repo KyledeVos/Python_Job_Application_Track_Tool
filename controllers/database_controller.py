@@ -115,7 +115,7 @@ class DatabaseController():
 
 
     # -----------------------------------------------------------------
-    # Database Writing
+    # Database Writing and Deletion
 
     def write_single_job_no_id(self, value_list):
 
@@ -131,11 +131,24 @@ class DatabaseController():
         self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, value_list )
         self.connection.close()
 
-    def update_row(self, table_name, column_list, values):
+    def update_job_application(self, column_list, values):
+
+        # Set default Values
+        table_name = "job_applications"
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
         self.db_writer.update_row(self.connection, self.cursor, table_name, column_list, values)
+        self.connection.close()
+
+    def delete_job_data(self, id_values):
+
+        # Set default values
+        table_name = "job_applications"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        self.db_writer.delete_job_application(self.connection, self.cursor, table_name, id_values)
         self.connection.close()
 
         
