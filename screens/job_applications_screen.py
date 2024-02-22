@@ -168,13 +168,14 @@ class ViewAllApplicationsScreen(FullScreen):
     def load_window(self):
         
         current_applications = self.db_controller.retrieve_job_display_cols()
-        self.column_titles = ['Number']
-
-        self.column_titles += [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names()[1:len(current_applications[0])]]
 
         if len(current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
+            self.empty_label.grid(row=0, column=0)
         else:
+            self.column_titles = ['Number']
+
+            self.column_titles += [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names()[1:len(current_applications[0])]]
 
             class Job_Instance():
 
@@ -217,9 +218,9 @@ class ViewAllApplicationsScreen(FullScreen):
                         else:
                             current_label = Label(self.container, text=title, width=20, anchor=W)
                         current_label.grid(row=0, column=col_count, pady=2)
-                else:
-                    current_job = Job_Instance(count, application, self.container, self.left_sub_window, self.db_controller)
-                    current_job.place_on_screen(count)
+
+                current_job = Job_Instance(count, application, self.container, self.left_sub_window, self.db_controller)
+                current_job.place_on_screen(count)
 
 
 # View Specific Job
@@ -340,80 +341,85 @@ class DeleteApplication(FullScreen):
         # retrieve all application data - id and desired columns specified by database controller
         current_applications = self.db_controller.retrieve_job_display_cols()
         
-         # retrieve column titles
-        self.column_titles = [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names()[1:len(current_applications[0])]]
 
-        # ---------------------------------------------------------------
-        # DELETION ITEM CLASS
-        class DeletionItem():
-
-            def __init__(self, container, job_data_tup, db_controller, reload_window_func) -> None:
-                self.db_controller = db_controller
-                self.reload_window_func = reload_window_func
-                self.container = container
-
-                self.containing_box = Frame(container, bg='blue')
-
-                self.checked = IntVar()
-                self.checkBox = Checkbutton(self.containing_box, variable=self.checked)
-                self.delete_job_btn = Button(container, text='Delete')
-
-                self.id = job_data_tup[0]
-                self.label_list = []
-
-                for job_entry in list(job_data_tup)[1:]:
-                    self.label_list.append(Label(self.containing_box, text = job_entry, width=20, anchor=W))
-
-                
-            def place_on_screen(self, row, column):
-
-                # configure individual deletion button command
-                self.delete_job_btn.config(command=self.delete_job)
-
-                self.containing_box.grid(row=row, column=0)
-                column_count = column
-                self.checkBox.grid(row=row, column=column_count, pady=2)
-                column_count += 1
-
-                for label in self.label_list:
-                    label.grid(row=row_count, column=column_count, padx=5, pady=2)
-                    column_count +=1
-
-                self.delete_job_btn.grid(row=row_count, column=column_count)
-
-            def delete_job(self):
-                self.db_controller.delete_job_data([self.id])
-                # reload window after row deletion
-                for screen in self.container.grid_slaves():
-                    screen.grid_forget()
-                self.reload_window_func()
-
-
-            def get_job_id(self):
-                return self.id
-            
-            def get_selection(self):
-                return self.checked.get()
-            
-            def uncheck_box(self):
-                self.checked.set(0)
-
-        # ---------------------------------------------------------------
-        # ELEMENT PLACEMENT ON SCREEN
-
-        # load top-level buttons
-        self.top_level_holder.grid(row=0, column=0, pady=10)
-        self.clear_boxes_btn.grid(row=0, column=0)
-        self.delete_selected_btn.grid(row=0, column=1, padx=5)
-
-        # Job Instance Placements
-        row_count = 2
+        if len(current_applications) == 0:
+            Label(self.container, text="No Job Applications").grid(row=0, column=0)
         
-        for application in current_applications:
-            item = DeletionItem(self.container, application, self.db_controller, self.load_window)
-            item.place_on_screen(row_count, 0)
-            self.deletion_items.append(item)
-            row_count+=1
+        else:
+            # retrieve column titles
+            self.column_titles = [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names()[1:len(current_applications[0])]]
+
+            # ---------------------------------------------------------------
+            # DELETION ITEM CLASS
+            class DeletionItem():
+
+                def __init__(self, container, job_data_tup, db_controller, reload_window_func) -> None:
+                    self.db_controller = db_controller
+                    self.reload_window_func = reload_window_func
+                    self.container = container
+
+                    self.containing_box = Frame(container, bg='blue')
+
+                    self.checked = IntVar()
+                    self.checkBox = Checkbutton(self.containing_box, variable=self.checked)
+                    self.delete_job_btn = Button(container, text='Delete')
+
+                    self.id = job_data_tup[0]
+                    self.label_list = []
+
+                    for job_entry in list(job_data_tup)[1:]:
+                        self.label_list.append(Label(self.containing_box, text = job_entry, width=20, anchor=W))
+
+                    
+                def place_on_screen(self, row, column):
+
+                    # configure individual deletion button command
+                    self.delete_job_btn.config(command=self.delete_job)
+
+                    self.containing_box.grid(row=row, column=0)
+                    column_count = column
+                    self.checkBox.grid(row=row, column=column_count, pady=2)
+                    column_count += 1
+
+                    for label in self.label_list:
+                        label.grid(row=row_count, column=column_count, padx=5, pady=2)
+                        column_count +=1
+
+                    self.delete_job_btn.grid(row=row_count, column=column_count)
+
+                def delete_job(self):
+                    self.db_controller.delete_job_data([self.id])
+                    # reload window after row deletion
+                    for screen in self.container.grid_slaves():
+                        screen.grid_forget()
+                    self.reload_window_func()
+
+
+                def get_job_id(self):
+                    return self.id
+                
+                def get_selection(self):
+                    return self.checked.get()
+                
+                def uncheck_box(self):
+                    self.checked.set(0)
+
+            # ---------------------------------------------------------------
+            # ELEMENT PLACEMENT ON SCREEN
+
+            # load top-level buttons
+            self.top_level_holder.grid(row=0, column=0, pady=10)
+            self.clear_boxes_btn.grid(row=0, column=0)
+            self.delete_selected_btn.grid(row=0, column=1, padx=5)
+
+            # Job Instance Placements
+            row_count = 2
+            
+            for application in current_applications:
+                item = DeletionItem(self.container, application, self.db_controller, self.load_window)
+                item.place_on_screen(row_count, 0)
+                self.deletion_items.append(item)
+                row_count+=1
 
 
     
