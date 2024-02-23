@@ -209,21 +209,21 @@ class ViewAllApplicationsScreen(FullScreen):
                         job_instance.grid(row=row_count, column=col_count,padx = 10, pady=2)
                         job_instance.grid(row=row_count, column=col_count, padx = 10, pady=2)
 
-            row_count = 0
             for count, application in enumerate(current_applications):
                 # Add Column Titles
                 if count == 0:
                     for col_count, title in enumerate(self.column_titles):
+                        # Set reduced width for row count
                         if col_count == 0:
                             current_label = Label(self.container, text=title, width=8, anchor=W)
                         else:
+                        # Set longer width for other rows (company, position, etc.)
                             current_label = Label(self.container, text=title, width=20, anchor=W)
                         current_label.grid(row=0, column=col_count, pady=2)
-                row_count += 1
-                print(row_count)
 
-                current_job = Job_Instance(row_count, application, self.container, self.left_sub_window, self.db_controller)
-                current_job.place_on_screen(row_count)
+                # Create Job Instane (with job data) and place on screen
+                current_job = Job_Instance(count+1, application, self.container, self.left_sub_window, self.db_controller)
+                current_job.place_on_screen(count+1)
 
 
 # View Specific Job
@@ -320,6 +320,9 @@ class DeleteApplication(FullScreen):
     def deselect_all(self):
         for item in self.deletion_items:
             item.uncheck_box()
+        # disbaled clear box and delete all buttons
+        self.clear_boxes_btn.config(state=DISABLED)
+        self.delete_selected_btn.config(state=DISABLED)
 
     def delete_selected_jobs(self):
 
@@ -332,12 +335,27 @@ class DeleteApplication(FullScreen):
 
         self.load_window()
 
+    def delete_clear_box_disable(self):
+        selected_box = False
+        for item in self.deletion_items:
+            if item.get_selection() == 1:
+                selected_box = True
+                break
+
+        if selected_box == True and self.clear_boxes_btn.cget('state') == 'disabled' and self.delete_selected_btn.cget('state') == 'disabled':
+            self.clear_boxes_btn.config(state=ACTIVE)
+            self.delete_selected_btn.config(state=ACTIVE)
+
+        elif selected_box == FALSE and self.clear_boxes_btn.cget('state') == 'active' and self.delete_selected_btn.cget('state') == 'active':
+            self.clear_boxes_btn.config(state=DISABLED)
+            self.delete_selected_btn.config(state=DISABLED)
+
 
     def load_window(self):
         
         # configure functions for clear_boxes and delete_selected
-        self.clear_boxes_btn.config(command=self.deselect_all)
-        self.delete_selected_btn.config(command=self.delete_selected_jobs)
+        self.clear_boxes_btn.config(command=self.deselect_all, state=DISABLED)
+        self.delete_selected_btn.config(command=self.delete_selected_jobs, state = DISABLED)
 
         # ---------------------------------------------------------------
         # DATA RETRIEVAL
@@ -356,15 +374,16 @@ class DeleteApplication(FullScreen):
             # DELETION ITEM CLASS
             class DeletionItem():
 
-                def __init__(self, container, job_data_tup, db_controller, reload_window_func) -> None:
+                def __init__(self, container, job_data_tup, db_controller, reload_window_func, delete_clear_box_disable) -> None:
                     self.db_controller = db_controller
                     self.reload_window_func = reload_window_func
+                    self.delete_clear_box_disable = delete_clear_box_disable
                     self.container = container
 
                     self.containing_box = Frame(container, bg='blue')
 
                     self.checked = IntVar()
-                    self.checkBox = Checkbutton(self.containing_box, variable=self.checked)
+                    self.checkBox = Checkbutton(self.containing_box, variable=self.checked, command=delete_clear_box_disable)
                     self.delete_job_btn = Button(container, text='Delete')
 
                     self.id = job_data_tup[0]
@@ -419,7 +438,7 @@ class DeleteApplication(FullScreen):
             row_count = 2
             
             for application in current_applications:
-                item = DeletionItem(self.container, application, self.db_controller, self.load_window)
+                item = DeletionItem(self.container, application, self.db_controller, self.load_window, self.delete_clear_box_disable)
                 item.place_on_screen(row_count, 0)
                 self.deletion_items.append(item)
                 row_count+=1
