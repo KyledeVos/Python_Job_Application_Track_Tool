@@ -46,6 +46,11 @@ class DatabaseController():
                                 ('Received Offer',), ("Declined", ), ("Rejected", ), ("Accepted",)]
         self.db_initializer.def_table_populate(self.connection, self.cursor, "application_status", app_status_cols, app_status_vals)
 
+        # Commuincation Type Table - Job Application Progress
+        comm_type_cols = ['type']
+        comm_type_vals =  [('Email',), ('Telephone',), ('Cellphone',), ('SMS',), ('WhatsApp',), ('Company System',)]
+        self.db_initializer.def_table_populate(self.connection, self.cursor, "communication_type", comm_type_cols, comm_type_vals)
+
         self.connection.close()
 
     # -----------------------------------------------------------------
