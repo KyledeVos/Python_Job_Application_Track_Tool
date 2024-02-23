@@ -131,6 +131,9 @@ class NewApplicationScreen(FullScreen):
         for input_field in self.single_data_inputs:
             input_field[1].delete(0, END)
 
+        # Display Message to user that Application has been saved
+        messagebox.showinfo(message='Application has been saved')
+
 
     def load_window(self):
 
