@@ -285,6 +285,9 @@ class JobView(FullScreen):
         data_values = tuple(data_values)
 
         self.db_controller.update_job_application(column_names, data_values)
+
+        # Display Message to user that Application has been updated
+        messagebox.showinfo(message='Changes have been saved')
         
     
     def load_window(self):
@@ -331,6 +334,7 @@ class DeleteApplication(FullScreen):
     def delete_selected_jobs(self):
 
         id_list = [item.get_job_id() for item in self.deletion_items if item.checked.get() == 1]
+        print(id_list)
         
         # create gramatically correct message
         if len(id_list) == 1:
@@ -455,6 +459,8 @@ class DeleteApplication(FullScreen):
             # Job Instance Placements
             row_count = 2
             
+            # clear deletion items from potential previous screen load
+            self.deletion_items.clear()
             for application in current_applications:
                 item = DeletionItem(self.container, application, self.db_controller, self.load_window, self.delete_clear_box_disable)
                 item.place_on_screen(row_count, 0)
