@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 from .parent_screens import FullScreen, SectionedLeftMinor
 
 
@@ -327,13 +328,23 @@ class DeleteApplication(FullScreen):
     def delete_selected_jobs(self):
 
         id_list = [item.get_job_id() for item in self.deletion_items if item.checked.get() == 1]
-        self.db_controller.delete_job_data(id_list)
+        
+        # create gramatically correct message
+        if len(id_list) == 1:
+            display_message = "Are you sure you want to delete this job?\nThis action cannot be undone"
+        else:
+            display_message = f"Are you sure you want to delete {len(id_list)} jobs?\nThis action cannot be undone"
 
-        # reload window after deletion
-        for screen in self.container.grid_slaves():
-            screen.grid_forget()
+        # Display Yes or No Box to confirm Deletion
+        if(messagebox.askyesno('Permanent Deletion Warning!', 
+                               message=display_message, default = 'no')):
+            self.db_controller.delete_job_data(id_list)
 
-        self.load_window()
+            # reload window after deletion
+            for screen in self.container.grid_slaves():
+                screen.grid_forget()
+
+            self.load_window()
 
     def delete_clear_box_disable(self):
         selected_box = False
@@ -410,11 +421,15 @@ class DeleteApplication(FullScreen):
                     self.delete_job_btn.grid(row=row_count, column=column_count)
 
                 def delete_job(self):
-                    self.db_controller.delete_job_data([self.id])
+                    # Display Yes or No Box to confirm Deletion
+                    if(messagebox.askyesno('Permanent Deletion Warning!', 
+                               message="Are you sure you want to delete this job?\nThis action cannot be undone",
+                               default = 'no')):
+                        self.db_controller.delete_job_data([self.id])
                     # reload window after row deletion
-                    for screen in self.container.grid_slaves():
-                        screen.grid_forget()
-                    self.reload_window_func()
+                        for screen in self.container.grid_slaves():
+                            screen.grid_forget()
+                        self.reload_window_func()
 
 
                 def get_job_id(self):
