@@ -19,10 +19,32 @@ class DatabaseController():
         self.cursor = self.connection.cursor()
 
         self.db_initializer.create_all_tables(self.connection, self.cursor)
-        self.db_initializer.set_default_values(self.connection, self.cursor)
+        self.populate_table_defaults()
 
         # testing population
         # print(self.db_initializer.retrieve_all_single_col(self.cursor, "employment_types", "type"))
+
+        self.connection.close()
+
+    def populate_table_defaults(self):
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+
+        # Employment Types Table
+        emp_columns = ["type"]
+        emp_values = [('Full Time',), ('Part Time',), ('Temporary',), ('Contractor',), ('Freelance',)]
+        self.db_initializer.def_table_populate(self.connection, self.cursor, "employment_types", emp_columns, emp_values)
+
+        # Contract Duration Table
+        cont_duration_cols = ["duration"]
+        cont_duration_vals = [('3 Months',), ('6 Months',), ('12 Months',), ('24 Months',), ('Permanent',), ('Not Specified',)]
+        self.db_initializer.def_table_populate(self.connection, self.cursor, "contract_period", cont_duration_cols, cont_duration_vals)
+
+        # Application Status Table
+        app_status_cols = ["status"]
+        app_status_vals = [('Applied',), ('Testing',), ('First Interview',), ('Second Interview',),
+                                ('Received Offer',), ("Declined", ), ("Rejected", ), ("Accepted",)]
+        self.db_initializer.def_table_populate(self.connection, self.cursor, "application_status", app_status_cols, app_status_vals)
 
         self.connection.close()
 

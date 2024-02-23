@@ -103,7 +103,7 @@ class DbInitializer():
         connection.commit()
 
 
-    # Helper Function
+    # Function To Populate a Specified Table with Default Values
     def def_table_populate(self, connection, cursor, table_name, columns, values):
 
         if len(cursor.execute(f"SELECT * FROM {table_name}").fetchall()) == 0:
@@ -123,36 +123,7 @@ class DbInitializer():
             connection.commit()
 
 
-    def set_default_values(self, connection, cursor):
-        emp_columns = ["type"]
-        emp_values = [('Full Time',), ('Part Time',), ('Temporary',), ('Contractor',), ('Freelance',)]
-        self.def_table_populate(connection, cursor, "employment_types", emp_columns, emp_values)
 
-        cont_duration_cols = ["duration"]
-        cont_duration_vals = [('3 Months',), ('6 Months',), ('12 Months',), ('24 Months',), ('Permanent',), ('Not Specified',)]
-        self.def_table_populate(connection, cursor, "contract_period", cont_duration_cols, cont_duration_vals)
-
-        app_status_cols = ["status"]
-        app_status_vals = [('Applied',), ('Testing',), ('First Interview',), ('Second Interview',),
-                                ('Received Offer',), ("Declined", ), ("Rejected", ), ("Accepted", )]
-        self.def_table_populate(connection, cursor, "application_status", app_status_cols, app_status_vals)
-
-
-    # def retrieve_all_single_col(self, cursor, table_name, column):
-    #     return cursor.execute(f"Select {column} from {table_name}").fetchall() 
-
-
-# connection = sqlite3.connect('test.db')
-# cursor = connection.cursor()
-
-
-# print(cursor.execute(f"Select id, type  from employment_types").fetchall())
-# # initial = DbInitializer()
-# # # initial.create_all_tables(connection, cursor)
-# # initial.set_default_values(connection, cursor)
-# # print(initial.retrieve_all_single_col(cursor, "employment_types", "type"))
-
-# connection.close()
 
 
 
