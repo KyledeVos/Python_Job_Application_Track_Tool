@@ -208,7 +208,8 @@ class ViewAllApplicationsScreen(FullScreen):
                         job_instance.grid(row = row_count, column=col_count, padx=10, pady=2)
                         job_instance.grid(row=row_count, column=col_count,padx = 10, pady=2)
                         job_instance.grid(row=row_count, column=col_count, padx = 10, pady=2)
- 
+
+            row_count = 0
             for count, application in enumerate(current_applications):
                 # Add Column Titles
                 if count == 0:
@@ -218,9 +219,11 @@ class ViewAllApplicationsScreen(FullScreen):
                         else:
                             current_label = Label(self.container, text=title, width=20, anchor=W)
                         current_label.grid(row=0, column=col_count, pady=2)
+                row_count += 1
+                print(row_count)
 
-                current_job = Job_Instance(count, application, self.container, self.left_sub_window, self.db_controller)
-                current_job.place_on_screen(count)
+                current_job = Job_Instance(row_count, application, self.container, self.left_sub_window, self.db_controller)
+                current_job.place_on_screen(row_count)
 
 
 # View Specific Job
