@@ -198,10 +198,11 @@ class NewApplicationScreen(FullScreen):
             # Input, Frame, Input Box and ScrollBar
             input_frame = Frame(self.progress_window, padx=10)
             input_frame.grid(row=label_row_count, column=0, columnspan=2, padx=5, pady=5, sticky="NEWS")
+            input_frame.bind_all('<MouseWheel>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
 
 
             text_box = Text(input_frame, width=50, height=10, padx=10, borderwidth=2, relief='solid')
-            scrollbar = ttk.Scrollbar(self.progress_window, orient='vertical')
+            scrollbar = ttk.Scrollbar(self.progress_window, orient='vertical', command=text_box.yview)
             text_box.config(yscrollcommand=scrollbar.set)
             scrollbar.config(command=text_box.yview)
             scrollbar.grid(row=label_row_count, column=1, sticky="NSE")
