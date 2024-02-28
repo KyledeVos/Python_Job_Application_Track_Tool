@@ -64,5 +64,34 @@ class DbReader():
         combined_data = {'single_data': single_data, 'menu_data':menu_data}
         return combined_data
         
+    def retrieve_configured_job_progress_columns(self, cursor, table_name, single_data, larger_data_inputs,fk_tables):
 
+        # retrieve all column names:
+        all_cols = self.retrieve_column_names(cursor, table_name)
         
+        # lists to hold seperated data for dictionary:
+        single_data_list = []
+        larger_box_data = []
+        fk_data = []
+
+        # dictionary to hold data as:
+        # {'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]] }
+        column_names_dict = {}
+
+        # Retrieve and Configure Data for single columns and larger box area columns
+        for name in all_cols:
+            if name in single_data:
+                single_data_list.append(name.title().replace("_", " "))
+            elif name in larger_data_inputs:
+                larger_box_data.append(name.title().replace("_", " "))
+
+        # retrieve foreign table data
+        for fk_tup in fk_tables:
+            #fk_tup[0] = desired column name, fk_tup[1] = table name
+            data_list = list(cursor.execute(f"SELECT id, {fk_tup[1]} FROM {fk_tup[0]}").fetchall())
+            fk_data.append([fk_tup[1].title().replace("_", " "), data_list])
+
+        # add all data from lists to column_names_dict
+        column_names_dict['single_data'] = tuple(single_data)
+        column_names_dict['larger_box_data'] = tuple(larger_box_data)
+        column_names_dict['fk_data'] = fk_data

@@ -46,10 +46,10 @@ class DatabaseController():
                                 ('Received Offer',), ("Declined", ), ("Rejected", ), ("Accepted",)]
         self.db_initializer.def_table_populate(self.connection, self.cursor, "application_status", app_status_cols, app_status_vals)
 
-        # Commuincation Type Table - Job Application Progress
-        comm_type_cols = ['type']
+        # Communication Type Table - Job Application Progress
+        comm_type_cols = ['communication_type']
         comm_type_vals =  [('Email',), ('Telephone',), ('Cellphone',), ('SMS',), ('WhatsApp',), ('Company System',)]
-        self.db_initializer.def_table_populate(self.connection, self.cursor, "communication_type", comm_type_cols, comm_type_vals)
+        self.db_initializer.def_table_populate(self.connection, self.cursor, "communication_types", comm_type_cols, comm_type_vals)
 
         self.connection.close()
 
@@ -95,6 +95,32 @@ class DatabaseController():
 
         return data
     
+    def retrieve_job_progress_column_names(self):
+
+        # Use of this method assumes columns in table are ordered as:
+        # id column, Single Data, Singe Data needing larger area input box, foreign key id's
+
+        # Set Default Table Name
+        table_name = 'progress'
+        # set names of columns with data for one line
+        single_data = ['date']
+        # set column names for data needing larger area input box
+        larger_data_inputs = ['description']
+        # set names of foreign key tables with corresponding column name
+        fk_tables = [('communication_types', 'communication_type')]
+
+        
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        # retrieve configured table column names data
+        # Data to be configured as:
+        # {'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]]}
+        data = self.db_reader.retrieve_configured_job_progress_columns(self.cursor, table_name, single_data, larger_data_inputs,
+                                                                       fk_tables)
+        self.connection.close()
+
+        return data
+
 
     def retrieve_job_display_cols(self):
 
