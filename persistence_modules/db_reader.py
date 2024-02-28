@@ -92,6 +92,8 @@ class DbReader():
             fk_data.append([fk_tup[1].title().replace("_", " "), data_list])
 
         # add all data from lists to column_names_dict
-        column_names_dict['single_data'] = tuple(single_data)
+        column_names_dict['single_data'] = tuple(single_data_list)
         column_names_dict['larger_box_data'] = tuple(larger_box_data)
         column_names_dict['fk_data'] = fk_data
+
+        return column_names_dict
