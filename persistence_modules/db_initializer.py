@@ -55,9 +55,9 @@ class DbInitializer():
         # ---------------------------------------------------------------------
         # CREATE communication type table for Application Progress Table
 
-        cursor.execute("""CREATE TABLE IF NOT EXISTS communication_type(
+        cursor.execute("""CREATE TABLE IF NOT EXISTS communication_types(
             id INTEGER PRIMARY KEY,
-            type TEXT NOT NULL
+            communication_type TEXT NOT NULL
         )""")
         connection.commit()
 
@@ -66,8 +66,9 @@ class DbInitializer():
         # CREATE Job Application Progress Table
         cursor.execute("""CREATE TABLE IF NOT EXISTS progress(
             id INTEGER PRIMARY KEY,
-            job_id INTEGER NOT NULL, 
+            date TEXT NOT NULL,
             description TEXT NOT NULL,
+            job_id INTEGER NOT NULL,
             comm_id INTEGER NOT NULL,
             FOREIGN KEY(job_id) REFERENCES job_applications(id),
             FOREIGN KEY(comm_id) REFERENCES communication_type(id)
