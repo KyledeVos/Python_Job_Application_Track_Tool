@@ -91,6 +91,12 @@ class NewApplicationScreen(FullScreen):
         super().__init__(container)
         self.db_controller = db_controller
         self.data_converter = DataConverter()
+        self.container = container
+
+        self.row_count = 0
+
+        # ---------------------------------------------------------------
+        # JOB BASIC INFO
 
         self.single_data_inputs = []
         self.menu_data_inputs = []
@@ -98,7 +104,8 @@ class NewApplicationScreen(FullScreen):
         self.job_attributes_titles = self.db_controller.retrieve_job_data_configured()
 
         for val_name in self.job_attributes_titles['single_data']:
-            self.single_data_inputs.append((Label(container, text=val_name), Entry(container, width=50, borderwidth=1)))
+            self.single_data_inputs.append((Label(container, text=val_name, anchor=W),
+                                            Entry(container, width=50, borderwidth=1)))
 
 
         for menu_option in self.job_attributes_titles['menu_data']:
@@ -107,14 +114,56 @@ class NewApplicationScreen(FullScreen):
             menu_options = [val[1] for val in menu_option[1]]
 
             # Form: (Label, input_holder, OptionMenu)
-            self.menu_data_inputs.append((Label(container, text=menu_option[0]), 
+            self.menu_data_inputs.append((Label(container, text=menu_option[0], anchor=W), 
                                      value_holder,
                                      OptionMenu(container, value_holder, *menu_options)))
-            
+        
+        
+        # ---------------------------------------------------------------
+        # JOB PROGRESS TRACK SECTION
+
+        # hold list of progress data after save  
+        self.progress_instance_list = []
+        
+        self.job_progress_frame = Frame(container, borderwidth=2, relief='solid', padx=5, pady=5)
+        self.add_progress_btn = Button(self.job_progress_frame, text='Add Progress Note', padx=5, pady=5, command=self.load_progress_window)
+        self.progress_counter = Label(self.job_progress_frame, text=f"Progress Notes: {len(self.progress_instance_list)}",
+                                      padx=5, pady=5)
+    
+        # ---------------------------------------------------------------
+        # JOB NOTES SECTION
+        self.new_note_btn = Button(container, text='Add Progress', anchor=W)
+        self.job_progress_instance = None
+
+        # Save Application Button
         self.save_new_application = Button(container, text="Save", command=self.save_data)
 
-    
+    def load_progress_window(self):
+        # retrieve job progress attributes as dict in form of:
+        # {'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]]}
+        progress_attributes = self.db_controller.retrieve_job_progress_column_names()
+
+        # new window to open progress input
+        self.progress_window = Toplevel()
+        self.progress_window.geometry("400x400")
+        self.progress_window.grid_columnconfigure(0, weight=1)
+
+        # disable main application window buttons whilst job progress is being created
+        self.add_progress_btn.config(state='disabled')
+        self.save_new_application.config(state='disabled')
+
+        # re-enable buttons if progress window is closed
+        # does not result in progress data being saved
+        self.progress_window.protocol("WM_DELETE_WINDOW", self.enable_buttons)
+
+
+    def enable_buttons(self):
+        self.add_progress_btn.config(state='active')
+        self.save_new_application.config(state='active')
+        self.progress_window.destroy()
+
     def save_data(self):
+
         data_values = []
         for single_input in self.single_data_inputs:
             data_values.append(single_input[1].get())
@@ -137,19 +186,27 @@ class NewApplicationScreen(FullScreen):
 
     def load_window(self):
 
-        row_count = 0
-
+        # load single data inputs
         for single_tup in self.single_data_inputs:
-            single_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
-            single_tup[1].grid(row = row_count, column = 1 , sticky=W+E)
-            row_count += 1
+            single_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
+            single_tup[1].grid(row = self.row_count, column = 1 , sticky=W+E)
+            self.row_count += 1
         
+        # load menu data inputs
         for menu_tup in self.menu_data_inputs:
-            menu_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
-            menu_tup[2].grid(row = row_count, column = 1 , sticky=W)
-            row_count += 1
-        
-        self.save_new_application.grid(row=row_count, column=0, sticky=W+E)
+            menu_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
+            menu_tup[2].grid(row = self.row_count, column = 1 , sticky=W)
+            self.row_count += 1
+
+        # load job progress section
+        self.job_progress_frame.grid(row=self.row_count, column=0, columnspan=2, padx=2, pady=5, sticky=W+E)
+        self.add_progress_btn.grid(row=0, column=0, padx=2, pady=5)
+        self.progress_counter.grid(row=0, column=1, padx=10, pady=2)
+        self.row_count += 1
+
+        # ------------------------------------------------------------------------
+        # BUTTONS
+        self.save_new_application.grid(row=self.row_count, column=0, sticky=W+E)
 
         
 # View All Applications Screen
@@ -334,7 +391,6 @@ class DeleteApplication(FullScreen):
     def delete_selected_jobs(self):
 
         id_list = [item.get_job_id() for item in self.deletion_items if item.checked.get() == 1]
-        print(id_list)
         
         # create gramatically correct message
         if len(id_list) == 1:
