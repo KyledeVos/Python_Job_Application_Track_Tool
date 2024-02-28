@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 from tkinter import messagebox
 from .parent_screens import FullScreen, SectionedLeftMinor
 
@@ -127,26 +128,36 @@ class NewApplicationScreen(FullScreen):
         
         self.job_progress_frame = Frame(container, borderwidth=2, relief='solid', padx=5, pady=5)
         self.add_progress_btn = Button(self.job_progress_frame, text='Add Progress Note', padx=5, pady=5, command=self.load_progress_window)
-        self.progress_counter = Label(self.job_progress_frame, text=f"Progress Notes: {len(self.progress_instance_list)}",
-                                      padx=5, pady=5)
+
     
         # ---------------------------------------------------------------
         # JOB NOTES SECTION
         self.new_note_btn = Button(container, text='Add Progress', anchor=W)
-        self.job_progress_instance = None
+
+        self.progress_counter = len(self.progress_instance_list) + 1
+        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter}",
+                                      padx=5, pady=5)
+
+        # list to store single data inputs (one-line)
+        self.single_data_list = []
+        # list to store single data inputs needing larger input box
+        self.large_box_data = []
 
         # Save Application Button
         self.save_new_application = Button(container, text="Save", command=self.save_data)
 
     def load_progress_window(self):
+
+        # -----------------------------------------------------------------------------
+        # Initial Window Configuration
         # retrieve job progress attributes as dict in form of:
         # {'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]]}
         progress_attributes = self.db_controller.retrieve_job_progress_column_names()
 
         # new window to open progress input
         self.progress_window = Toplevel()
-        self.progress_window.geometry("400x400")
-        self.progress_window.grid_columnconfigure(0, weight=1)
+        self.progress_window.geometry("600x400")
+        #self.progress_window.grid_columnconfigure(0, weight=1)
 
         # disable main application window buttons whilst job progress is being created
         self.add_progress_btn.config(state='disabled')
@@ -156,11 +167,65 @@ class NewApplicationScreen(FullScreen):
         # does not result in progress data being saved
         self.progress_window.protocol("WM_DELETE_WINDOW", self.enable_buttons)
 
+        # -----------------------------------------------------------------------------
+        # Initial Window Configuration
+        label_row_count = 0
+        input_row_count = 0
+
+        # Add Progress Note count
+        Label(self.progress_window, text=f"Progress Note: {self.progress_counter}", anchor=W
+              ).grid(row=label_row_count, column=0, padx=5, pady=5, sticky=W+E)
+        label_row_count += 1
+                
+        # create single data labels and input boxes (one-line)
+        for single_item in progress_attributes['single_data']:
+            Label(self.progress_window, text=single_item, anchor=W
+                  ).grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=5)
+            label_row_count += 1
+            self.single_data_list.append(Entry(self.progress_window, width=30))
+
+        # add single item data inputs to progress screen
+        for item in self.single_data_list:
+            item.grid(row=label_row_count, column = 0, sticky=W+E, padx=20, pady=5)
+            label_row_count += 1
+
+        # create single item data labels and input boxes needing larger box
+        for multi_line_item in progress_attributes['larger_box_data']:
+            Label(self.progress_window, text=multi_line_item, anchor=W
+                  ).grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=5)
+            label_row_count += 1
+
+            # Input, Frame, Input Box and ScrollBar
+            input_frame = Frame(self.progress_window, padx=10)
+            input_frame.grid(row=label_row_count, column=0, columnspan=2, padx=5, pady=5, sticky="NEWS")
+
+
+            text_box = Text(input_frame, width=50, height=10, padx=10, borderwidth=2, relief='solid')
+            scrollbar = ttk.Scrollbar(self.progress_window, orient='vertical')
+            text_box.config(yscrollcommand=scrollbar.set)
+            scrollbar.config(command=text_box.yview)
+            scrollbar.grid(row=label_row_count, column=1, sticky="NSE")
+            text_box.grid(row = 0, column=0, sticky=W)
+            label_row_count += 1
+            
+            self.large_box_data.append(text_box)
+            
+
+        # add single item (multi-line) data inputs to progress screen
+        for item in self.large_box_data:
+            item.grid(row=input_row_count, column = 1, padx=5, pady=5)
+            input_row_count += 1
+
+        
+
+
 
     def enable_buttons(self):
+        # re-enable main windows buttons if progress window is closed (without save)
         self.add_progress_btn.config(state='active')
         self.save_new_application.config(state='active')
         self.progress_window.destroy()
+
 
     def save_data(self):
 
@@ -201,7 +266,7 @@ class NewApplicationScreen(FullScreen):
         # load job progress section
         self.job_progress_frame.grid(row=self.row_count, column=0, columnspan=2, padx=2, pady=5, sticky=W+E)
         self.add_progress_btn.grid(row=0, column=0, padx=2, pady=5)
-        self.progress_counter.grid(row=0, column=1, padx=10, pady=2)
+        self.progress_count_label.grid(row=0, column=1, padx=10, pady=2)
         self.row_count += 1
 
         # ------------------------------------------------------------------------
