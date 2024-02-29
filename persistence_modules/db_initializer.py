@@ -67,7 +67,8 @@ class DbInitializer():
         # STANDARD ORDER TO FOLLOW FOR NEW COLUMNS:
         # 1) Single-Line Inputs
         # 2) Multi-line Inputs
-        # 3) Foreign Key ID's
+        # 3) Foreign Key ID's (available before job progress instance is created) - comm_id
+        # 4) Foreign Key ID's (only available after job progress instance is created) - job_id
         cursor.execute("""CREATE TABLE IF NOT EXISTS progress(
             id INTEGER PRIMARY KEY,
             date TEXT NOT NULL,
