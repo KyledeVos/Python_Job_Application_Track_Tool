@@ -20,6 +20,7 @@ class DbWriter():
 
         cursor.execute(query, value_list)
         connection.commit()
+        return cursor.lastrowid
 
     def update_row(self, connection, cursor, table_name, column_list, values):
         
