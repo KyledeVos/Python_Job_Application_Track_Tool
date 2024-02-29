@@ -184,6 +184,25 @@ class DatabaseController():
         lastid = self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, value_list )
         self.connection.close()
         return lastid
+    
+
+    def write_job_progress(self, progress_data, job_id):
+
+        # Set Default Values
+        table_name = "progress"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+
+        # retrieve all column names (except id) for table
+        column_names = self.db_reader.retrieve_column_names(self.cursor, table_name)[1:]
+        # ['date', 'description', 'comm_id', 'job_id']
+
+        # seperate and write individual progress instances
+        for progress_instance in progress_data:
+            self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, progress_instance + [job_id])
+        self.connection.close()
+
 
     def update_job_application(self, column_list, values):
 
