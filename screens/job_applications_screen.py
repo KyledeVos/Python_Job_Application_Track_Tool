@@ -568,6 +568,9 @@ class DeleteApplication(FullScreen):
         # Display Yes or No Box to confirm Deletion
         if(messagebox.askyesno('Permanent Deletion Warning!', 
                                message=display_message, default = 'no')):
+            # delete all job progress notes associated with job_id
+            self.db_controller.delete_job_progress_data(id_list)
+            # delete job application data
             self.db_controller.delete_job_data(id_list)
 
             # reload window after deletion
@@ -655,6 +658,10 @@ class DeleteApplication(FullScreen):
                     if(messagebox.askyesno('Permanent Deletion Warning!', 
                                message="Are you sure you want to delete this job?\nThis action cannot be undone",
                                default = 'no')):
+                        
+                        # delete all job progress notes associated with job_id
+                        self.db_controller.delete_job_progress_data([self.id])
+                        # delete job application data
                         self.db_controller.delete_job_data([self.id])
                     # reload window after row deletion
                         for screen in self.container.grid_slaves():
