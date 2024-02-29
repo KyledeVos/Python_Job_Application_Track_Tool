@@ -154,7 +154,7 @@ class NewApplicationScreen(FullScreen):
         # Initial Window Configuration
         # retrieve job progress attributes as dict in form of:
         # {'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]]}
-        progress_attributes = self.db_controller.retrieve_job_progress_column_names()
+        self.progress_attributes = self.db_controller.retrieve_job_progress_column_names()
 
         # new window to open progress input
         self.progress_window = Toplevel()
@@ -168,7 +168,7 @@ class NewApplicationScreen(FullScreen):
 
         # re-enable buttons if progress window is closed
         # does not result in progress data being saved
-        self.progress_window.protocol("WM_DELETE_WINDOW", self.enable_buttons)
+        self.progress_window.protocol("WM_DELETE_WINDOW", self.enable_buttons_close_window)
 
         # -----------------------------------------------------------------------------
         # Initial Window Configuration
@@ -183,7 +183,7 @@ class NewApplicationScreen(FullScreen):
         # --------------------------------------------------------------------------------
         # SINGLE ITEMS - SINGLE LINE
         # create single data labels and input boxes (one-line)
-        for single_item in progress_attributes['single_data']:
+        for single_item in self.progress_attributes['single_data']:
             item_descr = Label(self.progress_window, text=single_item, anchor=W)
             
             item_input = Entry(self.progress_window, width=30, borderwidth=2, relief='solid')
@@ -198,7 +198,7 @@ class NewApplicationScreen(FullScreen):
         # --------------------------------------------------------------------------------
         # FOREIGN TABLES - SELECTION INPUT FROM MENU
             
-        for menu_option in progress_attributes['fk_data']:
+        for menu_option in self.progress_attributes['fk_data']:
             
             value_holder = MenuInput(menu_option[1][0][1]).get_input_val()
             menu_options = [val[1] for val in menu_option[1]]
@@ -215,6 +215,7 @@ class NewApplicationScreen(FullScreen):
 
             # load menu options to progress window
             for item in self.fk_data:
+                # item[0] - Column Name, item[2] - Option Menu
                 item[0].grid(row=0, column = 0, sticky=W+E, pady=10)
                 item[2].grid(row=0, column = 1, pady=10)
         
@@ -222,7 +223,7 @@ class NewApplicationScreen(FullScreen):
         # --------------------------------------------------------------------------------
         # SINGLE ITEMS - MULTI LINE
         # create single item data labels and input boxes needing larger box
-        for multi_line_item in progress_attributes['larger_box_data']:
+        for multi_line_item in self.progress_attributes['larger_box_data']:
             Label(self.progress_window, text=multi_line_item, anchor=W
                   ).grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=(10, 5))
             label_row_count += 1
@@ -254,18 +255,64 @@ class NewApplicationScreen(FullScreen):
 
         # ------------------------------------------------------------------
         # Save Progress Button
-        self.save_progress_btn = Button(self.progress_window, text="Save Progress", anchor=E)
+        self.save_progress_btn = Button(self.progress_window, text="Save Progress", anchor=E, command=self.retrieve_progress_data)
         self.save_progress_btn.grid(row=label_row_count, column=0, pady=10)
+        
 
 
-    def enable_buttons(self):
+    def retrieve_progress_data(self):
+        # progress data retrieval order designed to match database format as:
+        # single,line inputs, multil-line data-inputs (text boxes), foreign-tables menu inputs, 
+
+        # list to store current progress note data (appended to progress_instance_list at end)
+        self.progress_counter += 1
+        progress_instance = []
+
+        # 1) Retrieve Single Items
+        for item in self.single_data_list:
+            progress_instance.append(item.get())
+
+
+        # 2) Retrieve multi-line input data
+            for item in self.large_box_data:
+                progress_instance.append(item.get("1.0", END).strip())
+                
+        # 3) Retrieve Foreign-Key (Menu-Based Data)
+            for menu_input in self.fk_data:
+                menu_title = menu_input[0].cget('text')
+                selected_option = menu_input[1].get()
+            
+                progress_instance.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.progress_attributes['fk_data']))
+
+        # Add Progress instance to list of instances
+        # NOTE - current implementation still needs job_id retrieved only after save of new job application
+        self.progress_instance_list.append(progress_instance)
+
+        # clear lists
+        self.single_data_list.clear()
+        self.large_box_data.clear()
+        self.fk_data.clear()
+
+        # re-enable buttons to add progress_instance, save new application and close progress window
+        self.enable_buttons_close_window()
+
+
+    def enable_buttons_close_window(self):
         # re-enable main windows buttons if progress window is closed (without save)
         self.add_progress_btn.config(state='active')
         self.save_new_application.config(state='active')
+
+        # clear lists
+        self.single_data_list.clear()
+        self.large_box_data.clear()
+        self.fk_data.clear()
+
         self.progress_window.destroy()
 
 
     def save_data(self):
+
+        print(self.progress_instance_list)
 
         data_values = []
         for single_input in self.single_data_inputs:
