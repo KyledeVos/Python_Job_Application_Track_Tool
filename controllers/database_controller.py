@@ -181,8 +181,9 @@ class DatabaseController():
         # retrieve all column names (except id) for table
         column_names = self.db_reader.retrieve_column_names(self.cursor, table_name)[1:]
 
-        self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, value_list )
+        lastid = self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, value_list )
         self.connection.close()
+        return lastid
 
     def update_job_application(self, column_list, values):
 
