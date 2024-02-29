@@ -64,12 +64,16 @@ class DbInitializer():
 
         # ---------------------------------------------------------------------
         # CREATE Job Application Progress Table
+        # STANDARD ORDER TO FOLLOW FOR NEW COLUMNS:
+        # 1) Single-Line Inputs
+        # 2) Multi-line Inputs
+        # 3) Foreign Key ID's
         cursor.execute("""CREATE TABLE IF NOT EXISTS progress(
             id INTEGER PRIMARY KEY,
             date TEXT NOT NULL,
             description TEXT NOT NULL,
-            job_id INTEGER NOT NULL,
             comm_id INTEGER NOT NULL,
+            job_id INTEGER NOT NULL,
             FOREIGN KEY(job_id) REFERENCES job_applications(id),
             FOREIGN KEY(comm_id) REFERENCES communication_type(id)
         )""")
