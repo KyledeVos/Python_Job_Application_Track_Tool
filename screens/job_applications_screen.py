@@ -108,7 +108,6 @@ class NewApplicationScreen(FullScreen):
             self.single_data_inputs.append((Label(container, text=val_name, anchor=W),
                                             Entry(container, width=50, borderwidth=1)))
 
-        print(self.job_attributes_titles['menu_data'])
         for menu_option in self.job_attributes_titles['menu_data']:
             
             value_holder = MenuInput(menu_option[1][0][1]).get_input_val()
@@ -320,8 +319,6 @@ class NewApplicationScreen(FullScreen):
 
     def save_data(self):
 
-        print(self.progress_instance_list)
-
         data_values = []
         for single_input in self.single_data_inputs:
             data_values.append(single_input[1].get())
@@ -332,7 +329,9 @@ class NewApplicationScreen(FullScreen):
             
             data_values.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.job_attributes_titles['menu_data']))
 
-        self.db_controller.write_single_job_no_id(data_values)
+        # save new job application and retrieve id
+        job_id = self.db_controller.write_single_job_no_id(data_values)
+        self.db_controller.write_job_progress(self.progress_instance_list, job_id)
 
         # clear input fields after save
         for input_field in self.single_data_inputs:
