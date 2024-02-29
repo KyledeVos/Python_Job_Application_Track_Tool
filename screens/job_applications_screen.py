@@ -135,7 +135,7 @@ class NewApplicationScreen(FullScreen):
         self.new_note_btn = Button(container, text='Add Progress', anchor=W)
 
         self.progress_counter = len(self.progress_instance_list) + 1
-        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter}",
+        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter - 1}",
                                       padx=5, pady=5)
 
         # list to store single data inputs (one-line)
@@ -266,6 +266,11 @@ class NewApplicationScreen(FullScreen):
 
         # list to store current progress note data (appended to progress_instance_list at end)
         self.progress_counter += 1
+        # correct progress count label in main application
+        self.progress_count_label.config(text=f"Progress Notes: {self.progress_counter - 1}")
+        self.progress_count_label.grid(row=0, column=1, padx=10, pady=2)
+        self.row_count += 1
+
         progress_instance = []
 
         # 1) Retrieve Single Items
@@ -292,6 +297,9 @@ class NewApplicationScreen(FullScreen):
         self.single_data_list.clear()
         self.large_box_data.clear()
         self.fk_data.clear()
+
+        # print message to user that progres instance has been added to list (not saved in db)
+        messagebox.showinfo(message='Job Progress has been added on')
 
         # re-enable buttons to add progress_instance, save new application and close progress window
         self.enable_buttons_close_window()
@@ -333,6 +341,15 @@ class NewApplicationScreen(FullScreen):
         # Display Message to user that Application has been saved
         messagebox.showinfo(message='Application has been saved')
 
+        # clear progress instanc list after job application save
+        self.progress_instance_list.clear()
+        # reset progress counter
+        self.progress_counter = 1
+        self.progress_count_label.destroy()
+        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter - 1}",
+                                      padx=5, pady=5)
+        self.load_window()
+
 
     def load_window(self):
 
@@ -351,7 +368,8 @@ class NewApplicationScreen(FullScreen):
         # load job progress section (in main application)
         self.job_progress_frame.grid(row=self.row_count, column=0, columnspan=2, padx=2, pady=5, sticky=W+E)
         self.add_progress_btn.grid(row=0, column=0, padx=2, pady=5)
-        self.progress_count_label.grid(row=0, column=1, padx=10, pady=2)
+        if self.progress_counter > 1:
+            self.progress_count_label.grid(row=0, column=1, padx=10, pady=2)
         self.row_count += 1
 
         # ------------------------------------------------------------------------
