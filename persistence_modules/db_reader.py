@@ -141,10 +141,20 @@ class DbReader():
             query += " LIMIT 1"
 
         if return_one == False:
-            retrieved_data = list(cursor.execute(query, tuple(data_list)).fetchall())
-            raw_data = [list(tup) for tup in retrieved_data]
+            retrieved_data = cursor.execute(query, tuple(data_list)).fetchall()
+            if retrieved_data != None:
+                raw_data = [list(tup) for tup in retrieved_data]
+            else:
+                # No existing job progress data
+                return None
+            
         else:
-            raw_data = list(cursor.execute(query, tuple(data_list)).fetchone())
+            raw_data = cursor.execute(query, tuple(data_list)).fetchone()
+            if raw_data != None:
+                raw_data = list(raw_data)
+            else:
+                # No existing job progress data
+                return None
 
         # remove any desired columns and data from lists
 
@@ -165,8 +175,19 @@ class DbReader():
             # Build Query:
             query = f"SELECT {fk_tup[1]} FROM {fk_tup[0]} WHERE id = ?"
             print(query)
-            # change data value in val_list from id to value stored in fk table
-            remaining_data['val_list'][col_index] = cursor.execute(query, (remaining_data['val_list'][col_index],)).fetchone()[0]
+
+            if display_only == True:
+                if return_one == True:
+                    # change data value in val_list from id to value stored in fk table
+                    remaining_data['val_list'][col_index] = cursor.execute(query, (remaining_data['val_list'][col_index],)).fetchone()[0]
+                else:
+                    # loop through each job process data set change data value from id to corresponding value in fk_table
+                    for values_list in remaining_data['val_list']:
+                        values_list[col_index] = cursor.execute(query, (values_list[col_index],)).fetchone()[0]
+
+            else:
+                pass
+
             # change name of column in col_list
             remaining_data['col_list'][col_index] = fk_tup[1]
             
@@ -176,7 +197,7 @@ class DbReader():
                 remaining_data['col_list'][count] = item.title().replace("_", " ")
 
 
-        return remaining_data
+        print(remaining_data)
 
             
 
