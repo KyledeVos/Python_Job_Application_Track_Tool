@@ -64,6 +64,7 @@ class DbReader():
         combined_data = {'single_data': single_data, 'menu_data':menu_data}
         return combined_data
         
+
     def retrieve_configured_job_progress_columns(self, cursor, table_name, single_data, larger_data_inputs,fk_tables):
 
         # retrieve all column names:
@@ -86,10 +87,10 @@ class DbReader():
                 larger_box_data.append(name.title().replace("_", " "))
 
         # retrieve foreign table data
-        for fk_tup in fk_tables:
-            #fk_tup[0] = desired column name, fk_tup[1] = table name
-            data_list = list(cursor.execute(f"SELECT id, {fk_tup[1]} FROM {fk_tup[0]}").fetchall())
-            fk_data.append([fk_tup[1].title().replace("_", " "), data_list])
+        for fk_tup in fk_tables['fk_table_data']:
+                #fk_tup[0] = desired column name, fk_tup[1] = table name
+                data_list = list(cursor.execute(f"SELECT id, {fk_tup[1]} FROM {fk_tup[0]}").fetchall())
+                fk_data.append([fk_tup[1].title().replace("_", " "), data_list])
 
         # add all data from lists to column_names_dict
         column_names_dict['single_data'] = tuple(single_data_list)
@@ -97,3 +98,93 @@ class DbReader():
         column_names_dict['fk_data'] = fk_data
 
         return column_names_dict
+    
+    # Helper Function to remove desired columns and matching value using index
+    def remove_col_and_val(self, col_data, val_data, remove_cols, return_One = False):
+        print(f"col: {col_data}")
+        print(f"val: {val_data}")
+
+        try:
+            for col in remove_cols:
+                col_index = col_data.index(col)
+                col_data.pop(col_index)
+                if return_One == True:
+                    val_data.pop(col_index)
+                else:
+                    for result_row in val_data:
+                        result_row.pop(col_index)
+        except ValueError:
+            print(f"ERROR: Colummn '{col}'' is not present for job progress column removal in db_reader")
+            
+        return {
+            'col_list': col_data,
+            'val_list': val_data
+        }
+
+
+    def retrieve_progress_rows_complex(self, cursor, table_name, identification_column, identification_value,
+                              large_box_columns, fk_tables, remove_cols,  order_by_col = None, return_one=False, display_only = False):
+        
+
+        # retrieve column names
+        column_names = self.retrieve_column_names(cursor, table_name)
+
+        # Build Query and data tup:
+        query = f"SELECT * FROM {table_name} WHERE {identification_column} = ?"
+        data_list = [identification_value]
+
+        # Check for data order specification
+        if order_by_col != None:
+            query += f" ORDER BY {order_by_col} DESC"
+
+        if return_one:
+            query += " LIMIT 1"
+
+        if return_one == False:
+            retrieved_data = list(cursor.execute(query, tuple(data_list)).fetchall())
+            raw_data = [list(tup) for tup in retrieved_data]
+        else:
+            raw_data = list(cursor.execute(query, tuple(data_list)).fetchone())
+
+        # remove any desired columns and data from lists
+
+        remaining_data = self.remove_col_and_val(column_names, raw_data, remove_cols, return_one)
+        print(remaining_data)
+
+        # self.fk_tables = {'progress_table_cols': ['comm_id'], "fk_table_data": [('communication_types', 'communication_type')]}
+        # configure remaining columns for foreign table data
+
+
+        for count, fk_tup in enumerate(fk_tables['fk_table_data']):
+            # retrieve index position of current column that contains menu (Option Menu) id
+            col_index = remaining_data['col_list'].index(fk_tables['progress_table_cols'][count])
+            print(col_index)
+
+            # 1) Display Data Only - Option Menu Data Held by Foreign Key Tables does not require Tkinter OptionMenu
+            # retrieve index position for foreign key data
+            # Build Query:
+            query = f"SELECT {fk_tup[1]} FROM {fk_tup[0]} WHERE id = ?"
+            print(query)
+            # change data value in val_list from id to value stored in fk table
+            remaining_data['val_list'][col_index] = cursor.execute(query, (remaining_data['val_list'][col_index],)).fetchone()[0]
+            # change name of column in col_list
+            remaining_data['col_list'][col_index] = fk_tup[1]
+            
+
+        # Perform Final correction of column names for display on interface
+            for count, item in enumerate(remaining_data["col_list"]):
+                remaining_data['col_list'][count] = item.title().replace("_", " ")
+
+
+        return remaining_data
+
+            
+
+
+
+
+
+
+
+       
+

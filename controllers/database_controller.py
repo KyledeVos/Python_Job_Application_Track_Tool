@@ -1,5 +1,21 @@
 import sqlite3
 
+class JobProgressDefaults():
+    # Class allows for centralized control of job progress attributes
+
+    def __init__(self):
+        # Set Default Table Name
+        self.table_name = 'progress'
+        # set names of columns with data for one line
+        self.single_data = ['date']
+        # set column names for data needing larger area input box
+        self.larger_data_inputs = ['description']
+        # set names of foreign key tables with corresponding column name
+        self.fk_tables = {'progress_table_cols': ['comm_id'], "fk_table_data": [('communication_types', 'communication_type')]}
+        # set names of columns to not be displayed (none must be blank list)
+        self.col_not_display = ["job_id"]
+        
+
 class DatabaseController():
 
     def __init__(self, database, InitializeDbParent, DbReader, DbWriter) -> None:
@@ -21,10 +37,8 @@ class DatabaseController():
         self.db_initializer.create_all_tables(self.connection, self.cursor)
         self.populate_table_defaults()
 
-        # testing population
-        # print(self.db_initializer.retrieve_all_single_col(self.cursor, "employment_types", "type"))
-
         self.connection.close()
+
 
     def populate_table_defaults(self):
         self.connection = sqlite3.connect(self.database)
@@ -95,31 +109,49 @@ class DatabaseController():
 
         return data
     
+    # --------------------------------------------------------------------------------------------------
+    # Job Progress Section
     def retrieve_job_progress_column_names(self):
 
         # Use of this method assumes columns in table are ordered as:
         # id column, Single Data, Singe Data needing larger area input box, foreign key id's
 
-        # Set Default Table Name
-        table_name = 'progress'
-        # set names of columns with data for one line
-        single_data = ['date']
-        # set column names for data needing larger area input box
-        larger_data_inputs = ['description']
-        # set names of foreign key tables with corresponding column name
-        fk_tables = [('communication_types', 'communication_type')]
-
+        # Retrieve default values for job_progress instance
+        progress_default_instance = JobProgressDefaults()
         
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
         # retrieve configured table column names data
         # Data to be configured as:
         # {'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]]}
-        data = self.db_reader.retrieve_configured_job_progress_columns(self.cursor, table_name, single_data, larger_data_inputs,
-                                                                       fk_tables)
+        data = self.db_reader.retrieve_configured_job_progress_columns(
+            self.cursor, progress_default_instance.table_name, progress_default_instance.single_data,
+                progress_default_instance.larger_data_inputs, progress_default_instance.fk_tables)
         self.connection.close()
 
         return data
+    
+
+    def retrieve_recent_job_progress(self, search_id):
+
+        progress_instance = JobProgressDefaults()
+
+        # set column used as most recent reference 
+        # will use the most recent (highest) id
+        search_column = "id"
+        identify_column = "job_id"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+
+        data = self.db_reader.retrieve_progress_rows_complex(self.cursor, progress_instance.table_name, 
+                                                    identify_column, search_id, progress_instance.larger_data_inputs,
+                                                    progress_instance.fk_tables, progress_instance.col_not_display,
+                                                    order_by_col = search_column, return_one = True, display_only = True)
+
+        self.connection.close()
+        return data
+        # --------------------------------------------------------------------------------------------------
 
 
     def retrieve_job_display_cols(self):
@@ -165,7 +197,7 @@ class DatabaseController():
         self.connection.close()
 
         return data
-
+    
 
     # -----------------------------------------------------------------
     # Database Writing and Deletion

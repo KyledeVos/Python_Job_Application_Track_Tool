@@ -1,35 +1,34 @@
 from tkinter import *
+from tkinter import ttk
+from tkinter import messagebox
 
-root = Tk()
+# Create an instance of tkinter frame
+win=Tk()
 
-class DeletionItem():
+second = None
 
-    def __init__(self, container, company, position, id) -> None:
-        self.container = container
-        self.id = id
-        self.selected = IntVar()
+def open_new_window(second):
+    second = Toplevel(win)
 
-        self.checkbox = Checkbutton(container, variable=self.selected)
-        self.companyLabel = Label(container, text = position)
-        self.positionLabel = Label(container, text=position)
-        self.delete_btn = Button(container, text="Delete")
+    lbl = Label(second, text="Hello").grid(row=0, column=0)
 
+   
+    holder = Frame(second)
+    holder.grid(row=1, column=0)
+    input = Text(holder)
+    input.grid(row=0, column = 0)
 
-    def checked(self):
-        pass
+    close_btn = Button(second, text="Close Window", command=lambda: close_window(second, input))
+    close_btn.grid(row=2, column=0)
 
+def close_window(second, input):
+    print(input.get("1.0", END))
+    second.destroy()
+    
 
-
-var = IntVar()
-
-def update():
-    label = Label(root, text = var.get()).pack()
-
-checkbox1 = Checkbutton(root, text = "First Box", variable=var)
-checkbox1.pack()
-
-btn = Button(root, text = "Submit", command=update).pack()
-
+open_window = Button(win, text = "Open Window", command=lambda: open_new_window(second))
+open_window.grid(row=0, column=0)
 
 
-root.mainloop()
+
+win.mainloop()

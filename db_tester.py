@@ -1,11 +1,19 @@
 import sqlite3
+from persistence_modules.db_reader import DbReader
 
 connection = sqlite3.connect("test.db")
 cursor = connection.cursor()
 
+reader = DbReader()
+
+# print(reader.retrieve_column_names(cursor, 'job_applications'))
+# print(cursor.execute('SELECT * FROM progress').fetchall())
+print(cursor.execute('SELECT * FROM progress where job_id=6 order by id DESC LIMIT 1').fetchall())
+
+
 # # print(cursor.execute('SELECT * FROM job_applications').fetchall())
-# # cursor.execute("DELETE FROM job_applications")
-# # connection.commit()
+# cursor.execute("DELETE FROM progress WHERE id=2")
+# connection.commit()
 
 # cursor.execute("UPDATE job_applications SET location = ?, salary = ? where id = ?", ("Ghana", 130000, 1))
 # connection.commit()

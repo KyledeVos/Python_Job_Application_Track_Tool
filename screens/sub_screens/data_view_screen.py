@@ -46,7 +46,9 @@ class ViewAllApplicationsScreen(FullScreen):
         
     def load_window(self):
         
+        # retrieve job_application_data
         current_applications = self.db_controller.retrieve_job_display_cols()
+
 
         if len(current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
@@ -118,8 +120,11 @@ class JobView(FullScreen):
         self.single_data_inputs = []
         self.menu_data_inputs = []
 
+        # retrieve job_application_data
         self.job_attributes_titles = self.db_controller.retrieve_job_data_configured(job_id)
         # print(self.job_attributes_titles)
+        self.recent_job_progress = self.db_controller.retrieve_recent_job_progress(job_id)
+
 
         # Retrieve single data input labels and assigned value
         for data_tup in self.job_attributes_titles['single_data']:
@@ -139,6 +144,24 @@ class JobView(FullScreen):
                                      OptionMenu(container, value_holder, *menu_options)))
             
         self.update_application_btn = Button(container, text="Save Changes", command=self.update_data)
+
+    
+    def load_window(self):
+        self.left_minor_subscreen.clear_right_major()
+
+        row_count = 0
+
+        for single_tup in self.single_data_inputs[1:]:
+            single_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
+            single_tup[1].grid(row = row_count, column = 1 , sticky=W+E)
+            row_count += 1
+        
+        for menu_tup in self.menu_data_inputs:
+            menu_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
+            menu_tup[2].grid(row = row_count, column = 1 , sticky=W)
+            row_count += 1
+        
+        self.update_application_btn.grid(row=row_count, column=0, sticky=W+E)
 
 
     def update_data(self):
@@ -162,21 +185,3 @@ class JobView(FullScreen):
 
         # Display Message to user that Application has been updated
         messagebox.showinfo(message='Changes have been saved')
-        
-    
-    def load_window(self):
-        self.left_minor_subscreen.clear_right_major()
-
-        row_count = 0
-
-        for single_tup in self.single_data_inputs[1:]:
-            single_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
-            single_tup[1].grid(row = row_count, column = 1 , sticky=W+E)
-            row_count += 1
-        
-        for menu_tup in self.menu_data_inputs:
-            menu_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
-            menu_tup[2].grid(row = row_count, column = 1 , sticky=W)
-            row_count += 1
-        
-        self.update_application_btn.grid(row=row_count, column=0, sticky=W+E)
