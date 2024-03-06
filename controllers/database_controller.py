@@ -132,7 +132,7 @@ class DatabaseController():
         return data
     
 
-    def retrieve_recent_job_progress(self, search_id):
+    def retrieve_job_progress_data(self, search_id, return_one, display_only):
 
         progress_instance = JobProgressDefaults()
 
@@ -145,14 +145,14 @@ class DatabaseController():
         self.cursor = self.connection.cursor()
 
         data = self.db_reader.retrieve_progress_rows_complex(self.cursor, progress_instance.table_name, 
-                                                    identify_column, search_id, progress_instance.larger_data_inputs,
-                                                    progress_instance.fk_tables, progress_instance.col_not_display,
-                                                    order_by_col = search_column, return_one = True, display_only = True)
+                                                    identify_column, search_id, progress_instance.fk_tables,
+                                                    progress_instance.col_not_display,
+                                                    return_one, display_only, order_by_col = search_column)
 
         self.connection.close()
         return data
-        # --------------------------------------------------------------------------------------------------
-
+        
+    
 
     def retrieve_job_display_cols(self):
 

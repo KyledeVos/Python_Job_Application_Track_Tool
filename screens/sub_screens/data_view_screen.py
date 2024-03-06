@@ -122,8 +122,10 @@ class JobView(FullScreen):
 
         # retrieve job_application_data
         self.job_attributes_titles = self.db_controller.retrieve_job_data_configured(job_id)
-        # print(self.job_attributes_titles)
-        self.recent_job_progress = self.db_controller.retrieve_recent_job_progress(job_id)
+        # retrieve most recent job progress data - function call below:
+        # sets return_one to True and display_only to True
+        self.recent_job_progress = self.db_controller.retrieve_job_progress_data(job_id, True, True)
+        print(self.recent_job_progress)
 
 
         # Retrieve single data input labels and assigned value

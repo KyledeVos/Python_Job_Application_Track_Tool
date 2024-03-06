@@ -101,8 +101,6 @@ class DbReader():
     
     # Helper Function to remove desired columns and matching value using index
     def remove_col_and_val(self, col_data, val_data, remove_cols, return_One = False):
-        print(f"col: {col_data}")
-        print(f"val: {val_data}")
 
         try:
             for col in remove_cols:
@@ -123,9 +121,8 @@ class DbReader():
 
 
     def retrieve_progress_rows_complex(self, cursor, table_name, identification_column, identification_value,
-                              large_box_columns, fk_tables, remove_cols,  order_by_col = None, return_one=False, display_only = False):
+                              fk_tables, remove_cols, return_one, display_only, order_by_col = None):
         
-
         # retrieve column names
         column_names = self.retrieve_column_names(cursor, table_name)
 
@@ -143,6 +140,7 @@ class DbReader():
         if return_one == False:
             retrieved_data = cursor.execute(query, tuple(data_list)).fetchall()
             if retrieved_data != None:
+                # convert each returned job progress instance to tuple stored in raw_data list
                 raw_data = [list(tup) for tup in retrieved_data]
             else:
                 # No existing job progress data
@@ -157,47 +155,43 @@ class DbReader():
                 return None
 
         # remove any desired columns and data from lists
-
         remaining_data = self.remove_col_and_val(column_names, raw_data, remove_cols, return_one)
-        print(remaining_data)
 
-        # self.fk_tables = {'progress_table_cols': ['comm_id'], "fk_table_data": [('communication_types', 'communication_type')]}
         # configure remaining columns for foreign table data
-
-
         for count, fk_tup in enumerate(fk_tables['fk_table_data']):
             # retrieve index position of current column that contains menu (Option Menu) id
             col_index = remaining_data['col_list'].index(fk_tables['progress_table_cols'][count])
-            print(col_index)
 
             # 1) Display Data Only - Option Menu Data Held by Foreign Key Tables does not require Tkinter OptionMenu
             # retrieve index position for foreign key data
             # Build Query:
+            # fk_tup[0] = table_name, fk_tup[1] = associated column name
             query = f"SELECT {fk_tup[1]} FROM {fk_tup[0]} WHERE id = ?"
-            print(query)
 
-            if display_only == True:
-                if return_one == True:
-                    # change data value in val_list from id to value stored in fk table
-                    remaining_data['val_list'][col_index] = cursor.execute(query, (remaining_data['val_list'][col_index],)).fetchone()[0]
+            if return_one == True:
+                # change data value in val_list from id to value stored in fk table
+                set_value = cursor.execute(query, (remaining_data['val_list'][col_index],)).fetchone()[0]
+
+                if display_only == True:
+                    remaining_data['val_list'][col_index] = set_value
                 else:
-                    # loop through each job process data set change data value from id to corresponding value in fk_table
-                    for values_list in remaining_data['val_list']:
-                        values_list[col_index] = cursor.execute(query, (values_list[col_index],)).fetchone()[0]
-
+                    query = f"SELECT {fk_tup[1]} FROM {fk_tup[0]}"
+                    remaining_data['val_list'][col_index] = (set_value, cursor.execute(query).fetchall())
             else:
-                pass
+                # loop through each job process data set and change data value from id to corresponding value in fk_table
+                for values_list in remaining_data['val_list']:
+                    set_value = cursor.execute(query, (values_list[col_index],)).fetchone()[0]
+                    if display_only == True:
+                        values_list[col_index] = set_value
+                    else:
+                        second_query = f"SELECT {fk_tup[1]} FROM {fk_tup[0]}"
+                        values_list[col_index] = (set_value, cursor.execute(second_query).fetchall())
 
             # change name of column in col_list
             remaining_data['col_list'][col_index] = fk_tup[1]
-            
+        
+        return remaining_data
 
-        # Perform Final correction of column names for display on interface
-            for count, item in enumerate(remaining_data["col_list"]):
-                remaining_data['col_list'][count] = item.title().replace("_", " ")
-
-
-        print(remaining_data)
 
             
 
