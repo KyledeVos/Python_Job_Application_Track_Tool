@@ -178,15 +178,37 @@ class JobView(FullScreen):
             self.fk_data_labels = []
             self.large_box_labels = []
 
+        
             for count, col in enumerate(self.recent_job_progress['col_list']):
+
+                # do not add a row for job progress id
                 if col == 'id':
                     continue
+
                 elif col in large_box_cols:
-                    text_box = Text(self.progress_data_frame, width=50, height=10, padx=10, pady=5, 
+
+                    # create frame to hold large_box_data textbox and scrollbar
+                    large_box_frame = Frame(self.progress_data_frame, padx=10)
+                    # allow mousewheel/trackpad to scroll text box
+                    large_box_frame.bind_all('<MouseWheel>',
+                                                  lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
+                    
+
+
+                    text_box = Text(large_box_frame, width=50, height=10, padx=10, pady=5, 
                                     borderwidth=2, relief='solid')
+                    text_box.grid(row =0, column=0, sticky='w')
                     text_box.insert("1.0", self.recent_job_progress['val_list'][count])
+
+                    # create and configure text box - scrolls text box
+                    scrollbar = ttk.Scrollbar(self.progress_data_frame, orient='vertical', command=text_box.yview)
+                    text_box.config(yscrollcommand=scrollbar.set)
+                    scrollbar.config(command=text_box.yview)
+                    
+                    
+
                     self.large_box_labels.append((Label(self.progress_data_frame, text=col.title().replace("_", " "), anchor='w'),
-                                                  text_box))
+                                                  large_box_frame, scrollbar))
                 elif col in fk_table_cols:
                     self.fk_data_labels.append(
                         (Label(self.progress_data_frame, text=col.title().replace("_", " "), anchor='e'), 
@@ -242,10 +264,33 @@ class JobView(FullScreen):
                 fk_label_tup[1].grid(row = progress_row_count, column = 1, padx = 5, pady = 5, sticky=W+E)
                 progress_row_count += 1 
 
+            # -------------------------------------------------------------------------------------------------------------------
+            # for multi_line_item in self.progress_attributes['larger_box_data']:
+                # Label(self.progress_window, text=multi_line_item, anchor=W
+                #       ).grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=(10, 5))
+                # label_row_count += 1
+
+            # # Input, Frame, Input Box and ScrollBar
+            # input_frame = Frame(self.progress_window, padx=10)
+            # input_frame.grid(row=label_row_count, column=0, columnspan=2, padx=5, pady=5, sticky="NEWS")
+            # # allow mousewheel/trackpad to scroll text box
+            # input_frame.bind_all('<MouseWheel>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
+
+            # # add textbox for larger text input
+            # text_box = Text(input_frame, width=50, height=10, padx=10, pady=5, borderwidth=2, relief='solid')
+            # # create and configure text box - scrolls text box
+            # scrollbar = ttk.Scrollbar(self.progress_window, orient='vertical', command=text_box.yview)
+            # text_box.config(yscrollcommand=scrollbar.set)
+            # scrollbar.config(command=text_box.yview)
+            # scrollbar.grid(row=label_row_count, column=1, sticky="NSE")
+            # text_box.grid(row = 0, column=0, sticky=W)
+            # label_row_count += 1
+
             for large_box_item_tup in self.large_box_labels:
                 large_box_item_tup[0].grid(row = progress_row_count, column = 0, padx = 5, pady = 10, sticky=W+E)
                 progress_row_count += 1
                 large_box_item_tup[1].grid(row = progress_row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
+                large_box_item_tup[2].grid(row = progress_row_count, column = 1, sticky="NSE")
                 progress_row_count += 1
 
 
