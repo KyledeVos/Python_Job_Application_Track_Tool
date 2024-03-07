@@ -146,7 +146,7 @@ class DatabaseController():
 
         data = self.db_reader.retrieve_progress_rows_complex(self.cursor, progress_instance.table_name, 
                                                     identify_column, search_id, progress_instance.fk_tables,
-                                                    progress_instance.col_not_display,
+                                                    progress_instance.larger_data_inputs, progress_instance.col_not_display,
                                                     return_one, display_only, order_by_col = search_column)
 
         self.connection.close()

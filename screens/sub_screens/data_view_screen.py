@@ -125,14 +125,18 @@ class JobView(FullScreen):
         # retrieve most recent job progress data - function call below:
         # sets return_one to True and display_only to True
         self.recent_job_progress = self.db_controller.retrieve_job_progress_data(job_id, True, True)
-        print(self.recent_job_progress)
 
+        # ----------------------------------------------------------------------------
+        # JOB BASIC INFO SECTION
+
+        self.basic_title = Label(container, padx=5, text="Job Information", anchor='w')
+        self.basic_info_frame = Frame(container, padx=5, pady=5, borderwidth=2, relief='solid')
 
         # Retrieve single data input labels and assigned value
         for data_tup in self.job_attributes_titles['single_data']:
-            new_Entry = Entry(container, width = 50, borderwidth=1)
+            new_Entry = Entry(self.basic_info_frame, width = 50, borderwidth=1)
             new_Entry.insert(0, data_tup[1])
-            self.single_data_inputs.append((Label(container, text=data_tup[0]), new_Entry))
+            self.single_data_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor='e'), new_Entry))
 
 
         for menu_option in self.job_attributes_titles['menu_data']:
@@ -141,29 +145,108 @@ class JobView(FullScreen):
             menu_options = [val[1] for val in menu_option[1]]
 
             # Form: (Label, input_holder, OptionMenu)
-            self.menu_data_inputs.append((Label(container, text=menu_option[0]), 
+            self.menu_data_inputs.append((Label(self.basic_info_frame, text=menu_option[0], anchor='e'), 
                                      value_holder,
-                                     OptionMenu(container, value_holder, *menu_options)))
+                                     OptionMenu(self.basic_info_frame, value_holder, *menu_options)))
             
-        self.update_application_btn = Button(container, text="Save Changes", command=self.update_data)
+        self.update_application_btn = Button(self.basic_info_frame, text="Save Changes", command=self.update_data)
 
+        # ----------------------------------------------------------------------------
+        # JOB PROGRESS SECTION - Display most recent job progress (no edit functionality)
+        
+        # check if current job has job progress data
+        if self.recent_job_progress != None:
+            self.progress_title = Label(container, text = "Latest Progress Note", anchor='w')
+            self.progress_data_frame = Frame(container, padx=5, pady=5, borderwidth=2, relief='solid')
+            self.progress_data_frame.grid_columnconfigure(1, weight=1)
+            self.edit_latest_progress_btn = Button(self.progress_data_frame, text="Edit",
+                                                    anchor='center')
+            
+
+            # retrieve large_text_box columns and fk_table joining column names
+            large_box_cols =[]
+            fk_table_cols = []
+
+            for column_tup in self.recent_job_progress['column_info']:
+                if column_tup[0] == "large_box_columns":
+                    large_box_cols = column_tup[1]
+                elif column_tup[0] == 'fk_columns':
+                    fk_table_cols = column_tup[1]
+            
+            # lists holding single_value, fk_data and large_text box data - DISPLAY ONLY
+            self.single_data_labels = []
+            self.fk_data_labels = []
+            self.large_box_labels = []
+
+            for count, col in enumerate(self.recent_job_progress['col_list']):
+                if col == 'id':
+                    continue
+                elif col in large_box_cols:
+                    text_box = Text(self.progress_data_frame, width=50, height=10, padx=10, pady=5, 
+                                    borderwidth=2, relief='solid')
+                    text_box.insert("1.0", self.recent_job_progress['val_list'][count])
+                    self.large_box_labels.append((Label(self.progress_data_frame, text=col.title().replace("_", " "), anchor='w'),
+                                                  text_box))
+                elif col in fk_table_cols:
+                    self.fk_data_labels.append(
+                        (Label(self.progress_data_frame, text=col.title().replace("_", " "), anchor='e'), 
+                         Label(self.progress_data_frame, text=self.recent_job_progress['val_list'][count],
+                               padx=10, pady=5, anchor='w')))
+                else:
+                    self.single_data_labels.append(
+                        (Label(self.progress_data_frame, text=col.title().replace("_", " ") + ":", anchor='e'),
+                         Label(self.progress_data_frame, text=self.recent_job_progress['val_list'][count], padx=10, pady=5, anchor='w')))
     
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
 
         row_count = 0
+        self.basic_title.grid(row=row_count, column=0, sticky="NEWS", padx=5, pady=5)
+        row_count += 1
+        self.basic_info_frame.grid(row=row_count, column=0, columnspan=2, sticky="NEWS", padx=5, pady=5)
+        row_count += 1
+        basic_row_count = 0
+        
 
         for single_tup in self.single_data_inputs[1:]:
-            single_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
-            single_tup[1].grid(row = row_count, column = 1 , sticky=W+E)
-            row_count += 1
+            single_tup[0].grid(row=basic_row_count, column = 0, padx=5, pady=2, sticky=W+E)
+            single_tup[1].grid(row = basic_row_count, column = 1 , sticky=W+E)
+            basic_row_count += 1
         
         for menu_tup in self.menu_data_inputs:
-            menu_tup[0].grid(row=row_count, column = 0, padx=2, pady=2, sticky=W+E)
-            menu_tup[2].grid(row = row_count, column = 1 , sticky=W)
-            row_count += 1
+            menu_tup[0].grid(row=basic_row_count, column = 0, padx=5, pady=2, sticky=W+E)
+            menu_tup[2].grid(row = basic_row_count, column = 1 , sticky=W)
+            basic_row_count += 1
         
-        self.update_application_btn.grid(row=row_count, column=0, sticky=W+E)
+        self.update_application_btn.grid(row=basic_row_count, column=0, sticky=W+E, pady=5)
+        basic_row_count += 1
+
+        # latest job progress section
+        if self.recent_job_progress != None:
+            self.progress_title.grid(row=row_count, column=0, sticky="NEWS")
+            row_count += 1
+            self.progress_data_frame.grid(row=row_count, column=0, columnspan=2, sticky="NEWS", padx=5, pady=5)
+            row_count += 1
+            progress_row_count = 0
+
+            self.edit_latest_progress_btn.grid(row=progress_row_count, column=0, sticky="NEWS")
+            progress_row_count += 1
+        
+            for single_line_label_tup in self.single_data_labels:
+                single_line_label_tup[0].grid(row = progress_row_count, column = 0, padx = 5, pady = 5, sticky=W+E)
+                single_line_label_tup[1].grid(row = progress_row_count, column = 1, padx = 5, pady = 5, sticky=W+E)
+                progress_row_count += 1
+
+            for fk_label_tup in self.fk_data_labels:
+                fk_label_tup[0].grid(row = progress_row_count, column = 0, padx = 5, pady = 5, sticky=W+E)
+                fk_label_tup[1].grid(row = progress_row_count, column = 1, padx = 5, pady = 5, sticky=W+E)
+                progress_row_count += 1 
+
+            for large_box_item_tup in self.large_box_labels:
+                large_box_item_tup[0].grid(row = progress_row_count, column = 0, padx = 5, pady = 10, sticky=W+E)
+                progress_row_count += 1
+                large_box_item_tup[1].grid(row = progress_row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
+                progress_row_count += 1
 
 
     def update_data(self):
