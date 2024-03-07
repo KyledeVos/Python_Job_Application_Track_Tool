@@ -121,10 +121,10 @@ class DbReader():
 
 
     def retrieve_progress_rows_complex(self, cursor, table_name, identification_column, identification_value,
-                              fk_tables, remove_cols, return_one, display_only, order_by_col = None):
+                              fk_tables, large_box_cols, remove_cols, return_one, display_only, order_by_col = None):
         
         # retrieve column names
-        column_names = self.retrieve_column_names(cursor, table_name)
+        column_names = self.retrieve_column_names(cursor,  table_name)
 
         # Build Query and data tup:
         query = f"SELECT * FROM {table_name} WHERE {identification_column} = ?"
@@ -189,7 +189,19 @@ class DbReader():
 
             # change name of column in col_list
             remaining_data['col_list'][col_index] = fk_tup[1]
-        
+
+            # add column names of large box data and foreign-table data
+            # needed by calling function to determine tkinter element for display
+            remaining_data['column_info'] = [('large_box_columns', large_box_cols)]
+
+            # Retrieve foreign_key tables joining column name
+            fk_cols = []
+            for fk_tup in fk_tables['fk_table_data']:
+                fk_cols.append(fk_tup[1])
+            
+            remaining_data['column_info'].append(('fk_columns', fk_cols))
+
+
         return remaining_data
 
 
