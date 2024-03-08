@@ -204,6 +204,7 @@ class JobView(FullScreen):
                     text_box.config(yscrollcommand=scrollbar.set)
                     scrollbar.config(command=text_box.yview)
                     large_box_frame.bind('<Enter>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
+                    large_box_frame.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
                     
                     
 
@@ -220,19 +221,6 @@ class JobView(FullScreen):
                          Label(self.progress_data_frame, text=self.recent_job_progress['val_list'][count], padx=10, pady=5, anchor='w')))
                     
 
-
-        # EXTRA
-        self.btn_list = []
-        for i in range(0, 10):
-            self.btn_list.append(Button(container, text=i))
-
-                    
-    def enable_inner_scroll(self, frame_box, text_box):
-        frame_box.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-
-    def disable_inner_scroll(self, frame_box, text_box):
-        frame_box.bind_all('<MouseWheel>',lambda e: None)
-    
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
 
