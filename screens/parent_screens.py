@@ -75,7 +75,8 @@ class ScrollableScreen():
         self.my_canvas.grid(row = 0, column=0, sticky="NEWS")
 
         # 3) Add the Scrollbar to the Canvas (it goes to the mainframe)
-        self.my_scrollbar = ttk.Scrollbar(self.main_frame, orient=VERTICAL, command=self.my_canvas.yview)
+        self.my_scrollbar = ttk.Scrollbar(self.main_frame, orient=VERTICAL)
+        self.my_scrollbar.config(command=self.my_canvas.yview)
         self.my_scrollbar.grid(row = 0, column=0, sticky='NSE')
 
         # 5) Create another frame within the Canvas
@@ -94,10 +95,12 @@ class ScrollableScreen():
         # 4) Configure the Canvas
         self.my_canvas.configure(yscrollcommand=self.my_scrollbar.set)
         self.my_canvas.bind('<Configure>', lambda e: self.my_canvas.configure(scrollregion=self.my_canvas.bbox("all")))
-        self.my_canvas.bind_all('<MouseWheel>', lambda e: self.my_canvas.yview_scroll(-1 * int(e.delta / 60), "units"))
+        # self.my_canvas.bind_all('<MouseWheel>', lambda e: self.my_canvas.yview_scroll(-1 * int(e.delta / 60), "units"))
         # 6) Add a new window to the canvas
         self.my_canvas.create_window((0, 0), window=self.second_frame, anchor="nw")
 
+        # enable window scrolling on load
+        self.my_canvas.bind('<Enter>', lambda e: self.my_canvas.configure(scrollregion=self.my_canvas.bbox("all")))
+        self.my_canvas.bind('<MouseWheel>', lambda e: self.my_canvas.yview_scroll(-1 * int(e.delta / 60), "units"))
 
-    
 

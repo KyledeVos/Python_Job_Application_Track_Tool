@@ -113,7 +113,7 @@ class JobView(FullScreen):
         self.left_minor_subscreen = left_minor_subscreen
         self.container = container
         self.db_controller = db_controller
-        self.job_id = job_id
+        self.job_id = job_id 
         self.job_data = db_controller.retrieve_job_data_configured(job_id)
         self.data_converter = DataConverter()
 
@@ -190,12 +190,11 @@ class JobView(FullScreen):
                     # create frame to hold large_box_data textbox and scrollbar
                     large_box_frame = Frame(self.progress_data_frame, padx=10)
                     # allow mousewheel/trackpad to scroll text box
-                    large_box_frame.bind_all('<MouseWheel>',
-                                                  lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-                    
+                    large_box_frame.bind('<Enter>', lambda e: self.enable_inner_scroll(large_box_frame, text_box))
+                    large_box_frame.bind('<Leave>', lambda e: self.disable_inner_scroll(large_box_frame, text_box))
 
 
-                    text_box = Text(large_box_frame, width=50, height=10, padx=10, pady=5, 
+                    text_box = Text(large_box_frame, width=40, height=10, padx=10, pady=5, 
                                     borderwidth=2, relief='solid')
                     text_box.grid(row =0, column=0, sticky='w')
                     text_box.insert("1.0", self.recent_job_progress['val_list'][count])
@@ -204,6 +203,7 @@ class JobView(FullScreen):
                     scrollbar = ttk.Scrollbar(self.progress_data_frame, orient='vertical', command=text_box.yview)
                     text_box.config(yscrollcommand=scrollbar.set)
                     scrollbar.config(command=text_box.yview)
+                    large_box_frame.bind('<Enter>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
                     
                     
 
@@ -218,6 +218,20 @@ class JobView(FullScreen):
                     self.single_data_labels.append(
                         (Label(self.progress_data_frame, text=col.title().replace("_", " ") + ":", anchor='e'),
                          Label(self.progress_data_frame, text=self.recent_job_progress['val_list'][count], padx=10, pady=5, anchor='w')))
+                    
+
+
+        # EXTRA
+        self.btn_list = []
+        for i in range(0, 10):
+            self.btn_list.append(Button(container, text=i))
+
+                    
+    def enable_inner_scroll(self, frame_box, text_box):
+        frame_box.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
+
+    def disable_inner_scroll(self, frame_box, text_box):
+        frame_box.bind_all('<MouseWheel>',lambda e: None)
     
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
@@ -255,36 +269,14 @@ class JobView(FullScreen):
             progress_row_count += 1
         
             for single_line_label_tup in self.single_data_labels:
-                single_line_label_tup[0].grid(row = progress_row_count, column = 0, padx = 5, pady = 5, sticky=W+E)
-                single_line_label_tup[1].grid(row = progress_row_count, column = 1, padx = 5, pady = 5, sticky=W+E)
+                single_line_label_tup[0].grid(row = progress_row_count, column = 0, padx = 5, sticky=W+E)
+                single_line_label_tup[1].grid(row = progress_row_count, column = 1, padx = 5, sticky=W+E)
                 progress_row_count += 1
 
             for fk_label_tup in self.fk_data_labels:
-                fk_label_tup[0].grid(row = progress_row_count, column = 0, padx = 5, pady = 5, sticky=W+E)
-                fk_label_tup[1].grid(row = progress_row_count, column = 1, padx = 5, pady = 5, sticky=W+E)
+                fk_label_tup[0].grid(row = progress_row_count, column = 0, padx = 5, sticky=W+E)
+                fk_label_tup[1].grid(row = progress_row_count, column = 1, padx = 5, sticky=W+E)
                 progress_row_count += 1 
-
-            # -------------------------------------------------------------------------------------------------------------------
-            # for multi_line_item in self.progress_attributes['larger_box_data']:
-                # Label(self.progress_window, text=multi_line_item, anchor=W
-                #       ).grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=(10, 5))
-                # label_row_count += 1
-
-            # # Input, Frame, Input Box and ScrollBar
-            # input_frame = Frame(self.progress_window, padx=10)
-            # input_frame.grid(row=label_row_count, column=0, columnspan=2, padx=5, pady=5, sticky="NEWS")
-            # # allow mousewheel/trackpad to scroll text box
-            # input_frame.bind_all('<MouseWheel>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-
-            # # add textbox for larger text input
-            # text_box = Text(input_frame, width=50, height=10, padx=10, pady=5, borderwidth=2, relief='solid')
-            # # create and configure text box - scrolls text box
-            # scrollbar = ttk.Scrollbar(self.progress_window, orient='vertical', command=text_box.yview)
-            # text_box.config(yscrollcommand=scrollbar.set)
-            # scrollbar.config(command=text_box.yview)
-            # scrollbar.grid(row=label_row_count, column=1, sticky="NSE")
-            # text_box.grid(row = 0, column=0, sticky=W)
-            # label_row_count += 1
 
             for large_box_item_tup in self.large_box_labels:
                 large_box_item_tup[0].grid(row = progress_row_count, column = 0, padx = 5, pady = 10, sticky=W+E)
@@ -292,6 +284,11 @@ class JobView(FullScreen):
                 large_box_item_tup[1].grid(row = progress_row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
                 large_box_item_tup[2].grid(row = progress_row_count, column = 1, sticky="NSE")
                 progress_row_count += 1
+
+        # Extra
+        for btn in self.btn_list:
+            btn.grid(row=row_count, column=0)
+            row_count += 1
 
 
     def update_data(self):
