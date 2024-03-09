@@ -156,13 +156,19 @@ class JobView(FullScreen):
         
         # check if current job has job progress data
         if self.recent_job_progress != None:
-            self.progress_title = Label(container, text = "Latest Progress Note", anchor='w')
-            self.progress_data_frame = Frame(container, padx=5, pady=5, borderwidth=2, relief='solid')
-            self.progress_data_frame.grid_columnconfigure(1, weight=1)
-            self.edit_latest_progress_btn = Button(self.progress_data_frame, text="Edit",
+            self.progress_title = Label(container, text = "Job Progress Info", anchor='w')
+            
+            # Buttons
+            self.top_btns_container = Frame(container)
+            self.view_all_btn = Button(self.top_btns_container, text="View All",
+                                                    anchor='center')
+            self.add_progress_btn = Button(self.top_btns_container, text="Add Progress",
                                                     anchor='center')
             
-
+            self.progress_data_frame = Frame(container, padx=5, pady=5, borderwidth=2, relief='solid')
+            self.progress_data_frame.grid_columnconfigure(1, weight=1)
+            # latest progress title
+            self.latest_progress_title = Label(self.progress_data_frame, text="Latest Progress Note:", anchor='w')
             # retrieve large_text_box columns and fk_table joining column names
             large_box_cols =[]
             fk_table_cols = []
@@ -189,10 +195,6 @@ class JobView(FullScreen):
 
                     # create frame to hold large_box_data textbox and scrollbar
                     large_box_frame = Frame(self.progress_data_frame, padx=10)
-                    # allow mousewheel/trackpad to scroll text box
-                    large_box_frame.bind('<Enter>', lambda e: self.enable_inner_scroll(large_box_frame, text_box))
-                    large_box_frame.bind('<Leave>', lambda e: self.disable_inner_scroll(large_box_frame, text_box))
-
 
                     text_box = Text(large_box_frame, width=40, height=10, padx=10, pady=5, 
                                     borderwidth=2, relief='solid')
@@ -220,11 +222,15 @@ class JobView(FullScreen):
                         (Label(self.progress_data_frame, text=col.title().replace("_", " ") + ":", anchor='e'),
                          Label(self.progress_data_frame, text=self.recent_job_progress['val_list'][count], padx=10, pady=5, anchor='w')))
                     
+            self.edit_latest_progress_btn = Button(self.progress_data_frame, text="Save Changes",
+                                                    anchor='center')
+                    
 
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
 
         row_count = 0
+        # place section title
         self.basic_title.grid(row=row_count, column=0, sticky="NEWS", padx=5, pady=5)
         row_count += 1
         self.basic_info_frame.grid(row=row_count, column=0, columnspan=2, sticky="NEWS", padx=5, pady=5)
@@ -249,11 +255,18 @@ class JobView(FullScreen):
         if self.recent_job_progress != None:
             self.progress_title.grid(row=row_count, column=0, sticky="NEWS")
             row_count += 1
+            # place top button container
+            self.top_btns_container.grid(row=row_count, column=0, sticky="NEWS", padx=5, pady=5)
+            self.view_all_btn.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
+            self.add_progress_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
+
+
+            row_count += 1
             self.progress_data_frame.grid(row=row_count, column=0, columnspan=2, sticky="NEWS", padx=5, pady=5)
             row_count += 1
             progress_row_count = 0
 
-            self.edit_latest_progress_btn.grid(row=progress_row_count, column=0, sticky="NEWS")
+            self.latest_progress_title.grid(row=progress_row_count, column=0, sticky=W+E)
             progress_row_count += 1
         
             for single_line_label_tup in self.single_data_labels:
@@ -273,10 +286,10 @@ class JobView(FullScreen):
                 large_box_item_tup[2].grid(row = progress_row_count, column = 1, sticky="NSE")
                 progress_row_count += 1
 
-        # Extra
-        for btn in self.btn_list:
-            btn.grid(row=row_count, column=0)
-            row_count += 1
+            self.edit_latest_progress_btn.grid(row=progress_row_count, column=0, sticky="NEWS")
+            progress_row_count += 1
+
+
 
 
     def update_data(self):
