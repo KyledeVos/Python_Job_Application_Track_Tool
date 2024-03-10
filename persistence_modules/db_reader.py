@@ -175,7 +175,7 @@ class DbReader():
                 if display_only == True:
                     remaining_data['val_list'][col_index] = set_value
                 else:
-                    query = f"SELECT {fk_tup[1]} FROM {fk_tup[0]}"
+                    query = f"SELECT id, {fk_tup[1]} FROM {fk_tup[0]}"
                     remaining_data['val_list'][col_index] = (set_value, cursor.execute(query).fetchall())
             else:
                 # loop through each job process data set and change data value from id to corresponding value in fk_table
@@ -184,7 +184,7 @@ class DbReader():
                     if display_only == True:
                         values_list[col_index] = set_value
                     else:
-                        second_query = f"SELECT {fk_tup[1]} FROM {fk_tup[0]}"
+                        second_query = f"SELECT id, {fk_tup[1]} FROM {fk_tup[0]}"
                         values_list[col_index] = (set_value, cursor.execute(second_query).fetchall())
 
             # change name of column in col_list
@@ -200,7 +200,6 @@ class DbReader():
                 fk_cols.append(fk_tup[1])
             
             remaining_data['column_info'].append(('fk_columns', fk_cols))
-
 
         return remaining_data
 
