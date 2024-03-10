@@ -125,6 +125,7 @@ class JobView(FullScreen):
         # retrieve most recent job progress data - function call below:
         # sets return_one to True and display_only to True
         self.recent_job_progress = self.db_controller.retrieve_job_progress_data(job_id, True, True)
+        print(self.recent_job_progress)
 
         # ----------------------------------------------------------------------------
         # JOB BASIC INFO SECTION
@@ -152,7 +153,7 @@ class JobView(FullScreen):
         self.update_application_btn = Button(self.basic_info_frame, text="Save Changes", command=self.update_data)
 
         # ----------------------------------------------------------------------------
-        # JOB PROGRESS SECTION - Display most recent job progress (no edit functionality)
+        # JOB PROGRESS SECTION
         
         # check if current job has job progress data
         if self.recent_job_progress != None:
@@ -161,7 +162,7 @@ class JobView(FullScreen):
             # Buttons
             self.top_btns_container = Frame(container)
             self.view_all_btn = Button(self.top_btns_container, text="View All",
-                                                    anchor='center')
+                                                    anchor='center', command=self.view_all_job_progress)
             self.add_progress_btn = Button(self.top_btns_container, text="Add Progress",
                                                     anchor='center')
             
@@ -200,6 +201,7 @@ class JobView(FullScreen):
                                     borderwidth=2, relief='solid')
                     text_box.grid(row =0, column=0, sticky='w')
                     text_box.insert("1.0", self.recent_job_progress['val_list'][count])
+                    text_box.config(state=DISABLED)
 
                     # create and configure text box - scrolls text box
                     scrollbar = ttk.Scrollbar(self.progress_data_frame, orient='vertical', command=text_box.yview)
@@ -222,9 +224,14 @@ class JobView(FullScreen):
                         (Label(self.progress_data_frame, text=col.title().replace("_", " ") + ":", anchor='e'),
                          Label(self.progress_data_frame, text=self.recent_job_progress['val_list'][count], padx=10, pady=5, anchor='w')))
                     
-            self.edit_latest_progress_btn = Button(self.progress_data_frame, text="Save Changes",
-                                                    anchor='center')
-                    
+        # ----------------------------------------------------------------------------
+        # JOB GENERAL NOTES SECTION
+            
+    
+    def view_all_job_progress(self):
+        self.left_minor_subscreen.clear_right_major()
+        self.test_label = Label(self.container, text="Hello")
+        self.test_label.grid(row=0, column=0)
 
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
@@ -285,9 +292,6 @@ class JobView(FullScreen):
                 large_box_item_tup[1].grid(row = progress_row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
                 large_box_item_tup[2].grid(row = progress_row_count, column = 1, sticky="NSE")
                 progress_row_count += 1
-
-            self.edit_latest_progress_btn.grid(row=progress_row_count, column=0, sticky="NEWS")
-            progress_row_count += 1
 
 
 
