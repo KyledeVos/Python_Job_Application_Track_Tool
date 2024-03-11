@@ -86,11 +86,14 @@ class ScrollableScreen():
     def get_container(self):
         return self.second_frame
     
+    def reset_scroll_window(self):
+        self.my_canvas.update_idletasks()
+        self.my_canvas.yview_moveto(0)
+    
     def load_screen(self):
 
         # move scroll window back to top for each page load
-        self.my_canvas.update_idletasks()
-        self.my_canvas.yview_moveto(0)
+        self.reset_scroll_window()
                                     
         # 4) Configure the Canvas
         self.my_canvas.configure(yscrollcommand=self.my_scrollbar.set)
