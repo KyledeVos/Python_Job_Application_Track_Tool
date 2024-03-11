@@ -25,8 +25,8 @@ class ScreenController():
         self.configure_root_sections()
 
     def configure_root_window(self):
-        self.root_window.geometry("600x600")
-        self.root_window.minsize(600, 200)
+        self.root_window.geometry("800x600")
+        self.root_window.minsize(700, 200)
         self.root_window.grid_columnconfigure(0, weight=1)
         self.root_window.rowconfigure(0, weight=0)
         self.root_window.rowconfigure(1, weight=1)
