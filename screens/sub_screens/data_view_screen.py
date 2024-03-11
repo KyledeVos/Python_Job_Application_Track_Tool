@@ -82,13 +82,13 @@ class ViewAllApplicationsScreen(FullScreen):
                         self.job_data_values.append(current_label)
 
                 def open_job_application(self, event):
+                    # Change Page Main Title
+                    self.left_sub_window.window_title.config(text="Job Application Details")
                     JobView(self.left_sub_window.get_right_major(), self.left_sub_window, self.db_controller, self.id).load_window()
 
                 def place_on_screen(self, row_count):
                     for col_count, job_instance in enumerate(self.job_data_values):
                         job_instance.grid(row = row_count, column=col_count, padx=10, pady=2)
-                        job_instance.grid(row=row_count, column=col_count,padx = 10, pady=2)
-                        job_instance.grid(row=row_count, column=col_count, padx = 10, pady=2)
 
             for count, application in enumerate(current_applications):
                 # Add Column Titles
@@ -113,7 +113,7 @@ class JobView(FullScreen):
         self.left_minor_subscreen = left_minor_subscreen
         self.container = container
         self.db_controller = db_controller
-        self.job_id = job_id 
+        self.job_id = job_id
         self.job_data = db_controller.retrieve_job_data_configured(job_id)
         self.data_converter = DataConverter()
 
@@ -125,7 +125,6 @@ class JobView(FullScreen):
         # retrieve most recent job progress data - function call below:
         # sets return_one to True and display_only to True
         self.recent_job_progress = self.db_controller.retrieve_job_progress_data(job_id, True, True)
-        print(self.recent_job_progress)
 
         # ----------------------------------------------------------------------------
         # JOB BASIC INFO SECTION
@@ -229,14 +228,44 @@ class JobView(FullScreen):
             
     
     def view_all_job_progress(self):
-        self.left_minor_subscreen.clear_right_major()
-        self.test_label = Label(self.container, text="Hello")
-        self.test_label.grid(row=0, column=0)
+
+        # cover job view screen
+        self.cover_frame = Frame(self.container, bg='green')
+        self.cover_frame.grid(row=0, rowspan=6, columnspan=2, column=0, sticky="NEWS")
+
+        # change window title
+        self.left_minor_subscreen.window_title.config(text="Job Progress Notes")
+
+        
+
+        # retrieve full job progress data for current job
+        # setting "return_one" to False and "display_only" to False
+        # "display_only" as False returns full fk data with complete row id's and column data
+        self.all_job_progress_data = self.db_controller.retrieve_job_progress_data(self.job_id, False, False)
+        print(self.all_job_progress_data)
+
+        back_btn = Button(self.cover_frame, text= "<- Go Back", padx=5, pady=5, anchor='w', command=self.back_to_applications)
+
+
+
+
+        # ----------------------------------------------------
+        #LOAD ITEMS TO SCREEN WINDOW
+        main_row_count = 0
+        back_btn.grid(row = main_row_count, column=0, padx=5, pady=5)
+
+    def back_to_applications(self):
+        # remove covering frame holding all job progress info
+        self.cover_frame.grid_forget()
+
+        # reset page title for view all job applications
+        self.left_minor_subscreen.window_title.config(text="Job Application Details")
+
 
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
-
         row_count = 0
+
         # place section title
         self.basic_title.grid(row=row_count, column=0, sticky="NEWS", padx=5, pady=5)
         row_count += 1
