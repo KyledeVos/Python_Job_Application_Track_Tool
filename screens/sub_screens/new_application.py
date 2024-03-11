@@ -100,7 +100,7 @@ class NewApplicationScreen(FullScreen):
         self.progress_window = Toplevel()
         self.progress_window.geometry("500x450")
         self.progress_window.minsize(500, 450)
-        self.progress_window.maxsize(500, 450)
+        self.progress_window.maxsize(500, 700)
 
         # disable main application window buttons whilst job progress is being created
         self.add_progress_btn.config(state='disabled')
@@ -134,6 +134,8 @@ class NewApplicationScreen(FullScreen):
             label_row_count += 1
             item_input.grid(row=label_row_count, column=0, sticky=W+E, padx=(20,0), pady=5)
             label_row_count += 1
+
+
 
         # --------------------------------------------------------------------------------
         # FOREIGN TABLES - SELECTION INPUT FROM MENU
@@ -219,15 +221,15 @@ class NewApplicationScreen(FullScreen):
 
 
         # 2) Retrieve multi-line input data
-            for item in self.large_box_data:
-                progress_instance.append(item.get("1.0", END).strip())
+        for item in self.large_box_data:
+            progress_instance.append(item.get("1.0", END).strip())
                 
         # 3) Retrieve Foreign-Key (Menu-Based Data)
-            for menu_input in self.fk_data:
-                menu_title = menu_input[0].cget('text')
-                selected_option = menu_input[1].get()
-            
-                progress_instance.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.progress_attributes['fk_data']))
+        for menu_input in self.fk_data:
+            menu_title = menu_input[0].cget('text')
+            selected_option = menu_input[1].get()
+        
+            progress_instance.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.progress_attributes['fk_data']))
 
         # Add Progress instance to list of instances
         # NOTE - current implementation still needs job_id retrieved only after save of new job application
@@ -272,7 +274,7 @@ class NewApplicationScreen(FullScreen):
 
         # save new job application and retrieve id
         job_id = self.db_controller.write_single_job_no_id(data_values)
-        self.db_controller.write_job_progress(self.progress_instance_list, job_id)
+        self.db_controller.write_job_progress(self.progress_instance_list , job_id)
 
         # clear input fields after save
         for input_field in self.single_data_inputs:

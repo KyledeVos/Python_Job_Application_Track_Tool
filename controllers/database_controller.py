@@ -7,13 +7,16 @@ class JobProgressDefaults():
         # Set Default Table Name
         self.table_name = 'progress'
         # set names of columns with data for one line
-        self.single_data = ['date']
+        self.single_data = ['date', 'title']
         # set column names for data needing larger area input box
         self.larger_data_inputs = ['description']
         # set names of foreign key tables with corresponding column name
         self.fk_tables = {'progress_table_cols': ['comm_id'], "fk_table_data": [('communication_types', 'communication_type')]}
         # set names of columns to not be displayed (none must be blank list)
         self.col_not_display = ["job_id"]
+
+        # Data Update - set columns that can be updated
+        self.update_cols = ['date', 'description', 'comm_id']
         
 
 class DatabaseController():
@@ -228,7 +231,7 @@ class DatabaseController():
 
         # retrieve all column names (except id) for table
         column_names = self.db_reader.retrieve_column_names(self.cursor, table_name)[1:]
-        # ['date', 'description', 'comm_id', 'job_id']
+        # ['date', 'title', 'description', 'comm_id', 'job_id']
 
         # seperate and write individual progress instances
         for progress_instance in progress_data:
