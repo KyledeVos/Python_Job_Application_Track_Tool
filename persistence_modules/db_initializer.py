@@ -72,6 +72,7 @@ class DbInitializer():
         cursor.execute("""CREATE TABLE IF NOT EXISTS progress(
             id INTEGER PRIMARY KEY,
             date TEXT NOT NULL,
+            title TEXT NOT NULL,
             description TEXT NOT NULL,
             comm_id INTEGER NOT NULL,
             job_id INTEGER NOT NULL,
