@@ -102,7 +102,7 @@ class ViewAllApplicationsScreen(FullScreen):
                             current_label = Label(self.container, text=title, width=20, anchor=W)
                         current_label.grid(row=0, column=col_count, pady=2)
 
-                # Create Job Instane (with job data) and place on screen
+                # Create Job Instance (with job data) and place on screen
                 current_job = Job_Instance(count+1, application, self.container, self.left_sub_window, self.db_controller)
                 current_job.place_on_screen(count+1)
 
@@ -229,30 +229,32 @@ class JobView(FullScreen):
     
     def view_all_job_progress(self):
 
-        # cover job view screen
+        # cover job view screen for view all job progress data
         self.cover_frame = Frame(self.container, bg='green')
-        self.cover_frame.grid(row=0, rowspan=6, columnspan=2, column=0, sticky="NEWS")
+        self.cover_frame.grid(row=0, rowspan=self.row_count, columnspan=2, column=0, sticky="NEWS")
+
+        # move scroll window back to top of page
+        self.left_minor_subscreen.scrollable_screen.reset_scroll_window()
 
         # change window title
         self.left_minor_subscreen.window_title.config(text="Job Progress Notes")
 
         
-
         # retrieve full job progress data for current job
         # setting "return_one" to False and "display_only" to False
         # "display_only" as False returns full fk data with complete row id's and column data
         self.all_job_progress_data = self.db_controller.retrieve_job_progress_data(self.job_id, False, False)
         print(self.all_job_progress_data)
 
+        # BUTTON to return to job view screen - removes covering frame
         back_btn = Button(self.cover_frame, text= "<- Go Back", padx=5, pady=5, anchor='w', command=self.back_to_applications)
-
-
 
 
         # ----------------------------------------------------
         #LOAD ITEMS TO SCREEN WINDOW
         main_row_count = 0
         back_btn.grid(row = main_row_count, column=0, padx=5, pady=5)
+
 
     def back_to_applications(self):
         # remove covering frame holding all job progress info
@@ -264,13 +266,13 @@ class JobView(FullScreen):
 
     def load_window(self):
         self.left_minor_subscreen.clear_right_major()
-        row_count = 0
+        self.row_count = 0
 
         # place section title
-        self.basic_title.grid(row=row_count, column=0, sticky="NEWS", padx=5, pady=5)
-        row_count += 1
-        self.basic_info_frame.grid(row=row_count, column=0, columnspan=2, sticky="NEWS", padx=5, pady=5)
-        row_count += 1
+        self.basic_title.grid(row=self.row_count, column=0, sticky="NEWS", padx=5, pady=5)
+        self.row_count += 1
+        self.basic_info_frame.grid(row=self.row_count, column=0, columnspan=2, sticky="NEWS", padx=5, pady=5)
+        self.row_count += 1
         basic_row_count = 0
         
 
@@ -289,17 +291,17 @@ class JobView(FullScreen):
 
         # latest job progress section
         if self.recent_job_progress != None:
-            self.progress_title.grid(row=row_count, column=0, sticky="NEWS")
-            row_count += 1
+            self.progress_title.grid(row=self.row_count, column=0, sticky="NEWS")
+            self.row_count += 1
             # place top button container
-            self.top_btns_container.grid(row=row_count, column=0, sticky="NEWS", padx=5, pady=5)
+            self.top_btns_container.grid(row=self.row_count, column=0, sticky="NEWS", padx=5, pady=5)
             self.view_all_btn.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
             self.add_progress_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
 
 
-            row_count += 1
-            self.progress_data_frame.grid(row=row_count, column=0, columnspan=2, sticky="NEWS", padx=5, pady=5)
-            row_count += 1
+            self.row_count += 1
+            self.progress_data_frame.grid(row=self.row_count, column=0, columnspan=2, sticky="NEWS", padx=5, pady=5)
+            self.row_count += 1
             progress_row_count = 0
 
             self.latest_progress_title.grid(row=progress_row_count, column=0, sticky=W+E)
@@ -321,8 +323,6 @@ class JobView(FullScreen):
                 large_box_item_tup[1].grid(row = progress_row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
                 large_box_item_tup[2].grid(row = progress_row_count, column = 1, sticky="NSE")
                 progress_row_count += 1
-
-
 
 
     def update_data(self):
