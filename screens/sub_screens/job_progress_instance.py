@@ -133,7 +133,7 @@ class JobInstanceQuickViewDeletion():
         # list to labels of single line items for job progress identification
         self.single_vals = []
         # individual deletion button
-        self.delete_btn = Button(self.outer_container, text = 'Delete', anchor='e')
+        self.delete_btn = Button(self.outer_container, text = 'Delete', anchor='e', command=self.delete_selected_progress)
 
         # add count of number of job progress instance
         self.progress_count = Label(self.outer_container, text = progress_count, anchor=CENTER)
@@ -177,6 +177,10 @@ class JobInstanceQuickViewDeletion():
         # enable clear boxes and delete selected button if checkbox is checked
         self.clear_boxes_btn.config(state=ACTIVE)
         self.delete_selected__btn.config(state=ACTIVE)
+
+    def delete_selected_progress(self):
+        # delete progress instance
+        self.db_controller.delete_job_progress_only([self.id])
 
 
 class AllJobProgress():
@@ -274,5 +278,7 @@ class AllJobProgress():
         else:
             self.clear_boxes_btn.config(state=ACTIVE)
             self.delete_selected_btn.config(state=ACTIVE)
+
+
 
 
