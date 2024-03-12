@@ -206,7 +206,8 @@ class JobView(FullScreen):
         self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected', anchor=E)
         
         # Initialize instance of view all job Progress
-        self.all_job_progress_instance = AllJobProgress(self.cover_frame, self.all_job_progress_data, self.clear_all_boxes, self.delete_selected_btn)
+        self.all_job_progress_instance = AllJobProgress(self.cover_frame, self.db_controller, self.all_job_progress_data, 
+                                                        self.clear_all_boxes, self.delete_selected_btn, self.job_id)
         # call for creation of frame housing all job_progress data
         self.all_job_progress_instance.view_all_job_progress_notes()
 
