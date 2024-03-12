@@ -4,7 +4,7 @@ from tkinter import messagebox
 from .parent_screens import FullScreen, SectionedLeftMinor
 from .sub_screens.new_application import NewApplicationScreen
 from .sub_screens.delete_screen import DeleteApplication
-from .sub_screens.data_view_screen import ViewAllApplicationsScreen
+from .sub_screens.job_view_screen import ViewAllApplicationsScreen
 
 class JobApplicationsScreen(FullScreen):
 
