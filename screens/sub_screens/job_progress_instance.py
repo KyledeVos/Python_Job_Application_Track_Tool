@@ -108,13 +108,80 @@ class RecentJobProgress():
             progress_row_count += 1
 
         return row_count
+    
+
+class JobInstanceQuickViewDeletion():
+    # create instance of job progress showing single-line data fields and deletion button with
+    # clickable feature to later enter update window for job progress updates
+    
+    def __init__(self, outer_container, values_list, db_controller, progress_count) -> None:
+
+        self.outer_container = outer_container
+        self.values_list = values_list
+        self.db_controller = db_controller
+        self.progress_count = progress_count
+        
+        # initialize row attributes
+        self.inner_container = Frame(outer_container, borderwidth=1, relief='solid')
+        self.id = None
+        
+        # checkbox allowing for selection and deletion of multiple job progress instances
+        self.checked = IntVar()
+        self.checkbox = Checkbutton(self.outer_container, variable=self.checked)
+        # list to labels of single line items for job progress identification
+        self.single_vals = []
+        # individual deletion button
+        self.delete_btn = Button(self.outer_container, text = 'Delete', anchor='e')
+
+        # add count of number of job progress instance
+        self.progress_count = Label(self.outer_container, text = progress_count, anchor=CENTER)
+
+        # populate id and single line data fields
+        self.populate_values()
+
+    def populate_values(self):
+
+        # job progress id always first value in values list
+        self.id = self.values_list[0]
+
+        for val in self.values_list[1:]:
+            if len(val) <= 20:
+                self.single_vals.append(Label(self.outer_container, text=val, width=15, anchor=CENTER))
+            else:
+                self.single_vals.append(Label(self.outer_container, text=val, width=30, anchor=CENTER))
+        
+    def load_row(self, main_row_count, col_total):
+
+        #place row container
+        #self.inner_container.grid(row=main_row_count, column=0, columnspan=col_total)
+
+        #track column placements
+        col_count = 0
+        
+        # place CheckButton first
+        self.checkbox.grid(row=main_row_count, column=col_count, padx=5, pady=2)
+        col_count += 1
+
+        # place count of current number of progress instances
+        self.progress_count.grid(row=main_row_count, column=col_count, sticky=W+E, padx=5, pady=2)
+        col_count += 1
+
+        # place each single line field
+        for attribute in self.single_vals:
+            attribute.grid(row=main_row_count, column = col_count, sticky=W+E, padx=5, pady=2)
+            col_count += 1
+
+        # place individual row deletion button
+        self.delete_btn.grid(row=main_row_count, column=col_count, padx=5, pady=2)
 
 
 class AllJobProgress():
 
-    def __init__(self, outer_container, all_job_progress_data, clear_boxes_btn, delete_selected_btn) -> None:
+    def __init__(self, outer_container, db_controller, all_job_progress_data, clear_boxes_btn, delete_selected_btn, job_id) -> None:
         self.outer_container = outer_container
+        self.db_controller = db_controller
         self.all_job_progress_data = all_job_progress_data
+        self.job_id = job_id
 
         # buttons initialized in calling method
         self.clear_boxes_btn = clear_boxes_btn
@@ -146,13 +213,20 @@ class AllJobProgress():
                         break
             
             if col_found == False:
-                self.display_columns.append(Label(self.job_progress_frame, text=column_name.title().replace("_", " "), anchor='w'))
+                self.display_columns.append(Label(self.job_progress_frame, text=column_name.title().replace("_", " "), anchor=CENTER))
             col_found = False
 
+        # list to hold each progress instance row
+        self.progress_rows = []
+        # iterate through progress values data to create individual rows of progress data
+        for count, progress_instance in enumerate(self.all_job_progress_data['val_list']):
+            # only provide id and single line data fields to instance
+            self.progress_rows.append(JobInstanceQuickViewDeletion(self.job_progress_frame, progress_instance[:len(self.display_columns) - 1], self.db_controller, count))
+
+
     def load_all_progress_window(self, main_row_count):
-
-        # --------- Load Column Titles
-
+        
+        # --------- Load Column Titles -------------
         # place containing frame
         self.job_progress_frame.grid(row=main_row_count, column=0, columnspan=4, padx=5, sticky=W+E)
         main_row_count += 1
@@ -163,6 +237,11 @@ class AllJobProgress():
             display_col.grid(row=job_instance_row, column=column_count, padx=5, pady=5, sticky=W+E)
             column_count += 1
         job_instance_row += 1
+
+        # --------- Load Progress Rows -------------
+        for progress_row in self.progress_rows:
+            progress_row.load_row(main_row_count, len(self.display_columns) + 1)
+            main_row_count += 1
 
         # return incremented main row count to calling method for possible additional
         # frame/widget placement
