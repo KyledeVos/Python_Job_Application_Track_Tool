@@ -115,7 +115,8 @@ class JobInstanceQuickViewDeletion():
     # clickable feature to later enter update window for job progress updates
     
     def __init__(self, outer_container, values_list, db_controller,
-                 progress_count, clear_boxes_btn, delete_selected_btn, deselect_btns_function) -> None:
+                 progress_count, clear_boxes_btn, delete_selected_btn, deselect_btns_function,
+                 outer_window_reload_func) -> None:
 
         self.outer_container = outer_container
         self.values_list = values_list
@@ -124,6 +125,7 @@ class JobInstanceQuickViewDeletion():
         self.clear_boxes_btn = clear_boxes_btn
         self.delete_selected__btn = delete_selected_btn
         self.deselect_btns_function = deselect_btns_function
+        self.outer_window_reload_func = outer_window_reload_func
         
         self.id = None
         
@@ -181,16 +183,19 @@ class JobInstanceQuickViewDeletion():
     def delete_selected_progress(self):
         # delete progress instance
         self.db_controller.delete_job_progress_only([self.id])
+        # reload outer window after deletion of job_instance
+        self.outer_window_reload_func()
 
 
 class AllJobProgress():
 
     def __init__(self, outer_container, db_controller, all_job_progress_data,
-                 clear_boxes_btn, delete_selected_btn, job_id) -> None:
+                 clear_boxes_btn, delete_selected_btn, job_id, outer_window_reload_func) -> None:
         self.outer_container = outer_container
         self.db_controller = db_controller
         self.all_job_progress_data = all_job_progress_data
         self.job_id = job_id
+        self.outer_window_reload_func = outer_window_reload_func
 
         # buttons initialized in calling method
         self.clear_boxes_btn = clear_boxes_btn
@@ -234,7 +239,7 @@ class AllJobProgress():
                                                                    progress_instance[:len(self.display_columns) - 1], 
                                                                    self.db_controller, count,
                                                                    self.clear_boxes_btn, self.delete_selected_btn, 
-                                                                   self.check_box_full_deselection))
+                                                                   self.check_box_full_deselection, self.outer_window_reload_func))
 
 
     def load_all_progress_window(self, main_row_count):
