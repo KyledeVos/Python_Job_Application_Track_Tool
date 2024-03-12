@@ -135,7 +135,7 @@ class JobInstanceQuickViewDeletion():
         # list to labels of single line items for job progress identification
         self.single_vals = []
         # individual deletion button
-        self.delete_btn = Button(self.outer_container, text = 'Delete', anchor='e', command=self.delete_selected_progress)
+        self.delete_btn = Button(self.outer_container, text = 'Delete', anchor='e', command=self.delete_single_progress)
 
         # add count of number of job progress instance
         self.progress_count = Label(self.outer_container, text = progress_count, anchor=CENTER)
@@ -180,7 +180,7 @@ class JobInstanceQuickViewDeletion():
         self.clear_boxes_btn.config(state=ACTIVE)
         self.delete_selected__btn.config(state=ACTIVE)
 
-    def delete_selected_progress(self):
+    def delete_single_progress(self):
         # delete progress instance
         self.db_controller.delete_job_progress_only([self.id])
         # reload outer window after deletion of job_instance
@@ -200,6 +200,9 @@ class AllJobProgress():
         # buttons initialized in calling method
         self.clear_boxes_btn = clear_boxes_btn
         self.delete_selected_btn = delete_selected_btn
+
+        # configure delete_selected_button to delete selected job instances
+        self.delete_selected_btn.config(command = self.delete_selected_progress)
 
         # create frame to hold column titles
         self.job_progress_frame = Frame(self.outer_container, borderwidth=2, relief='solid')
@@ -285,5 +288,13 @@ class AllJobProgress():
             self.delete_selected_btn.config(state=ACTIVE)
 
 
+    def delete_selected_progress(self):
+        # delete all selected job progress instances
 
+        # retrieve id's of selected job instances for deletion
+        id_list = [val.id for val in self.progress_rows if val.checked.get() ==  1]
+        # call for progress instances deletion
+        self.db_controller.delete_job_progress_only(id_list)
+        # call for job view window and job progress view all windows reload
+        self.outer_window_reload_func()
 
