@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from ..parent_screens import FullScreen
-from .job_progress_instance import RecentJobProgress
+from .job_progress_instance import RecentJobProgress, AllJobProgress
 import copy
 
 
@@ -152,7 +152,7 @@ class JobView(FullScreen):
                                      value_holder,
                                      OptionMenu(self.basic_info_frame, value_holder, *menu_options)))
             
-        self.update_application_btn = Button(self.basic_info_frame, text="Save Changes", command=self.update_data)
+        self.update_application_btn = Button(self.basic_info_frame, text="Save Changes", command=self.update_basic_data)
 
         # ----------------------------------------------------------------------------
         # JOB PROGRESS SECTION - MOST RECENT PROGRESS
@@ -190,7 +190,6 @@ class JobView(FullScreen):
         # change window title
         self.left_minor_subscreen.window_title.config(text="Job Progress Notes")
 
-        
         # retrieve full job progress data for current job
         # setting "return_one" to False and "display_only" to False
         # "display_only" as False returns full fk data with complete row id's and column data
@@ -205,58 +204,38 @@ class JobView(FullScreen):
         self.top_level_holder = Frame(self.cover_frame)
         self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes",anchor=E)
         self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected', anchor=E)
+        
+        # Initialize instance of view all job Progress
+        self.all_job_progress_instance = AllJobProgress(self.cover_frame, self.all_job_progress_data, self.clear_all_boxes, self.delete_selected_btn)
+        # call for creation of frame housing all job_progress data
+        self.all_job_progress_instance.view_all_job_progress_notes()
 
-        # ------------------- DISPLAY COLUMN TITLES ------------------------------------------------------
-        # setup of display column names - only add single line data values (not text box or fk data)
+        # call for load of screen widgets, retrieving last set main row count
+        main_row_count = self.load_all_progress_top_screen()
 
-        # create frame to hold column titles
-        self.job_progress_frame = Frame(self.cover_frame, borderwidth=2, relief='solid')
+        # call for load of recent job progress section
+        main_row_count = self.all_job_progress_instance.load_all_progress_window(main_row_count)
 
-        # add blank label for check_box column and number (count) column
-        self.display_columns = [Label(self.job_progress_frame, text=''), Label(self.job_progress_frame, text='Number')]
-        for column_name in self.all_job_progress_data['col_list']:
-            col_found = False
-            # remove id column
-            if column_name == 'id':
-                continue
-            else:
-                # check column name is not part of longer text box or comes from foreign key table
-                for sub_columns in self.all_job_progress_data['column_info']:
-                    if column_name in sub_columns[1]:
-                        col_found = True
-                        break
-            
-            if col_found == False:
-                self.display_columns.append(Label(self.job_progress_frame, text=column_name.title().replace("_", " "), anchor='w'))
-            col_found = False
 
-        # ----------------------------------------------------
-        # LOAD ITEMS TO SCREEN WINDOW
+    def load_all_progress_top_screen(self):
+        
+        # load return to job view button
         main_row_count = 0
         self.back_btn.grid(row = main_row_count, column=0, padx=2, pady=5)
         main_row_count += 1
 
-         # configure functions for clear_boxes and delete_selected
-        self.clear_boxes_btn.config(command=self.clear_all_boxes, state=DISABLED)
-        self.delete_selected_btn.config(state = DISABLED)
-
+        # load top holder holding clear boxes and delete selected buttons
         self.top_level_holder.grid(row=main_row_count, column=1, padx=10, pady=10, sticky='e')
         main_row_count += 1
         self.clear_boxes_btn.grid(row=0, column=0)
         self.delete_selected_btn.grid(row=0, column=1, padx=5)
 
-        # --------- Load Column Titles
+         # configure functions for clear_boxes and delete_selected
+        self.clear_boxes_btn.config(command=self.clear_all_boxes, state=DISABLED)
+        self.delete_selected_btn.config(state = DISABLED)
 
-        # place containing frame
-        self.job_progress_frame.grid(row=main_row_count, column=0, columnspan=4, padx=5, sticky=W+E)
-        main_row_count += 1
+        return main_row_count
 
-        job_instance_row = 0
-        column_count = 0
-        for display_col in self.display_columns:
-            display_col.grid(row=job_instance_row, column=column_count, padx=5, pady=5, sticky=W+E)
-            column_count += 1
-        job_instance_row += 1
         
     def back_to_applications(self):
         # remove covering frame holding all job progress info
@@ -314,6 +293,7 @@ class JobView(FullScreen):
             self.row_count += 1
             # place top button container
             self.top_btns_container.grid(row=self.row_count, column=0, sticky="NEWS", padx=5, pady=5)
+            self.row_count += 1
             # place job progress function buttons
             self.view_all_btn.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
             self.add_progress_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
@@ -322,7 +302,7 @@ class JobView(FullScreen):
             self.row_count = self.recent_progress.place_progress_frame(self.row_count)
 
 
-    def update_data(self):
+    def update_basic_data(self):
 
         data_values = []
         column_names = self.db_controller.retrieve_job_column_names()
