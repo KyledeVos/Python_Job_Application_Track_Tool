@@ -181,10 +181,33 @@ class JobInstanceQuickViewDeletion():
         self.delete_selected__btn.config(state=ACTIVE)
 
     def delete_single_progress(self):
-        # delete progress instance
-        self.db_controller.delete_job_progress_only([self.id])
-        # reload outer window after deletion of job_instance
-        self.outer_window_reload_func()
+
+        # Change Colour of Job Instance text to highlight selected job
+
+        self.progress_count.config(fg = 'white')
+        self.progress_count.config(bg = 'red')
+
+        for attribute in self.single_vals:
+            attribute.config(fg = 'white')
+            attribute.config(bg = 'red')
+
+        # DISPLAY CONFIRMATION MESSAGE BEFORE DELETION
+        if(messagebox.askyesno('Permanent Deletion Warning!', 
+            message="Are you sure you want to delete this job?\nThis action cannot be undone",
+            default = 'no')):
+            # delete progress instance
+            self.db_controller.delete_job_progress_only([self.id])
+            # reload outer window after deletion of job_instance
+            self.outer_window_reload_func()
+
+        else:
+            # Deletion cancelled, change font colour back to black and background to white
+            self.progress_count.config(fg = 'black')
+            self.progress_count.config(bg = 'white')
+
+            for attribute in self.single_vals:
+                attribute.config(fg = 'black')
+                attribute.config(bg = 'white')
 
 
 class AllJobProgress():
@@ -291,10 +314,46 @@ class AllJobProgress():
     def delete_selected_progress(self):
         # delete all selected job progress instances
 
-        # retrieve id's of selected job instances for deletion
-        id_list = [val.id for val in self.progress_rows if val.checked.get() ==  1]
-        # call for progress instances deletion
-        self.db_controller.delete_job_progress_only(id_list)
-        # call for job view window and job progress view all windows reload
-        self.outer_window_reload_func()
+        # retrieve id's of selected job instances for deletion and change text and 
+        # background colour to highlight selected jobs
+        id_list = []
+
+        for val in self.progress_rows:
+            if val.checked.get() == 1:
+                # add id num to id__list
+                id_list.append(val.id)
+                val.progress_count.config(fg = 'white')
+                val.progress_count.config(bg = 'red')
+
+                for attribute in val.single_vals:
+                    attribute.config(fg = 'white')
+                    attribute.config(bg = 'red')
+
+         # create gramatically correct message for Deletion Warning
+        if len(id_list) == 1:
+            display_message = "Are you sure you want to delete this job?\nThis action cannot be undone"
+        else:
+            display_message = f"Are you sure you want to delete {len(id_list)} jobs?\nThis action cannot be undone"
+
+        # Display Yes or No Box to confirm Deletion
+        if(messagebox.askyesno('Permanent Deletion Warning!', 
+                               message=display_message, default = 'no')):
+
+            # call for progress instances deletion
+            self.db_controller.delete_job_progress_only(id_list)
+            # call for job view window and job progress view all windows reload
+            self.outer_window_reload_func()
+
+        else:
+            # Deletion Cancelled, change colours back to original
+            for val in self.progress_rows:
+                if val.checked.get() == 1:
+                    # add id num to id__list
+                    id_list.append(val.id)
+                    val.progress_count.config(fg = 'black')
+                    val.progress_count.config(bg = 'white')
+
+                    for attribute in val.single_vals:
+                        attribute.config(fg = 'black')
+                        attribute.config(bg = 'white')
 

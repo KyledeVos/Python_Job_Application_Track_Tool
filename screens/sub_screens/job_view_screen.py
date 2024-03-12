@@ -3,7 +3,6 @@ from tkinter import ttk
 from tkinter import messagebox
 from ..parent_screens import FullScreen
 from .job_progress_instance import RecentJobProgress, AllJobProgress
-import copy
 
 
 # HELPER CLASS FOR MENU BASED DATA
