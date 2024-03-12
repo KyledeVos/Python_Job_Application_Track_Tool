@@ -114,20 +114,22 @@ class JobInstanceQuickViewDeletion():
     # create instance of job progress showing single-line data fields and deletion button with
     # clickable feature to later enter update window for job progress updates
     
-    def __init__(self, outer_container, values_list, db_controller, progress_count) -> None:
+    def __init__(self, outer_container, values_list, db_controller,
+                 progress_count, clear_boxes_btn, delete_selected_btn, deselect_btns_function) -> None:
 
         self.outer_container = outer_container
         self.values_list = values_list
         self.db_controller = db_controller
         self.progress_count = progress_count
+        self.clear_boxes_btn = clear_boxes_btn
+        self.delete_selected__btn = delete_selected_btn
+        self.deselect_btns_function = deselect_btns_function
         
-        # initialize row attributes
-        self.inner_container = Frame(outer_container, borderwidth=1, relief='solid')
         self.id = None
         
         # checkbox allowing for selection and deletion of multiple job progress instances
         self.checked = IntVar()
-        self.checkbox = Checkbutton(self.outer_container, variable=self.checked)
+        self.checkbox = Checkbutton(self.outer_container, variable=self.checked, command=self.deselect_btns_function)
         # list to labels of single line items for job progress identification
         self.single_vals = []
         # individual deletion button
@@ -152,9 +154,6 @@ class JobInstanceQuickViewDeletion():
         
     def load_row(self, main_row_count, col_total):
 
-        #place row container
-        #self.inner_container.grid(row=main_row_count, column=0, columnspan=col_total)
-
         #track column placements
         col_count = 0
         
@@ -174,10 +173,16 @@ class JobInstanceQuickViewDeletion():
         # place individual row deletion button
         self.delete_btn.grid(row=main_row_count, column=col_count, padx=5, pady=2)
 
+    def enable_clear_and_deleted_selected(self):
+        # enable clear boxes and delete selected button if checkbox is checked
+        self.clear_boxes_btn.config(state=ACTIVE)
+        self.delete_selected__btn.config(state=ACTIVE)
+
 
 class AllJobProgress():
 
-    def __init__(self, outer_container, db_controller, all_job_progress_data, clear_boxes_btn, delete_selected_btn, job_id) -> None:
+    def __init__(self, outer_container, db_controller, all_job_progress_data,
+                 clear_boxes_btn, delete_selected_btn, job_id) -> None:
         self.outer_container = outer_container
         self.db_controller = db_controller
         self.all_job_progress_data = all_job_progress_data
@@ -221,7 +226,11 @@ class AllJobProgress():
         # iterate through progress values data to create individual rows of progress data
         for count, progress_instance in enumerate(self.all_job_progress_data['val_list']):
             # only provide id and single line data fields to instance
-            self.progress_rows.append(JobInstanceQuickViewDeletion(self.job_progress_frame, progress_instance[:len(self.display_columns) - 1], self.db_controller, count))
+            self.progress_rows.append(JobInstanceQuickViewDeletion(self.job_progress_frame, 
+                                                                   progress_instance[:len(self.display_columns) - 1], 
+                                                                   self.db_controller, count,
+                                                                   self.clear_boxes_btn, self.delete_selected_btn, 
+                                                                   self.check_box_full_deselection))
 
 
     def load_all_progress_window(self, main_row_count):
@@ -246,3 +255,24 @@ class AllJobProgress():
         # return incremented main row count to calling method for possible additional
         # frame/widget placement
         return main_row_count
+    
+    def check_box_full_deselection(self):
+        # during ticking of check box, check if all progress instances have been deselected,
+        # if so, disable clear_boxes_btn and delete_selected_btn
+        instance_selected = False
+
+        # check if any progress instance row has been selected
+        for progress_instance in self.progress_rows:
+            if progress_instance.checked.get() == 1:
+                instance_selected = True
+                break
+        
+        # if all progress instance checkboxes are deselected, disable buttons
+        if instance_selected == False:
+            self.clear_boxes_btn.config(state=DISABLED)
+            self.delete_selected_btn.config(state=DISABLED)
+        else:
+            self.clear_boxes_btn.config(state=ACTIVE)
+            self.delete_selected_btn.config(state=ACTIVE)
+
+

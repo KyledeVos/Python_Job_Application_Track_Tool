@@ -176,6 +176,7 @@ class JobView(FullScreen):
                     
         # ----------------------------------------------------------------------------
         # JOB GENERAL NOTES SECTION
+            # LATER
             
     def view_all_job_progress(self):
 
@@ -202,19 +203,19 @@ class JobView(FullScreen):
 
         # clear boxes and delete selected job progress button
         self.top_level_holder = Frame(self.cover_frame)
-        self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes",anchor=E)
+        self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes",anchor=E, command=self.clear_all_boxes)
         self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected', anchor=E)
         
         # Initialize instance of view all job Progress
         self.all_job_progress_instance = AllJobProgress(self.cover_frame, self.db_controller, self.all_job_progress_data, 
-                                                        self.clear_all_boxes, self.delete_selected_btn, self.job_id)
+                                                        self.clear_boxes_btn, self.delete_selected_btn, self.job_id)
         # call for creation of frame housing all job_progress data
         self.all_job_progress_instance.view_all_job_progress_notes()
 
         # call for load of screen widgets, retrieving last set main row count
         main_row_count = self.load_all_progress_top_screen()
 
-        # call for load of recent job progress section
+        # call for load of recent job progress section - column title and progress rows
         main_row_count = self.all_job_progress_instance.load_all_progress_window(main_row_count)
 
 
@@ -231,13 +232,13 @@ class JobView(FullScreen):
         self.clear_boxes_btn.grid(row=0, column=0)
         self.delete_selected_btn.grid(row=0, column=1, padx=5)
 
-         # configure functions for clear_boxes and delete_selected
+         # configure functions for clear_boxes and delete_selected as disabled on window load up
         self.clear_boxes_btn.config(command=self.clear_all_boxes, state=DISABLED)
         self.delete_selected_btn.config(state = DISABLED)
 
+        # return incremented main row count for calling method placement of further widgets
         return main_row_count
 
-        
     def back_to_applications(self):
         # remove covering frame holding all job progress info
         self.cover_frame.grid_forget()
@@ -254,12 +255,13 @@ class JobView(FullScreen):
         self.delete_selected_btn.config(state=ACTIVE)
 
     def clear_all_boxes(self):
-        pass
-        
-        # disable clear_box button and delete selected job_instances
+        # iterate through all job_progress rows to remove checks on checkboxes
+        for progress_instance in self.all_job_progress_instance.progress_rows:
+            progress_instance.checked.set(0)
+
+        # disable clear boxes and selected deletion buttons
         self.clear_boxes_btn.config(state=DISABLED)
         self.delete_selected_btn.config(state=DISABLED)
-
 
     def load_window(self):
 
