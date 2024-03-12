@@ -98,8 +98,8 @@ class NewApplicationScreen(FullScreen):
 
         # new window to open progress input
         self.progress_window = Toplevel()
-        self.progress_window.geometry("500x450")
-        self.progress_window.minsize(500, 450)
+        self.progress_window.geometry("500x600")
+        self.progress_window.minsize(500, 550)
         self.progress_window.maxsize(500, 700)
 
         # disable main application window buttons whilst job progress is being created
