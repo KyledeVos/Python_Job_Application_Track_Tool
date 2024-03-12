@@ -208,7 +208,8 @@ class JobView(FullScreen):
         
         # Initialize instance of view all job Progress
         self.all_job_progress_instance = AllJobProgress(self.cover_frame, self.db_controller, self.all_job_progress_data, 
-                                                        self.clear_boxes_btn, self.delete_selected_btn, self.job_id)
+                                                        self.clear_boxes_btn, self.delete_selected_btn, self.job_id,
+                                                        self.reload_window)
         # call for creation of frame housing all job_progress data
         self.all_job_progress_instance.view_all_job_progress_notes()
 
@@ -303,6 +304,29 @@ class JobView(FullScreen):
 
             # Place Recent Job Progress Section
             self.row_count = self.recent_progress.place_progress_frame(self.row_count)
+
+    def reload_window(self):
+        # reload window after any changes have been made
+
+        # clear previous screen
+        self.left_minor_subscreen.clear_right_major()
+        
+        # 1) Reload underlying job application screen to perform
+        # possible update to most recent job progress instance
+        self.recent_job_progress = self.db_controller.retrieve_job_progress_data(self.job_id, True, True)
+        # if there is remaining job progress data, reload recent progress section
+        if self.recent_job_progress is not None:
+            self.recent_progress = RecentJobProgress(self.container, self.recent_job_progress)
+            self.recent_progress_section = self.recent_progress.retrieve_recent_progress_frame()
+        
+        # load window already handles checks for no job progress data
+        self.load_window()
+
+        # 2) Reload overlying view all job progress screen
+        if self.recent_job_progress is not None:
+            # reload overlying progress window only if there is still progress data
+            self.view_all_job_progress()
+
 
 
     def update_basic_data(self):

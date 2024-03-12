@@ -259,6 +259,7 @@ class DatabaseController():
         self.db_writer.delete_job_application(self.connection, self.cursor, table_name, id_values)
         self.connection.close()
 
+    # Delete All Job Progress data for associated job instance
     def delete_job_progress_data(self, id_list):
 
         # Set default values
@@ -267,5 +268,15 @@ class DatabaseController():
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
         self.db_writer.delete_job_progress(self.connection, self.cursor, table_name, id_list)
+        self.connection.close()
+
+    # Delete job progress (not associated job instance)
+    def delete_job_progress_only(self, id_list):
+                # Set default values
+        table_name = "progress"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        self.db_writer.delete_single_job_progress(self.connection, self.cursor, table_name, id_list)
         self.connection.close()
         
