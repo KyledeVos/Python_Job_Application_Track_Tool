@@ -23,10 +23,7 @@ class DbWriter():
         return cursor.lastrowid
 
     def update_row(self, connection, cursor, table_name, column_list, values):
-
-        # print(f'cols: {column_list}')
-        # print(f'vals: {values}')
-        
+     
         # construct column name section of query
         column_query = ""
         for index in range(len(column_list)):

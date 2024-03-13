@@ -135,6 +135,18 @@ class DatabaseController():
         return data
     
 
+    def retrieve_job_progress_cols_exact(self):
+
+        table_name = 'progress'
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        data = self.db_reader.retrieve_column_names(self.cursor, table_name)
+        self.connection.close()
+
+        return data
+    
+
     def retrieve_job_progress_data(self, search_id, return_one, display_only):
 
         progress_instance = JobProgressDefaults()
@@ -243,6 +255,23 @@ class DatabaseController():
 
         # Set default Values
         table_name = "job_applications"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        self.db_writer.update_row(self.connection, self.cursor, table_name, column_list, values)
+        self.connection.close()
+
+    def update_job_progress(self, column_list, values):
+
+        # Set default Values
+        table_name = "progress"
+
+        # remove columns that may be in column list that are not to be updated
+        job_progress_controller = JobProgressDefaults()
+
+        for column in column_list:
+            if column in job_progress_controller.col_not_display:
+                column_list.remove(column)
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
