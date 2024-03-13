@@ -27,7 +27,6 @@ class DataConverter():
         return None
 
 
-
 # View All Applications Screen
 class ViewAllApplicationsScreen(FullScreen):
 
@@ -126,7 +125,6 @@ class JobView(FullScreen):
         # retrieve most recent job progress data - function call below:
         # sets return_one to True and display_only to True
         self.recent_job_progress = self.db_controller.retrieve_job_progress_data(job_id, True, True)
-        print(self.recent_job_progress)
 
         # ----------------------------------------------------------------------------
         # JOB BASIC INFO SECTION
@@ -207,7 +205,7 @@ class JobView(FullScreen):
         
         # Initialize instance of view all job Progress
         self.all_job_progress_instance = AllJobProgress(self.cover_frame, self.db_controller, self.all_job_progress_data, 
-                                                        self.clear_boxes_btn, self.delete_selected_btn, self.job_id,
+                                                        self.clear_boxes_btn, self.delete_selected_btn, self.back_btn, self.job_id,
                                                         self.reload_window)
         # call for creation of frame housing all job_progress data
         self.all_job_progress_instance.view_all_job_progress_notes()

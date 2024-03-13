@@ -118,25 +118,34 @@ class MenuInput():
 
     def get_input_val(self):
         return self.input_val
+    
+# HELPER CLASS FOR DESCRIPTION TO ID CONVERSION
+class DataConverter():
+
+    def return_id_from_name(self, description, label_name, val_list):
+        for val in val_list:
+            if val[0] == label_name:
+                for inner_tup in val[1]:
+                    if inner_tup[1] == description:
+                        return inner_tup[0]     
+        return None
 
 class ProgressInstanceWindow():
 
-    def __init__(self, progress_attributes, db_controller, single_data_list, large_box_data, fk_data, btns_list, retrieve_progress_data_func) -> None:
+    def __init__(self, progress_attributes, db_controller, single_data_list, large_box_data,
+                 fk_data, btns_list, outer_window_reload_func = None, retrieve_progress_data_func = None, full_data = None,  progress_instance = None) -> None:
         self.db_controller = db_controller
         self.progress_attributes = progress_attributes
+        self.progress_instance = progress_instance
         self.single_data_list = single_data_list
         self.large_box_data = large_box_data
         self.fk_data = fk_data
         self.btns_list = btns_list
         self.retrieve_progress_data_func = retrieve_progress_data_func
+        self.outer_window_reload_func = outer_window_reload_func
+        self.full_data = full_data
 
     def create_window(self):
-        # -----------------------------------------------------------------------------
-        # Initial Window Configuration
-        # retrieve job progress attributes as dict in form of:
-        # {'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]]}
-        
-
         # new window to open progress input
         self.progress_window = Toplevel()
         self.progress_window.geometry("500x600")
@@ -155,7 +164,7 @@ class ProgressInstanceWindow():
         # Initial Window Configuration
         label_row_count = 0
         input_row_count = 0
-                
+
         # --------------------------------------------------------------------------------
         # SINGLE ITEMS - SINGLE LINE
         # create single data labels and input boxes (one-line)
@@ -163,20 +172,38 @@ class ProgressInstanceWindow():
             item_descr = Label(self.progress_window, text=single_item, anchor=W)
             
             item_input = Entry(self.progress_window, width=30, borderwidth=2, relief='solid')
-            self.single_data_list.append(item_input)
 
+            # POPULATE SINGLE LINE ENTRY BOX - UPDATE ONLY
+            # check if current input field has a value to be assigned (when updating job progress instance)
+            if self.full_data is not None:
+                # retrieve index of current single data item
+                col_index = self.full_data['col_list'].index(single_item.lower().replace(" ", "_"))
+                # Add value to input box
+                item_input.insert(0, self.progress_instance[col_index])
+
+            self.single_data_list.append(item_input)
+        
             # add frame, label and input box to window
             item_descr.grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=5)
             label_row_count += 1
             item_input.grid(row=label_row_count, column=0, sticky=W+E, padx=(20,0), pady=5)
             label_row_count += 1
-
         # --------------------------------------------------------------------------------
         # FOREIGN TABLES - SELECTION INPUT FROM MENU
             
         for menu_option in self.progress_attributes['fk_data']:
+
+            # POPULATE OPTION MENU WITH CURRENT SET VALUE - UPDATE ONLY
+            # check if current input field has a value to be assigned (when updating job progress instance)
+            if self.full_data is not None:
+                # retrieve index of current single data item
+                col_index = self.full_data['col_list'].index(menu_option[0].lower().replace(" ", "_"))
+                # convert current set string value for option Menu to string var
+                value_holder = MenuInput(self.progress_instance[col_index][0]).get_input_val()
             
-            value_holder = MenuInput(menu_option[1][0][1]).get_input_val()
+            else:
+                value_holder = MenuInput(menu_option[1][0][1]).get_input_val()
+            
             menu_options = [val[1] for val in menu_option[1]]
 
             holding_frame = Frame(self.progress_window)
@@ -219,6 +246,14 @@ class ProgressInstanceWindow():
             scrollbar.grid(row=label_row_count, column=1, sticky="NSE")
             text_box.grid(row = 0, column=0, sticky=W)
             label_row_count += 1
+
+            # POPULATE MULTI-LINE TEXT BOX - UPDATE ONLY
+            # check if current input field has a value to be assigned (when updating job progress instance)
+            if self.full_data is not None:
+                # retrieve index of current single data item
+                col_index = self.full_data['col_list'].index(multi_line_item.lower().replace(" ", "_"))
+                # Add value to input box
+                text_box.insert("1.0", self.progress_instance[col_index])
             
             # add textbox to list to later retrieve input
             self.large_box_data.append(text_box)
@@ -231,8 +266,14 @@ class ProgressInstanceWindow():
 
         # ------------------------------------------------------------------
         # Save Progress Button
-        self.save_progress_btn = Button(self.progress_window, text="Save Progress", anchor=E, command=self.retrieve_progress_data_func)
+        self.save_progress_btn = Button(self.progress_window, text="Save Progress", anchor=E)
         self.save_progress_btn.grid(row=label_row_count, column=0, pady=10)
+
+        if self.retrieve_progress_data_func is not None:
+            self.save_progress_btn.config(command = self.retrieve_progress_data_func)
+        else:
+            self.save_progress_btn.config(command = self.save_progress_data)
+
 
     def close_progress_window(self):
         self.progress_window.destroy()
@@ -250,26 +291,73 @@ class ProgressInstanceWindow():
         self.close_progress_window()
 
 
+    def save_progress_data(self):
+
+        self.data_converter = DataConverter()
+        self.progress_instance_data = []
+
+        # 1) Retrieve Single Items
+        for item in self.single_data_list:
+            self.progress_instance_data.append(item.get())
+
+        # 2) Retrieve multi-line input data
+        for item in self.large_box_data:
+            self.progress_instance_data.append(item.get("1.0", END).strip())
+                
+        # 3) Retrieve Foreign-Key (Menu-Based Data)
+        for menu_input in self.fk_data:
+            menu_title = menu_input[0].cget('text')
+            selected_option = menu_input[1].get()
+        
+            self.progress_instance_data.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.progress_attributes['fk_data']))
+
+        # clear lists
+        self.single_data_list.clear()
+        self.large_box_data.clear()
+        self.fk_data.clear()
+
+        # add id to progress_instance
+        self.progress_instance_data.append(self.progress_instance[0])
+
+        column_names = self.db_controller.retrieve_job_progress_cols_exact()
+
+        # save new job progress
+        self.db_controller.update_job_progress(column_names[1:], self.progress_instance_data)
+
+        # re-enable buttons to add progress_instance and close progress window
+        self.enable_buttons_close_window()
+        # reload windows
+        self.outer_window_reload_func()
+
+        # print message to user that progres instance has been added to list (not saved in db)
+        messagebox.showinfo(message='Job Progress has been saved')
+
+
 class JobInstanceQuickViewDeletion():
     # create instance of job progress showing single-line data fields and deletion button with
     # clickable feature to later enter update window for job progress updates
     
-    def __init__(self, outer_container, full_data, quick_display_count, column_titles, column_info, db_controller,
-                 progress_count,  clear_boxes_btn, delete_selected_btn, deselect_btns_function,
+    def __init__(self, outer_container, full_data, progress_instance, quick_display_count, column_titles, column_info, db_controller,
+                 progress_count,  clear_boxes_btn, delete_selected_btn, return_to_all_jobs_btn, deselect_btns_function,
                  outer_window_reload_func) -> None:
 
         self.outer_container = outer_container
         self.full_data = full_data
+        self.progress_instance = progress_instance
         # slice full data to only use values in single line data list
-        self.values_list = full_data[:quick_display_count]
+        self.values_list = progress_instance[:quick_display_count]
         self.column_titles = column_titles
         self.column_info = column_info
         self.db_controller = db_controller
         self.progress_count = progress_count
         self.clear_boxes_btn = clear_boxes_btn
         self.delete_selected__btn = delete_selected_btn
+        self.return_to_all_jobs_btn = return_to_all_jobs_btn
         self.deselect_btns_function = deselect_btns_function
         self.outer_window_reload_func = outer_window_reload_func
+
+        # retrieve job progress config data
+        self.progress_attributes = self.db_controller.retrieve_job_progress_column_names()
         
         self.id = None
         
@@ -364,15 +452,25 @@ class JobInstanceQuickViewDeletion():
 
     # Open new window for job progress update
     def progress_update(self, event):
-        pass
-        
 
+        # list to store single data inputs (one-line)
+        self.single_data_list = []
+        # list to store foreign key inputs
+        self.fk_data = []
+        # list to store single data inputs needing larger input box
+        self.large_box_data = []
 
+        # list of buttons to be disabled during job progress view/ update
+        self.buttons_list = [self.clear_boxes_btn, self.delete_selected__btn, self.return_to_all_jobs_btn]
+
+        self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.db_controller, self.single_data_list, self.large_box_data,
+                                                      self.fk_data, self.buttons_list, self.outer_window_reload_func, None, self.full_data, self.progress_instance)
+        self.progress_window.create_window()   
 
 class AllJobProgress():
 
     def __init__(self, outer_container, db_controller, all_job_progress_data,
-                 clear_boxes_btn, delete_selected_btn, job_id, outer_window_reload_func) -> None:
+                 clear_boxes_btn, delete_selected_btn, return_to_all_jobs_btn, job_id, outer_window_reload_func) -> None:
         self.outer_container = outer_container
         self.db_controller = db_controller
         self.all_job_progress_data = all_job_progress_data
@@ -382,6 +480,7 @@ class AllJobProgress():
         # buttons initialized in calling method
         self.clear_boxes_btn = clear_boxes_btn
         self.delete_selected_btn = delete_selected_btn
+        self.return_to_all_jobs_btn = return_to_all_jobs_btn
 
         # configure delete_selected_button to delete selected job instances
         self.delete_selected_btn.config(command = self.delete_selected_progress)
@@ -421,10 +520,10 @@ class AllJobProgress():
         quick_display_count = (len(self.display_columns) - 1)
         for count, progress_instance in enumerate(self.all_job_progress_data['val_list']):
             # only provide id and single line data fields to instance
-            self.progress_rows.append(JobInstanceQuickViewDeletion(self.job_progress_frame, progress_instance,  
+            self.progress_rows.append(JobInstanceQuickViewDeletion(self.job_progress_frame, self.all_job_progress_data, progress_instance,  
                                                                    quick_display_count, self.all_job_progress_data['col_list'],
                                                                    self.all_job_progress_data['column_info'],self.db_controller, count,
-                                                                   self.clear_boxes_btn, self.delete_selected_btn, 
+                                                                   self.clear_boxes_btn, self.delete_selected_btn, self.return_to_all_jobs_btn,
                                                                    self.check_box_full_deselection, self.outer_window_reload_func))
 
 

@@ -25,8 +25,6 @@ class DataConverter():
                         return inner_tup[0]     
         return None
 
-
-
 # New Job Application Sub-Screen
 class NewApplicationScreen(FullScreen):
 
@@ -90,8 +88,7 @@ class NewApplicationScreen(FullScreen):
 
         # new progress window screen
         self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, self.retrieve_progress_data)
-        
+                                                      self.fk_data, self.buttons_list, self.retrieve_progress_data)       
 
         # ---------------------------------------------------------------
         # JOB NOTES SECTION
