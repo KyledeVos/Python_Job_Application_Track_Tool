@@ -153,18 +153,16 @@ class JobView(FullScreen):
 
         # ----------------------------------------------------------------------------
         # JOB PROGRESS SECTION - MOST RECENT PROGRESS
+        self.progress_title = Label(container, text = "Job Progress Info", anchor='w')
         
+        # Buttons
+        self.top_btns_container = Frame(container)
+        self.view_all_btn = Button(self.top_btns_container, text="View All",
+                                                anchor='center', command=self.view_all_job_progress)
+        self.add_progress_btn = Button(self.top_btns_container, text="Add Progress",
+                                                anchor='center', command=self.add_job_progress)
         # check if current job has job progress data
         if self.recent_job_progress != None:
-            self.progress_title = Label(container, text = "Job Progress Info", anchor='w')
-            
-            # Buttons
-            self.top_btns_container = Frame(container)
-            self.view_all_btn = Button(self.top_btns_container, text="View All",
-                                                    anchor='center', command=self.view_all_job_progress)
-            self.add_progress_btn = Button(self.top_btns_container, text="Add Progress",
-                                                    anchor='center', command=self.add_job_progress)
-            
             # Create recent job progress instance
             self.recent_progress = RecentJobProgress(container, self.recent_job_progress)
             # retrieve recent progress frame containing recent progress data
@@ -185,7 +183,7 @@ class JobView(FullScreen):
         # list of buttons to be disabled/enabled during progress creation
         self.buttons_list = [self.view_all_btn, self.add_progress_btn]
 
-                # list to store single data inputs (one-line)
+        # list to store single data inputs (one-line)
         self.single_data_list = []
         # list to store foreign key inputs
         self.fk_data = []
@@ -194,7 +192,7 @@ class JobView(FullScreen):
 
         # new progress window screen
         self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, self.reload_window, self.retrieve_and_save_progress_data, None, None)
+                                                      self.fk_data, self.buttons_list, lambda: self.reload_window(False), self.retrieve_and_save_progress_data, None, None)
         
         # load progress window
         self.progress_window.create_window()
@@ -228,8 +226,8 @@ class JobView(FullScreen):
         # save new job progress
         self.db_controller. write_job_progress([progress_instance], self.job_id)
 
-        # reload windows - False: do not load view all window
-        self.reload_window(False)
+        # reload windows 
+        self.reload_window(True)
 
         # print message to user that progres instance has been added to list (not saved in db)
         messagebox.showinfo(message='Job Progress has been saved')
@@ -351,17 +349,21 @@ class JobView(FullScreen):
         self.update_application_btn.grid(row=basic_row_count, column=0, sticky=W+E, pady=5)
         basic_row_count += 1
 
-        # # --- LATEST JOB PROGRESS INFO  ---
-        if self.recent_job_progress != None:
-            self.progress_title.grid(row=self.row_count, column=0, sticky="NEWS")
-            self.row_count += 1
-            # place top button container
-            self.top_btns_container.grid(row=self.row_count, column=0, sticky="NEWS", padx=5, pady=5)
-            self.row_count += 1
-            # place job progress function buttons
-            self.view_all_btn.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
-            self.add_progress_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
+        # # --- LATEST JOB PROGRESS INFO  ---  
+        self.progress_title.grid(row=self.row_count, column=0, sticky="NEWS")
+        self.row_count += 1
+        # place top button container
+        self.top_btns_container.grid(row=self.row_count, column=0, sticky="NEWS", padx=5, pady=5)
+        self.row_count += 1
+        # place job progress function buttons
+        
+        self.view_all_btn.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
+        self.add_progress_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
 
+        if self.recent_job_progress is None:
+            self.view_all_btn.config(state=DISABLED)
+
+        if self.recent_job_progress != None:
             # Place Recent Job Progress Section
             self.row_count = self.recent_progress.place_progress_frame(self.row_count)
 
@@ -384,6 +386,7 @@ class JobView(FullScreen):
 
         # 2) Reload overlying view all job progress screen
         if self.recent_job_progress is not None and reload_view_all is True:
+        # if reload_view_all is True:
             # reload overlying progress window only if there is still progress data
             self.view_all_job_progress()
 

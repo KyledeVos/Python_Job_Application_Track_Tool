@@ -67,7 +67,7 @@ class NewApplicationScreen(FullScreen):
 
         # new progress window screen
         self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, None, self.retrieve_progress_data, None, None)       
+                                                      self.fk_data, self.buttons_list, self.load_window, self.retrieve_progress_data, None, None)       
 
         # ---------------------------------------------------------------
         # JOB NOTES SECTION

@@ -279,7 +279,9 @@ class ProgressInstanceWindow():
 
 
     def close_progress_window(self):
+        
         self.progress_window.destroy()
+        self.outer_window_reload_func()
 
     def enable_buttons_close_window(self):
         # re-enable main windows buttons if progress window is closed (without save)
@@ -329,8 +331,8 @@ class ProgressInstanceWindow():
 
         # re-enable buttons to add progress_instance and close progress window
         self.enable_buttons_close_window()
-        # reload windows
-        self.outer_window_reload_func()
+        # reload windows - needed for reset of scrollbar
+        self.outer_window_reload_func(True)
 
         # print message to user that progres instance has been added to list (not saved in db)
         messagebox.showinfo(message='Job Progress has been saved')
