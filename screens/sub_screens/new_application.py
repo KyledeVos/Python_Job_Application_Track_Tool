@@ -2,28 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from ..parent_screens import FullScreen
-from .job_progress_instance import ProgressInstanceWindow
-
-# HELPER CLASS FOR MENU BASED DATA
-class MenuInput():
-
-    def __init__(self, default_value):
-        self.input_val = StringVar()
-        self.input_val.set(default_value)
-
-    def get_input_val(self):
-        return self.input_val
-    
-# HELPER CLASS FOR DESCRIPTION TO ID CONVERSION
-class DataConverter():
-
-    def return_id_from_name(self, description, label_name, val_list):
-        for val in val_list:
-            if val[0] == label_name:
-                for inner_tup in val[1]:
-                    if inner_tup[1] == description:
-                        return inner_tup[0]     
-        return None
+from .job_progress_instance import ProgressInstanceWindow, DataConverter, MenuInput
 
 # New Job Application Sub-Screen
 class NewApplicationScreen(FullScreen):
@@ -88,7 +67,7 @@ class NewApplicationScreen(FullScreen):
 
         # new progress window screen
         self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, self.retrieve_progress_data)       
+                                                      self.fk_data, self.buttons_list, None, self.retrieve_progress_data, None, None)       
 
         # ---------------------------------------------------------------
         # JOB NOTES SECTION

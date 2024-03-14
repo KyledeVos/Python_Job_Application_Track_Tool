@@ -2,6 +2,29 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 
+
+# HELPER CLASS FOR MENU BASED DATA
+class MenuInput():
+
+    def __init__(self, default_value):
+        self.input_val = StringVar()
+        self.input_val.set(default_value)
+
+    def get_input_val(self):
+        return self.input_val
+    
+# HELPER CLASS FOR DESCRIPTION TO ID CONVERSION
+class DataConverter():
+
+    def return_id_from_name(self, description, label_name, val_list):
+        for val in val_list:
+            if val[0] == label_name:
+                for inner_tup in val[1]:
+                    if inner_tup[1] == description:
+                        return inner_tup[0]     
+        return None
+
+
 class RecentJobProgress():
 
     def __init__(self, outer_frame, recent_job_progress) -> None:
@@ -109,26 +132,6 @@ class RecentJobProgress():
 
         return row_count
 
-# HELPER CLASS FOR MENU BASED DATA
-class MenuInput():
-
-    def __init__(self, default_value):
-        self.input_val = StringVar()
-        self.input_val.set(default_value)
-
-    def get_input_val(self):
-        return self.input_val
-    
-# HELPER CLASS FOR DESCRIPTION TO ID CONVERSION
-class DataConverter():
-
-    def return_id_from_name(self, description, label_name, val_list):
-        for val in val_list:
-            if val[0] == label_name:
-                for inner_tup in val[1]:
-                    if inner_tup[1] == description:
-                        return inner_tup[0]     
-        return None
 
 class ProgressInstanceWindow():
 
