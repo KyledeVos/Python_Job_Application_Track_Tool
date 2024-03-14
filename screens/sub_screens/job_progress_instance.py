@@ -238,7 +238,8 @@ class ProgressInstanceWindow():
             input_frame = Frame(self.progress_window, padx=10)
             input_frame.grid(row=label_row_count, column=0, columnspan=2, padx=5, pady=5, sticky="NEWS")
             # allow mousewheel/trackpad to scroll text box
-            input_frame.bind_all('<MouseWheel>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
+            
+
 
             # add textbox for larger text input
             text_box = Text(input_frame, width=50, height=10, padx=10, pady=5, borderwidth=2, relief='solid')
@@ -257,6 +258,7 @@ class ProgressInstanceWindow():
                 col_index = self.full_data['col_list'].index(multi_line_item.lower().replace(" ", "_"))
                 # Add value to input box
                 text_box.insert("1.0", self.progress_instance[col_index])
+                input_frame.bind_all('<MouseWheel>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
             
             # add textbox to list to later retrieve input
             self.large_box_data.append(text_box)
