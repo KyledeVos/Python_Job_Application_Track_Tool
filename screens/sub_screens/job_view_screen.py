@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from ..parent_screens import FullScreen
-from .job_progress_instance import RecentJobProgress, AllJobProgress
+from .job_progress_instance import RecentJobProgress, AllJobProgress, ProgressInstanceWindow
 
 
 # HELPER CLASS FOR MENU BASED DATA
@@ -163,7 +163,7 @@ class JobView(FullScreen):
             self.view_all_btn = Button(self.top_btns_container, text="View All",
                                                     anchor='center', command=self.view_all_job_progress)
             self.add_progress_btn = Button(self.top_btns_container, text="Add Progress",
-                                                    anchor='center')
+                                                    anchor='center', command=self.add_job_progress)
             
             # Create recent job progress instance
             self.recent_progress = RecentJobProgress(container, self.recent_job_progress)
@@ -174,6 +174,69 @@ class JobView(FullScreen):
         # ----------------------------------------------------------------------------
         # JOB GENERAL NOTES SECTION
             # LATER
+
+    def add_job_progress(self):
+
+        # retrieve job progress config data
+        self.progress_attributes = self.db_controller.retrieve_job_progress_column_names()
+
+        # hold list of progress data after save  
+        self.progress_instance_list = []
+        # list of buttons to be disabled/enabled during progress creation
+        self.buttons_list = [self.view_all_btn, self.add_progress_btn]
+
+                # list to store single data inputs (one-line)
+        self.single_data_list = []
+        # list to store foreign key inputs
+        self.fk_data = []
+        # list to store single data inputs needing larger input box
+        self.large_box_data = []
+
+        # new progress window screen
+        self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.db_controller, self.single_data_list, self.large_box_data,
+                                                      self.fk_data, self.buttons_list, self.reload_window, self.retrieve_and_save_progress_data, None, None)
+        
+        # load progress window
+        self.progress_window.create_window()
+        
+    def retrieve_and_save_progress_data(self):
+        # progress data retrieval order designed to match database format as:
+        # single,line inputs, multil-line data-inputs (text boxes), foreign-tables menu inputs, 
+
+        progress_instance = []
+
+        # 1) Retrieve Single Item
+        for item in self.single_data_list:
+            progress_instance.append(item.get())
+
+        # 2) Retrieve multi-line input data
+        for item in self.large_box_data:
+            progress_instance.append(item.get("1.0", END).strip())
+                
+        # 3) Retrieve Foreign-Key (Menu-Based Data)
+        for menu_input in self.fk_data:
+            menu_title = menu_input[0].cget('text')
+            selected_option = menu_input[1].get()
+        
+            progress_instance.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.progress_attributes['fk_data']))
+
+        # clear lists
+        self.single_data_list.clear()
+        self.large_box_data.clear()
+        self.fk_data.clear()
+
+        # save new job progress
+        self.db_controller. write_job_progress([progress_instance], self.job_id)
+
+        # reload windows - False: do not load view all window
+        self.reload_window(False)
+
+        # print message to user that progres instance has been added to list (not saved in db)
+        messagebox.showinfo(message='Job Progress has been saved')
+
+        # re-enable buttons to add progress_instance, save new application and close progress window
+        self.progress_window.enable_buttons_close_window()
+
             
     def view_all_job_progress(self):
 
@@ -302,7 +365,7 @@ class JobView(FullScreen):
             # Place Recent Job Progress Section
             self.row_count = self.recent_progress.place_progress_frame(self.row_count)
 
-    def reload_window(self):
+    def reload_window(self, reload_view_all = True):
         # reload window after any changes have been made
 
         # clear previous screen
@@ -320,7 +383,7 @@ class JobView(FullScreen):
         self.load_window()
 
         # 2) Reload overlying view all job progress screen
-        if self.recent_job_progress is not None:
+        if self.recent_job_progress is not None and reload_view_all is True:
             # reload overlying progress window only if there is still progress data
             self.view_all_job_progress()
 

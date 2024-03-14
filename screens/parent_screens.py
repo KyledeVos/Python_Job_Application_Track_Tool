@@ -98,7 +98,7 @@ class ScrollableScreen():
         # 4) Configure the Canvas
         self.my_canvas.configure(yscrollcommand=self.my_scrollbar.set)
         self.my_canvas.bind('<Configure>', lambda e: self.my_canvas.configure(scrollregion=self.my_canvas.bbox("all")))
-        # self.my_canvas.bind_all('<MouseWheel>', lambda e: self.my_canvas.yview_scroll(-1 * int(e.delta / 60), "units"))
+        self.my_canvas.bind_all('<MouseWheel>', lambda e: self.my_canvas.yview_scroll(-1 * int(e.delta / 60), "units"))
         # 6) Add a new window to the canvas
         self.my_canvas.create_window((0, 0), window=self.second_frame, anchor="nw")
 
