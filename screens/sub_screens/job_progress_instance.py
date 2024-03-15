@@ -239,8 +239,6 @@ class ProgressInstanceWindow():
             input_frame.grid(row=label_row_count, column=0, columnspan=2, padx=5, pady=5, sticky="NEWS")
             # allow mousewheel/trackpad to scroll text box
             
-
-
             # add textbox for larger text input
             text_box = Text(input_frame, width=50, height=10, padx=10, pady=5, borderwidth=2, relief='solid')
             # create and configure text box - scrolls text box

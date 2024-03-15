@@ -28,10 +28,27 @@ class NewApplicationScreen(FullScreen):
             self.single_data_inputs.append((Label(container, text=val_name, anchor=W),
                                             Entry(container, width=50, borderwidth=1, relief = 'solid')))
             
+        # large box data
         for val_name in self.job_attributes_titles['large_box_data']:
+            
+            # create frame to hold large_box_data textbox and scrollbar
+            large_box_frame = Frame(self.container, padx=10,)
+
+            text_box = Text(large_box_frame, width=40, height=10, padx=10, pady=5, 
+                            borderwidth=2, relief='solid')
+            text_box.grid(row =0, column=0, sticky='w')
+
+            # create and configure text box - scrolls text box
+            scrollbar = ttk.Scrollbar(self.container, orient='vertical', command=text_box.yview)
+            text_box.config(yscrollcommand=scrollbar.set)
+            scrollbar.config(command=text_box.yview)
+            # allow for scrolling when entering textbox
+            #large_box_frame.bind('<Enter>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
+            # allow scrolling with the use of trackpad/ mouse scrollwheel
+            large_box_frame.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
+
             self.large_box_inputs.append((Label(container, text=val_name, anchor=W),
-                                            Text(container,width=40, height=10, padx=10, pady=5, 
-                                                borderwidth=1, relief='solid')))
+                                            large_box_frame, scrollbar, text_box))
 
         for menu_option in self.job_attributes_titles['menu_data']:
             
@@ -141,7 +158,7 @@ class NewApplicationScreen(FullScreen):
             data_values.append(single_input[1].get())
 
         for large_box_value in self.large_box_inputs:
-            data_values.append(large_box_value[1].get("1.0", END))
+            data_values.append(large_box_value[3].get("1.0", END))
 
         for menu_input in self.menu_data_inputs:
             menu_title = menu_input[0].cget('text')
@@ -158,7 +175,7 @@ class NewApplicationScreen(FullScreen):
             input_field[1].delete(0, END)
 
         for input_field in self.large_box_inputs:
-            input_field[1].delete("1.0", END)
+            input_field[3].delete("1.0", END)
 
         # Display Message to user that Application has been saved
         messagebox.showinfo(message='Application has been saved')
@@ -181,11 +198,14 @@ class NewApplicationScreen(FullScreen):
             single_tup[1].grid(row = self.row_count, column = 1 , sticky=W+E)
             self.row_count += 1
 
-        # load single data inputs
-        for large_data_tup in self.large_box_inputs:
-            large_data_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
-            large_data_tup[1].grid(row = self.row_count, column = 1 , sticky=W+E)
+        # load large_box data inputs
+        for large_box_item_tup in self.large_box_inputs:
+            large_box_item_tup[0].grid(row = self.row_count, column = 0, padx = 5, pady = 10, sticky=W+E)
             self.row_count += 1
+            large_box_item_tup[1].grid(row = self.row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
+            large_box_item_tup[2].grid(row = self.row_count, column = 1, sticky="NSE")
+            self.row_count += 1
+
         
         # load menu data inputs
         for menu_tup in self.menu_data_inputs:

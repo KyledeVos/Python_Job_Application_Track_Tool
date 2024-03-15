@@ -137,13 +137,33 @@ class JobView(FullScreen):
         for data_tup in self.job_attributes_titles['single_data']:
             new_Entry = Entry(self.basic_info_frame, width = 50, borderwidth=1, relief='solid')
             new_Entry.insert(0, data_tup[1])
-            self.single_data_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor='e'), new_Entry))
+            self.single_data_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor='w'), new_Entry))
 
         # Retrieve large box data input labels and assigned value
         for data_tup in self.job_attributes_titles['large_box_data']:
-            new_Entry = Text(self.basic_info_frame, width=40, height=10, padx=10, pady=5, borderwidth=1, relief='solid')
-            new_Entry.insert("1.0", data_tup[1])
-            self.large_box_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor='e'), new_Entry))
+
+            # create frame to hold large_box_data textbox and scrollbar
+            large_box_frame = Frame(self.basic_info_frame, padx=10,)
+
+            text_box = Text(large_box_frame, width=40, height=10, padx=10, pady=5, 
+                            borderwidth=2, relief='solid')
+            text_box.insert("1.0", data_tup[1])
+            text_box.grid(row =0, column=0, sticky='w')
+
+            # create and configure text box - scrolls text box
+            scrollbar = ttk.Scrollbar(self.basic_info_frame, orient='vertical', command=text_box.yview)
+            text_box.config(yscrollcommand=scrollbar.set)
+            scrollbar.config(command=text_box.yview)
+            # allow for scrolling when entering textbox
+            #large_box_frame.bind('<Enter>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
+            # allow scrolling with the use of trackpad/ mouse scrollwheel
+            large_box_frame.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
+
+            self.large_box_inputs.append((Label(container, text=data_tup[0], anchor=W),
+                                            large_box_frame, scrollbar, text_box))
+
+
+            # self.large_box_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor='e'), new_Entry))
         
         for menu_option in self.job_attributes_titles['menu_data']:
             
@@ -348,8 +368,10 @@ class JobView(FullScreen):
             basic_row_count += 1
 
         for large_tup in self.large_box_inputs:
-            large_tup[0].grid(row=basic_row_count, column = 0, padx=5, pady=2, sticky=W+E)
-            large_tup[1].grid(row = basic_row_count, column = 1 , sticky=W+E)
+            large_tup[0].grid(row = basic_row_count, column = 0, padx = 5, pady = 10, sticky=W+E)
+            basic_row_count += 1
+            large_tup[1].grid(row = basic_row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
+            large_tup[2].grid(row = basic_row_count, column = 1, sticky="NSE")
             basic_row_count += 1
         
         for menu_tup in self.menu_data_inputs:
@@ -412,7 +434,7 @@ class JobView(FullScreen):
             data_values.append(single_input[1].get())
 
         for large_input in self.large_box_inputs:
-            data_values.append(large_input[1].get("1.0", END))
+            data_values.append(large_input[3].get("1.0", END))
 
         for menu_input in self.menu_data_inputs:
             menu_title = menu_input[0].cget('text')
