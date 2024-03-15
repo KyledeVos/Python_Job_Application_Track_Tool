@@ -1,5 +1,27 @@
 import sqlite3
 
+class JobApplicationDefault():
+
+    def __init__(self) -> None:
+        # Set Default Table Name
+        self.table_name = 'job_applications'
+        # set names of columns with data for one line
+        self.single_data = ['id', 'company', 'position', 'salary', 'date_applied', 'location']
+        # set column names for data needing larger area input box
+        self.larger_data_inputs = ['description']
+        # set names of foreign key tables with corresponding column name
+        # NOTE: ORDER OF DATA IS COMPULSORY
+        self.fk_tables_data = {'job_application_cols': ['type_id', 'period_id', 'status_id'],
+                          "fk_table_data": [('employment_types', 'type'),
+                                            ('contract_period', 'duration'),
+                                            ('application_status', 'status')]}
+        # set names of columns to not be displayed (none must be blank list)
+        self.col_not_display = ["id"]
+        # Data Update - set columns that can be updated
+        self.update_cols = ['company', 'position', 'salary', 'date_applied', 'location', 'description',
+                            'type_id', 'period_id', 'status_id']
+
+
 class JobProgressDefaults():
     # Class allows for centralized control of job progress attributes
 
@@ -14,7 +36,6 @@ class JobProgressDefaults():
         self.fk_tables = {'progress_table_cols': ['comm_id'], "fk_table_data": [('communication_types', 'communication_type')]}
         # set names of columns to not be displayed (none must be blank list)
         self.col_not_display = ["job_id"]
-
         # Data Update - set columns that can be updated
         self.update_cols = ['date', 'description', 'comm_id']
         
@@ -167,7 +188,7 @@ class DatabaseController():
         self.connection.close()
         return data
         
-    
+    # -------------------------------------------------------------------------------------------------
 
     def retrieve_job_display_cols(self):
 
@@ -196,19 +217,22 @@ class DatabaseController():
 
         return data
     
-    def retrieve_job_data_configured(self, job_id=None):
+    def retrieve_configured_job_data(self, job_id=None):
+
+        job_application_defaults = JobApplicationDefault()
         
         # Set Default Values
-        table_name = 'job_applications'
-        # set end of number of columns containing single data (not menu option)
-        single_end_index = 7
-
-        # names of tables linked with foreign key
-        fk_tables = ['employment_types', 'contract_period', 'application_status']
+        table_name = job_application_defaults.table_name
+        # retrieve columns designated as single_data
+        single_data = job_application_defaults.single_data
+        # retrieve columns designated to hold large box (textbox) data
+        large_box_data = job_application_defaults.larger_data_inputs
+        # retrieve fk_data
+        fk_tables_data = job_application_defaults.fk_tables_data
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
-        data = self.db_reader.retrieve_and_config_data(self.cursor, table_name, fk_tables, single_end_index, job_id,)
+        data = self.db_reader.retrieve_configured_job_data(self.cursor, table_name, single_data, large_box_data, fk_tables_data, job_id,)
         self.connection.close()
 
         return data

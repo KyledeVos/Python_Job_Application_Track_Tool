@@ -114,14 +114,15 @@ class JobView(FullScreen):
         self.container = container
         self.db_controller = db_controller
         self.job_id = job_id
-        self.job_data = db_controller.retrieve_job_data_configured(job_id)
+        self.job_data = db_controller.retrieve_configured_job_data(job_id)
         self.data_converter = DataConverter()
 
         self.single_data_inputs = []
+        self.large_box_inputs = []
         self.menu_data_inputs = []
 
         # retrieve job_application_data
-        self.job_attributes_titles = self.db_controller.retrieve_job_data_configured(job_id)
+        self.job_attributes_titles = self.db_controller.retrieve_configured_job_data(job_id)
         # retrieve most recent job progress data - function call below:
         # sets return_one to True and display_only to True
         self.recent_job_progress = self.db_controller.retrieve_job_progress_data(job_id, True, True)
@@ -134,11 +135,16 @@ class JobView(FullScreen):
 
         # Retrieve single data input labels and assigned value
         for data_tup in self.job_attributes_titles['single_data']:
-            new_Entry = Entry(self.basic_info_frame, width = 50, borderwidth=1)
+            new_Entry = Entry(self.basic_info_frame, width = 50, borderwidth=1, relief='solid')
             new_Entry.insert(0, data_tup[1])
             self.single_data_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor='e'), new_Entry))
 
-
+        # Retrieve large box data input labels and assigned value
+        for data_tup in self.job_attributes_titles['large_box_data']:
+            new_Entry = Text(self.basic_info_frame, width=40, height=10, padx=10, pady=5, borderwidth=1, relief='solid')
+            new_Entry.insert("1.0", data_tup[1])
+            self.large_box_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor='e'), new_Entry))
+        
         for menu_option in self.job_attributes_titles['menu_data']:
             
             value_holder = MenuInput(menu_option[2]).get_input_val()
@@ -340,6 +346,11 @@ class JobView(FullScreen):
             single_tup[0].grid(row=basic_row_count, column = 0, padx=5, pady=2, sticky=W+E)
             single_tup[1].grid(row = basic_row_count, column = 1 , sticky=W+E)
             basic_row_count += 1
+
+        for large_tup in self.large_box_inputs:
+            large_tup[0].grid(row=basic_row_count, column = 0, padx=5, pady=2, sticky=W+E)
+            large_tup[1].grid(row = basic_row_count, column = 1 , sticky=W+E)
+            basic_row_count += 1
         
         for menu_tup in self.menu_data_inputs:
             menu_tup[0].grid(row=basic_row_count, column = 0, padx=5, pady=2, sticky=W+E)
@@ -399,6 +410,9 @@ class JobView(FullScreen):
 
         for single_input in self.single_data_inputs:
             data_values.append(single_input[1].get())
+
+        for large_input in self.large_box_inputs:
+            data_values.append(large_input[1].get("1.0", END))
 
         for menu_input in self.menu_data_inputs:
             menu_title = menu_input[0].cget('text')

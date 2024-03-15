@@ -29,39 +29,67 @@ class DbReader():
     def retrieve_column_names(self, cursor, table_name):
         cursor.execute(f"SELECT * FROM {table_name}")
         return [name[0] for name in cursor.description]
+    
+    def retrieve_single_row_and_col_names(self, cursor, id, table_name):
+        columns = self.retrieve_column_names(cursor, table_name)
+        data = self.retrieve_single_row(cursor, id, table_name)
+
+        return list(zip(columns, data))
 
     
     # ----------------------------------------------------------------------------------
     # Data Specific Functions
 
-    def retrieve_and_config_data(self, cursor, table_name, fk_tables, single_end_index, id=None):
+    def retrieve_configured_job_data(self, cursor, table_name, single_data, large_box_data, fk_data, id=None):
+        
+        combined_data = {}
+        menu_data = []
         
         # retrieve all column names and raw data incl. id's of linked tables
-        column_names = [name.title().replace("_", " ") for name in self.retrieve_column_names(cursor, table_name)]
+        column_names = [name for name in self.retrieve_column_names(cursor, table_name)]
         if id != None:
-            raw_data = list(self.retrieve_single_row(cursor, id, table_name))
+            raw_data = list(self.retrieve_single_row_and_col_names(cursor, id, table_name))
 
-        # list holding single data (not based on Foreign Key)
-        if id != None:
-            single_data = list(zip(column_names[:single_end_index], raw_data[:single_end_index]))
+            # existing data present, combine existing column names with saved respective data
+            single_data_config = []
+            large_data_config = []
+
+            for data_col_tup in raw_data:
+                # ---- SINGLE DATA CONFIGURATION
+                if data_col_tup[0] in single_data:
+                    single_data_config.append(data_col_tup)
+
+                # ---- LARGE BOX DATA CONFIGURATION
+                elif data_col_tup[0] in large_box_data:
+                    large_data_config.append(data_col_tup)
+
+                # ---- FK DATA (menu options with data held in foreign table)
+                elif data_col_tup[0] in fk_data['job_application_cols']:
+                    table_name_index = fk_data['job_application_cols'].index(data_col_tup[0])
+                    fk_table_name = fk_data['fk_table_data'][table_name_index][0]
+
+                    # retrieve current set value
+                    set_value = self.retrieve_single_row(cursor, data_col_tup[1], fk_table_name)[1]
+                    # retrieve all possible values
+                    current_data = [val for val in self.retrieve_all_data(cursor, fk_table_name)]
+                    menu_data.append((fk_table_name.title().replace("_", " "), current_data, set_value))
+                    
+            combined_data['single_data'] = single_data_config
+            combined_data['large_box_data'] = large_data_config
+            combined_data['menu_data'] = menu_data
+
         else:
-            single_data = column_names[1:single_end_index]
+            # NO existing data (new application) - just add column names
+            combined_data['single_data'] = single_data
+            combined_data['large_box_data'] = large_box_data
 
-        # list holding data based on Foreign Key (Used for Option Menus)
-        menu_data = []
-        current_data = []
-        for table_name in fk_tables:
-            # get menu option values
-            current_data = [val for val in self.retrieve_all_data(cursor, table_name)]
+            for data_tup in fk_data['fk_table_data']:
+                fk_table_name = data_tup[0]
+                current_data = [val for val in self.retrieve_all_data(cursor, fk_table_name)]
+                menu_data.append((fk_table_name.title().replace("_", " "), current_data))
 
-            if id != None:
-                set_value = self.retrieve_single_row(cursor, raw_data[single_end_index], table_name)[1]
-                menu_data.append((table_name.title().replace("_", " "), current_data, set_value))
-                single_end_index += 1
-            else:
-                menu_data.append((table_name.title().replace("_", " "), current_data))
+            combined_data['menu_data'] = menu_data
 
-        combined_data = {'single_data': single_data, 'menu_data':menu_data}
         return combined_data
         
 

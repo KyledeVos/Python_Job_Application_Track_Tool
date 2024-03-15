@@ -19,13 +19,19 @@ class NewApplicationScreen(FullScreen):
         # JOB BASIC INFO
 
         self.single_data_inputs = []
+        self.large_box_inputs = []
         self.menu_data_inputs = []
 
-        self.job_attributes_titles = self.db_controller.retrieve_job_data_configured()
+        self.job_attributes_titles = self.db_controller.retrieve_configured_job_data()
 
         for val_name in self.job_attributes_titles['single_data']:
             self.single_data_inputs.append((Label(container, text=val_name, anchor=W),
-                                            Entry(container, width=50, borderwidth=1)))
+                                            Entry(container, width=50, borderwidth=1, relief = 'solid')))
+            
+        for val_name in self.job_attributes_titles['large_box_data']:
+            self.large_box_inputs.append((Label(container, text=val_name, anchor=W),
+                                            Text(container,width=40, height=10, padx=10, pady=5, 
+                                                borderwidth=1, relief='solid')))
 
         for menu_option in self.job_attributes_titles['menu_data']:
             
@@ -131,8 +137,11 @@ class NewApplicationScreen(FullScreen):
     def save_data(self):
 
         data_values = []
-        for single_input in self.single_data_inputs:
+        for single_input in self.single_data_inputs[1:]:
             data_values.append(single_input[1].get())
+
+        for large_box_value in self.large_box_inputs:
+            data_values.append(large_box_value[1].get("1.0", END))
 
         for menu_input in self.menu_data_inputs:
             menu_title = menu_input[0].cget('text')
@@ -147,6 +156,9 @@ class NewApplicationScreen(FullScreen):
         # clear input fields after save
         for input_field in self.single_data_inputs:
             input_field[1].delete(0, END)
+
+        for input_field in self.large_box_inputs:
+            input_field[1].delete("1.0", END)
 
         # Display Message to user that Application has been saved
         messagebox.showinfo(message='Application has been saved')
@@ -164,9 +176,15 @@ class NewApplicationScreen(FullScreen):
     def load_window(self):
 
         # load single data inputs
-        for single_tup in self.single_data_inputs:
+        for single_tup in self.single_data_inputs[1:]:
             single_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
             single_tup[1].grid(row = self.row_count, column = 1 , sticky=W+E)
+            self.row_count += 1
+
+        # load single data inputs
+        for large_data_tup in self.large_box_inputs:
+            large_data_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
+            large_data_tup[1].grid(row = self.row_count, column = 1 , sticky=W+E)
             self.row_count += 1
         
         # load menu data inputs
