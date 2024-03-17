@@ -159,7 +159,7 @@ class JobView(FullScreen):
             # allow scrolling with the use of trackpad/ mouse scrollwheel
             large_box_frame.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
 
-            self.large_box_inputs.append((Label(container, text=data_tup[0], anchor=W),
+            self.large_box_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor=W),
                                             large_box_frame, scrollbar, text_box))
 
 
