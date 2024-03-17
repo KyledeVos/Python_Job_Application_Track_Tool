@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+from tkcalendar import *
+from datetime import date
 from ..parent_screens import FullScreen
 from .job_progress_instance import ProgressInstanceWindow, DataConverter, MenuInput
 
@@ -17,7 +19,6 @@ class NewApplicationScreen(FullScreen):
 
         # ---------------------------------------------------------------
         # JOB BASIC INFO
-
         self.single_data_inputs = []
         self.large_box_inputs = []
         self.menu_data_inputs = []
@@ -25,7 +26,22 @@ class NewApplicationScreen(FullScreen):
         self.job_attributes_titles = self.db_controller.retrieve_configured_job_data()
 
         for val_name in self.job_attributes_titles['single_data']:
-            self.single_data_inputs.append((Label(container, text=val_name, anchor=W),
+
+            if 'date' in val_name:
+               
+                # retrieve current datae to set as default
+                current_date = [int(val) for val in str(date.today()).split("-")]
+                current_year = current_date[0]
+                current_month=current_date[1]
+                current_day=current_date[2]
+
+                # Create Calendar widget for date retrieval
+                cal = Calendar(container, selectmode='day', year=current_year,
+                               month=current_month, day=current_day)
+
+                self.single_data_inputs.append((Label(container, text="Date:", anchor=W), cal))
+            else:
+                self.single_data_inputs.append((Label(container, text=val_name, anchor=W),
                                             Entry(container, width=50, borderwidth=1, relief = 'solid')))
             
         # large box data
@@ -47,7 +63,7 @@ class NewApplicationScreen(FullScreen):
             # allow scrolling with the use of trackpad/ mouse scrollwheel
             large_box_frame.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
 
-            self.large_box_inputs.append((Label(container, text=val_name, anchor=W),
+            self.large_box_inputs.append((Label(self.container, text=val_name, anchor=W),
                                             large_box_frame, scrollbar, text_box))
 
         for menu_option in self.job_attributes_titles['menu_data']:
@@ -98,7 +114,7 @@ class NewApplicationScreen(FullScreen):
 
         # ---------------------------------------------------------------
         # Save Application Button
-        self.save_new_application = Button(container, text="Save", command=self.save_data)
+        self.save_new_application = Button(container, text="Save New Application", command=self.save_data)
         self.buttons_list.append(self.save_new_application)
 
     def load_progress_window(self):
@@ -154,8 +170,13 @@ class NewApplicationScreen(FullScreen):
     def save_data(self):
 
         data_values = []
+
         for single_input in self.single_data_inputs[1:]:
-            data_values.append(single_input[1].get())
+            # check if input type was for date, if so reset
+            if 'date' in single_input[0].cget('text').lower():
+                data_values.append(single_input[1].get_date())
+            else:
+                data_values.append(single_input[1].get())
 
         for large_box_value in self.large_box_inputs:
             data_values.append(large_box_value[3].get("1.0", END))
@@ -172,7 +193,18 @@ class NewApplicationScreen(FullScreen):
 
         # clear input fields after save
         for input_field in self.single_data_inputs:
-            input_field[1].delete(0, END)
+            # check if input type was for date, if so ret
+            if 'date' in input_field[0].cget('text').lower():
+                # retrieve current date - default setting
+                current_date = [int(val) for val in str(date.today()).split("-")]
+                current_year = current_date[0]
+                current_month=current_date[1]
+                current_day=current_date[2]
+                # reset current date
+                input_field[1].selection_set(date(current_year, current_month, current_day))
+            else:
+                # non-date field - clear input box
+                input_field[1].delete(0, END)
 
         for input_field in self.large_box_inputs:
             input_field[3].delete("1.0", END)
@@ -194,7 +226,14 @@ class NewApplicationScreen(FullScreen):
 
         # load single data inputs
         for single_tup in self.single_data_inputs[1:]:
-            single_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
+            
+            # check for date field
+            if 'date' in single_tup[0].cget('text').lower():   
+                single_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
+                self.row_count += 1
+            else:
+                single_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
+            
             single_tup[1].grid(row = self.row_count, column = 1 , sticky=W+E)
             self.row_count += 1
 
