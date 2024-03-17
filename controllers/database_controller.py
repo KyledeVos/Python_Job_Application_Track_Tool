@@ -3,10 +3,14 @@ import sqlite3
 class JobApplicationDefault():
 
     def __init__(self) -> None:
+
+        # NOTE: Fields that require calendar widget for display MUST include 'date' as a substring 
+        # of field name
+
         # Set Default Table Name
         self.table_name = 'job_applications'
         # set names of columns with data for one line
-        self.single_data = ['id', 'company', 'position', 'salary', 'date_applied', 'location']
+        self.single_data = ['id', 'date', 'company', 'position', 'salary', 'location']
         # set column names for data needing larger area input box
         self.larger_data_inputs = ['description']
         # set names of foreign key tables with corresponding column name
@@ -18,7 +22,7 @@ class JobApplicationDefault():
         # set names of columns to not be displayed (none must be blank list)
         self.col_not_display = ["id"]
         # Data Update - set columns that can be updated
-        self.update_cols = ['company', 'position', 'salary', 'date_applied', 'location', 'description',
+        self.update_cols = ['date', 'company', 'position', 'salary', 'location', 'description',
                             'type_id', 'period_id', 'status_id']
 
 
@@ -26,6 +30,10 @@ class JobProgressDefaults():
     # Class allows for centralized control of job progress attributes
 
     def __init__(self):
+
+        # NOTE: Fields that require calendar widget for display MUST include 'date' as a substring 
+        # of field name
+
         # Set Default Table Name
         self.table_name = 'progress'
         # set names of columns with data for one line
