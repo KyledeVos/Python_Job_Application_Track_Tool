@@ -39,7 +39,7 @@ class DbInitializer():
         company TEXT NOT NULL,
         position TEXT NOT NULL,
         salary TEXT,
-        date_applied TEXT NOT NULL,
+        date TEXT NOT NULL,
         location TEXT NOT NULL,
         description TEXT,
         type_id INT,
