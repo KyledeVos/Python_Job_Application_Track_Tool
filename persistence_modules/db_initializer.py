@@ -36,10 +36,10 @@ class DbInitializer():
 
         cursor.execute("""CREATE TABLE IF NOT EXISTS job_applications(
         id INTEGER PRIMARY KEY,
+        date TEXT NOT NULL,
         company TEXT NOT NULL,
         position TEXT NOT NULL,
         salary TEXT,
-        date TEXT NOT NULL,
         location TEXT NOT NULL,
         description TEXT,
         type_id INT,
