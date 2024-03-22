@@ -33,7 +33,7 @@ class JobApplicationsScreen(FullScreen):
 
     def right_screens_initialize(self, container):
         
-        return {'New Application': NewApplicationScreen(container, self.db_controller),
+        return {'New Application': NewApplicationScreen(container, self.db_controller, self.left_sub),
                 'View All Applications': ViewAllApplicationsScreen(container, self.db_controller, self.left_sub),
                 'Delete Application': DeleteApplication(container, self.db_controller)}
     
