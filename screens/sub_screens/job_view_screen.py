@@ -1,6 +1,7 @@
-from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
+from ttkbootstrap import *
+from ttkbootstrap.scrolled import ScrolledText
+from ttkbootstrap.dialogs import Messagebox
+from datetime import date
 from ..parent_screens import FullScreen
 from .job_progress_instance import RecentJobProgress, AllJobProgress, ProgressInstanceWindow
 
@@ -85,10 +86,15 @@ class ViewAllApplicationsScreen(FullScreen):
                     # Change Page Main Title
                     self.left_sub_window.window_title.config(text="Job Application Details")
                     JobView(self.left_sub_window.get_right_major(), self.left_sub_window, self.db_controller, self.id).load_window()
+                    # COMPULSORY - DO NOT REMOVE THIS OR CHANGE PLACEMENT IN CODE!
+                    # Load of the new window requires manual generation of "Enter" event for cursor already present in window
+                    # allowing trackpad to scroll immediately
+                    self.left_sub_window.scrollable_screen.scrollable.master.event_generate("<Enter>", when="now")
+                    self.left_sub_window.scrollable_screen.reset_scroll_window()
 
                 def place_on_screen(self, row_count):
                     for col_count, job_instance in enumerate(self.job_data_values):
-                        job_instance.grid(row = row_count, column=col_count, padx=10, pady=2)
+                        job_instance.grid(row = row_count, column=col_count, padx=10, pady=10)
 
             for count, application in enumerate(current_applications):
                 # Add Column Titles
@@ -130,50 +136,50 @@ class JobView(FullScreen):
         # ----------------------------------------------------------------------------
         # JOB BASIC INFO SECTION
 
-        self.basic_title = Label(container, padx=5, text="Job Information", anchor='w')
-        self.basic_info_frame = Frame(container, padx=5, pady=5, borderwidth=2, relief='solid')
+        self.basic_title = Label(container, text="Job Information", anchor='w')
+        self.basic_info_frame = Frame(container, bootstyle = 'default')
 
         # Retrieve single data input labels and assigned value
         for data_tup in self.job_attributes_titles['single_data']:
-            new_Entry = Entry(self.basic_info_frame, width = 50, borderwidth=1, relief='solid')
-            new_Entry.insert(0, data_tup[1])
-            self.single_data_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor='w'), new_Entry))
+            
+            # check for date field
+            if 'date' in data_tup[0]:
+                # seperate date attributes
+                split_date = [int(val) for val in data_tup[1].split("/")]
+                set_year = split_date[0]
+                set_month = split_date[1]
+                set_day = split_date[2]
+
+                new_Entry = DateEntry(self.basic_info_frame, bootstyle='danger', startdate=date(set_year, set_month, set_day))
+
+            else: 
+                new_Entry = Entry(self.basic_info_frame, width = 50)
+                new_Entry.insert(0, data_tup[1])
+            self.single_data_inputs.append((Label(self.basic_info_frame, text=data_tup[0].title().replace("_", ""),
+                                                   anchor='w'), new_Entry))
 
         # Retrieve large box data input labels and assigned value
         for data_tup in self.job_attributes_titles['large_box_data']:
 
-            # create frame to hold large_box_data textbox and scrollbar
-            large_box_frame = Frame(self.basic_info_frame, padx=10,)
+            text_box = ScrolledText(self.basic_info_frame, width=80, height=10, wrap=WORD, autohide=True)
+            text_box.insert(END, data_tup[1])
 
-            text_box = Text(large_box_frame, width=40, height=10, padx=10, pady=5, 
-                            borderwidth=2, relief='solid')
-            text_box.insert("1.0", data_tup[1])
-            text_box.grid(row =0, column=0, sticky='w')
-
-            # create and configure text box - scrolls text box
-            scrollbar = ttk.Scrollbar(self.basic_info_frame, orient='vertical', command=text_box.yview)
-            text_box.config(yscrollcommand=scrollbar.set)
-            scrollbar.config(command=text_box.yview)
-            # allow for scrolling when entering textbox
-            #large_box_frame.bind('<Enter>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-            # allow scrolling with the use of trackpad/ mouse scrollwheel
-            large_box_frame.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-
-            self.large_box_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor=W),
-                                            large_box_frame, scrollbar, text_box))
-
-
-            # self.large_box_inputs.append((Label(self.basic_info_frame, text=data_tup[0], anchor='e'), new_Entry))
+            self.large_box_inputs.append((Label(self.basic_info_frame, text=data_tup[0].title().replace("_", ""), anchor='w'),
+                                           text_box))
         
         for menu_option in self.job_attributes_titles['menu_data']:
             
-            value_holder = MenuInput(menu_option[2]).get_input_val()
             menu_options = [val[1] for val in menu_option[1]]
 
-            # Form: (Label, input_holder, OptionMenu)
-            self.menu_data_inputs.append((Label(self.basic_info_frame, text=menu_option[0], anchor='e'), 
-                                     value_holder,
-                                     OptionMenu(self.basic_info_frame, value_holder, *menu_options)))
+            box = Combobox(self.basic_info_frame, bootstyle="success", values=menu_options)
+            # find matching menu option to current set and retrieve index position
+            for count, menu_tup in enumerate(menu_option[1]):
+                if menu_option[2] == menu_tup[1]:
+                    box.current(count)
+                    break
+           
+            # Form: (Label, Combobox)
+            self.menu_data_inputs.append((Label(self.basic_info_frame, text=menu_option[0], anchor='e'), box))
             
         self.update_application_btn = Button(self.basic_info_frame, text="Save Changes", command=self.update_basic_data)
 
@@ -183,10 +189,8 @@ class JobView(FullScreen):
         
         # Buttons
         self.top_btns_container = Frame(container)
-        self.view_all_btn = Button(self.top_btns_container, text="View All",
-                                                anchor='center', command=self.view_all_job_progress)
-        self.add_progress_btn = Button(self.top_btns_container, text="Add Progress",
-                                                anchor='center', command=self.add_job_progress)
+        self.view_all_btn = Button(self.top_btns_container, text="View All", command=self.view_all_job_progress)
+        self.add_progress_btn = Button(self.top_btns_container, text="Add Progress", command=self.add_job_progress)
         # check if current job has job progress data
         if self.recent_job_progress != None:
             # Create recent job progress instance
@@ -229,8 +233,11 @@ class JobView(FullScreen):
 
         progress_instance = []
 
-        # 1) Retrieve Single Item
-        for item in self.single_data_list:
+        # 1) First field set as date for progress instance by default
+        progress_instance.append(self.single_data_list[0].entry.get())
+
+        # 2) Retrieve remaining Single Items
+        for item in self.single_data_list[1:]:
             progress_instance.append(item.get())
 
         # 2) Retrieve multi-line input data
@@ -256,7 +263,7 @@ class JobView(FullScreen):
         self.reload_window(True)
 
         # print message to user that progres instance has been added to list (not saved in db)
-        messagebox.showinfo(message='Job Progress has been saved')
+        Messagebox.show_info(message='Job Progress has been saved')
 
         # re-enable buttons to add progress_instance, save new application and close progress window
         self.progress_window.enable_buttons_close_window()
@@ -265,7 +272,7 @@ class JobView(FullScreen):
     def view_all_job_progress(self):
 
         # cover job view screen for view all job progress data
-        self.cover_frame = Frame(self.container, bg='green')
+        self.cover_frame = Frame(self.container, bootstyle = 'default')
         self.cover_frame.grid_columnconfigure(1, weight=1)
         self.cover_frame.grid(row=0, rowspan=self.row_count, columnspan=2, column=0, sticky="NEWS")
 
@@ -283,12 +290,12 @@ class JobView(FullScreen):
         # print(self.all_job_progress_data)
 
         # BUTTON to return to job view screen - removes covering frame
-        self.back_btn = Button(self.cover_frame, text= "<- Go Back", pady=5, anchor='w', command=self.back_to_applications)
+        self.back_btn = Button(self.cover_frame, text= "<- Go Back", command=self.back_to_applications)
 
         # clear boxes and delete selected job progress button
-        self.top_level_holder = Frame(self.cover_frame)
-        self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes",anchor=E, command=self.clear_all_boxes)
-        self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected', anchor=E)
+        self.top_level_holder = Frame(self.cover_frame, bootstyle = 'default')
+        self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes", command=self.clear_all_boxes)
+        self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected')
         
         # Initialize instance of view all job Progress
         self.all_job_progress_instance = AllJobProgress(self.cover_frame, self.db_controller, self.all_job_progress_data, 
@@ -352,6 +359,7 @@ class JobView(FullScreen):
 
         # clear previous screen
         self.left_minor_subscreen.clear_right_major()
+
         self.row_count = 0
 
         # --- BASIC JOB INFO PLACEMENT  ---
@@ -362,7 +370,9 @@ class JobView(FullScreen):
         self.row_count += 1
         basic_row_count = 0
         
+        # first value is always id field - do not place on screen
         for single_tup in self.single_data_inputs[1:]:
+            # place label
             single_tup[0].grid(row=basic_row_count, column = 0, padx=5, pady=2, sticky=W+E)
             single_tup[1].grid(row = basic_row_count, column = 1 , sticky=W+E)
             basic_row_count += 1
@@ -371,12 +381,11 @@ class JobView(FullScreen):
             large_tup[0].grid(row = basic_row_count, column = 0, padx = 5, pady = 10, sticky=W+E)
             basic_row_count += 1
             large_tup[1].grid(row = basic_row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
-            large_tup[2].grid(row = basic_row_count, column = 1, sticky="NSE")
             basic_row_count += 1
         
         for menu_tup in self.menu_data_inputs:
-            menu_tup[0].grid(row=basic_row_count, column = 0, padx=5, pady=2, sticky=W+E)
-            menu_tup[2].grid(row = basic_row_count, column = 1 , sticky=W)
+            menu_tup[0].grid(row=basic_row_count, column = 0, padx=5, pady=5, sticky=W+E)
+            menu_tup[1].grid(row = basic_row_count, column = 1, padx=5, pady=5, sticky=W)
             basic_row_count += 1
         
         self.update_application_btn.grid(row=basic_row_count, column=0, sticky=W+E, pady=5)
@@ -423,18 +432,20 @@ class JobView(FullScreen):
             # reload overlying progress window only if there is still progress data
             self.view_all_job_progress()
 
-
-
     def update_basic_data(self):
 
         data_values = []
         column_names = self.db_controller.retrieve_job_column_names()
 
         for single_input in self.single_data_inputs:
-            data_values.append(single_input[1].get())
+            # check if input type was for date, if so retrieve date
+            if 'date' in single_input[0].cget('text').lower():
+                data_values.append(single_input[1].entry.get())
+            else:
+                data_values.append(single_input[1].get())
 
         for large_input in self.large_box_inputs:
-            data_values.append(large_input[3].get("1.0", END))
+            data_values.append(large_input[1].get("1.0", END))
 
         for menu_input in self.menu_data_inputs:
             menu_title = menu_input[0].cget('text')
@@ -447,6 +458,6 @@ class JobView(FullScreen):
 
         self.db_controller.update_job_application(column_names, data_values)
 
-        # Display Message to user that Application has been updated
-        messagebox.showinfo(message='Changes have been saved')
+        # Display Message to user that changes to application have been saved
+        Messagebox.show_info(message='Changes have been saved')
 

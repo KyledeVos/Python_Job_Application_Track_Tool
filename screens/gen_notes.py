@@ -1,4 +1,4 @@
-from tkinter import *
+from ttkbootstrap import *
 from .parent_screens import FullScreen
 
 class GeneralNotesScreen(FullScreen):

@@ -1,4 +1,4 @@
-from tkinter import *
+from ttkbootstrap import *
 from .parent_screens import FullScreen, ScrollableScreen
 
 class HomeScreen(FullScreen):
@@ -17,7 +17,7 @@ class HomeScreen(FullScreen):
         self.left_holder = self.left_scrollable.get_container()
         
 
-        self.recent_applications = LabelFrame(self.left_holder, bg="blue")
+        self.recent_applications = LabelFrame(self.left_holder, bootstyle = "default")
         self.recent_applications.grid_columnconfigure(0, weight=1)
         self.recent_applications.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
 
@@ -35,7 +35,6 @@ class HomeScreen(FullScreen):
         # right screen - notes summary
         self.right_scrollable = ScrollableScreen(self.screen_window, 1, 1)
         self.holding_screen = self.right_scrollable.get_container()
-        self.holding_screen.config(bg="red")
         
         
         

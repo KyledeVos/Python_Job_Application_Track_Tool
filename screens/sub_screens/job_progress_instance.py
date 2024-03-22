@@ -1,7 +1,7 @@
-from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
-
+from ttkbootstrap import *
+from ttkbootstrap.scrolled import ScrolledText
+from ttkbootstrap.dialogs import Messagebox
+from datetime import date
 
 # HELPER CLASS FOR MENU BASED DATA
 class MenuInput():
@@ -33,11 +33,11 @@ class RecentJobProgress():
 
     def retrieve_recent_progress_frame(self):
             
-        self.progress_data_frame = Frame(self.outer_frame, padx=5, pady=5, borderwidth=2, relief='solid')
+        self.progress_data_frame = Frame(self.outer_frame, bootstyle="default")
         self.progress_data_frame.grid_columnconfigure(1, weight=1)
 
         # latest progress title
-        self.latest_progress_title = Label(self.progress_data_frame, text="Latest Progress Note:", anchor='w')
+        self.latest_progress_title = Label(self.progress_data_frame, text="Latest Progress Note Review:", anchor='w')
         # retrieve large_text_box columns and fk_table joining column names
         large_box_cols =[]
         fk_table_cols = []
@@ -62,40 +62,27 @@ class RecentJobProgress():
             elif col in large_box_cols:
 
                 # create frame to hold large_box_data textbox and scrollbar
-                large_box_frame = Frame(self.progress_data_frame, padx=10)
-
-                text_box = Text(large_box_frame, width=40, height=10, padx=10, pady=5, 
-                                borderwidth=2, relief='solid')
-                text_box.grid(row =0, column=0, sticky='w')
-                text_box.insert("1.0", self.recent_job_progress['val_list'][count])
+                text_box = ScrolledText(self.progress_data_frame, width=80, height=10,wrap=WORD, autohide=True)
+                text_box.insert(END, self.recent_job_progress['val_list'][count])
                 # recent job progress allows for read only - disable edit functionality for text boxes
-                text_box.config(state=DISABLED)
+                # text_box.configure(state=DISABLED)
 
-                # create and configure text box - scrolls text box
-                scrollbar = ttk.Scrollbar(self.progress_data_frame, orient='vertical', command=text_box.yview)
-                text_box.config(yscrollcommand=scrollbar.set)
-                scrollbar.config(command=text_box.yview)
-                # allow for scrolling when entering textbox
-                large_box_frame.bind('<Enter>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-                # allow scrolling with the use of trackpad/ mouse scrollwheel
-                large_box_frame.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-                # add current text box to list of text boxes
                 self.large_box_labels.append((Label(self.progress_data_frame, text=col.title().replace("_", " "), anchor='w'),
-                                                large_box_frame, scrollbar))
+                                                text_box))
                 
             # check if column name exists in fk table
-            # NOTE: recent job progress does not allow for edits - fk data not set as MenuOption
+            # NOTE: recent job progress does not allow for edits - fk data not set as ComboBox
             elif col in fk_table_cols:
                 self.fk_data_labels.append(
                     (Label(self.progress_data_frame, text=col.title().replace("_", " "), anchor='e'), 
                         Label(self.progress_data_frame, text=self.recent_job_progress['val_list'][count],
-                            padx=10, pady=5, anchor='w')))
+                            anchor='w')))
                 
             # column not in large text box data or fk data - single line data
             else:
                 self.single_data_labels.append(
                     (Label(self.progress_data_frame, text=col.title().replace("_", " ") + ":", anchor='e'),
-                        Label(self.progress_data_frame, text=self.recent_job_progress['val_list'][count], padx=10, pady=5, anchor='w')))
+                        Label(self.progress_data_frame, text=self.recent_job_progress['val_list'][count], anchor='w')))
 
         # return progress frame containing recent job progress info
         return self.progress_data_frame
@@ -127,7 +114,6 @@ class RecentJobProgress():
             large_box_item_tup[0].grid(row = progress_row_count, column = 0, padx = 5, pady = 10, sticky=W+E)
             progress_row_count += 1
             large_box_item_tup[1].grid(row = progress_row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
-            large_box_item_tup[2].grid(row = progress_row_count, column = 1, sticky="NSE")
             progress_row_count += 1
 
         return row_count
@@ -152,8 +138,8 @@ class ProgressInstanceWindow():
         # new window to open progress input
         self.progress_window = Toplevel()
         self.progress_window.geometry("500x600")
-        self.progress_window.minsize(500, 550)
-        self.progress_window.maxsize(500, 700)
+        self.progress_window.minsize(600, 550)
+        self.progress_window.maxsize(700, 700)
 
         # disable main application window buttons whilst job progress is being created
         for button in self.btns_list:
@@ -172,17 +158,44 @@ class ProgressInstanceWindow():
         # SINGLE ITEMS - SINGLE LINE
         # create single data labels and input boxes (one-line)
         for single_item in self.progress_attributes['single_data']:
-            item_descr = Label(self.progress_window, text=single_item, anchor=W)
             
-            item_input = Entry(self.progress_window, width=30, borderwidth=2, relief='solid')
+            # Add Label
+            item_descr = Label(self.progress_window, text=single_item, anchor=W)
 
-            # POPULATE SINGLE LINE ENTRY BOX - UPDATE ONLY
-            # check if current input field has a value to be assigned (when updating job progress instance)
-            if self.full_data is not None:
-                # retrieve index of current single data item
-                col_index = self.full_data['col_list'].index(single_item.lower().replace(" ", "_"))
-                # Add value to input box
-                item_input.insert(0, self.progress_instance[col_index])
+            # Configuration for Date Field
+            if 'date' in single_item.lower():
+
+                # check for existing data for date (update/view of progress instance)
+                if self.full_data is None: 
+                    # retrieve current date to set as default
+                    current_date = [int(val) for val in str(date.today()).split("-")]
+                    set_year = current_date[0]
+                    set_month=current_date[1]
+                    set_day=current_date[2]
+
+                else:
+                    # retrieve index of current single data item
+                    col_index = self.full_data['col_list'].index(single_item.lower().replace(" ", "_"))
+                    # retrieve date
+                    split_date = [int(val) for val in self.progress_instance[col_index].split("/")]
+                    set_year = split_date[0]
+                    set_month = split_date[1]
+                    set_day = split_date[2]
+                
+                # Create Calendar widget for date retrieval
+                item_input = DateEntry(self.progress_window, bootstyle='danger', startdate=date(set_year, set_month, set_day))
+
+            # non-date fields     
+            else:
+                item_input = Entry(self.progress_window, width=30)
+
+                # POPULATE SINGLE LINE ENTRY BOX - UPDATE ONLY
+                # check if current input field has a value to be assigned (when updating job progress instance)
+                if self.full_data is not None:
+                    # retrieve index of current single data item
+                    col_index = self.full_data['col_list'].index(single_item.lower().replace(" ", "_"))
+                    # Add value to input box
+                    item_input.insert(0, self.progress_instance[col_index])
 
             self.single_data_list.append(item_input)
         
@@ -196,34 +209,41 @@ class ProgressInstanceWindow():
             
         for menu_option in self.progress_attributes['fk_data']:
 
+            # add frame to hold label and ComboBox - necessary for spacing and stylings
+            holding_frame = Frame(self.progress_window, bootstyle = 'default')
+            holding_frame.grid(row=label_row_count, column=0, columnspan=2, sticky=W+E)
+            label_row_count += 1
+
+            label = Label(holding_frame, text=menu_option[0], anchor=W)
+
+            menu_options = [val[1] for val in menu_option[1]]
+            box = Combobox(holding_frame, bootstyle="success", values=menu_options)
+
             # POPULATE OPTION MENU WITH CURRENT SET VALUE - UPDATE ONLY
             # check if current input field has a value to be assigned (when updating job progress instance)
             if self.full_data is not None:
                 # retrieve index of current single data item
                 col_index = self.full_data['col_list'].index(menu_option[0].lower().replace(" ", "_"))
-                # convert current set string value for option Menu to string var
-                value_holder = MenuInput(self.progress_instance[col_index][0]).get_input_val()
-            
+                # retrieve name of current set option
+                set_val_name = self.full_data['val_list'][0][col_index][0]
+
+                for count, data_tup in enumerate(menu_option[1]):
+                    # iterate through options for menu comparing names until match is found
+                    if set_val_name == data_tup[1]:
+                        box.current(count) 
+                        break
             else:
-                value_holder = MenuInput(menu_option[1][0][1]).get_input_val()
+                box.current(0)
             
-            menu_options = [val[1] for val in menu_option[1]]
-
-            holding_frame = Frame(self.progress_window)
-            holding_frame.grid(row=label_row_count, column=0, sticky=W+E)
-            label_row_count += 1
-
-            # Form: (Label, input_holder, OptionMenu)
-            self.fk_data.append((Label(holding_frame, text=menu_option[0], anchor=W), 
-                                     value_holder,
-                                     OptionMenu(holding_frame, value_holder, *menu_options)))
+            # Form: (Label, OptionMenu)
+            self.fk_data.append((label, box))
             
-
             # load menu options to progress window
             for item in self.fk_data:
-                # item[0] - Column Name, item[2] - Option Menu
+                # item[0] - Column Name, item[1] - ComboBox
                 item[0].grid(row=0, column = 0, sticky=W+E, pady=10)
-                item[2].grid(row=0, column = 1, pady=10)
+                item[1].grid(row=0, column = 1, padx=5, pady=10, sticky=W)
+
         
 
         # --------------------------------------------------------------------------------
@@ -234,20 +254,9 @@ class ProgressInstanceWindow():
                   ).grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=(10, 5))
             label_row_count += 1
 
-            # Input, Frame, Input Box and ScrollBar
-            input_frame = Frame(self.progress_window, padx=10)
-            input_frame.grid(row=label_row_count, column=0, columnspan=2, padx=5, pady=5, sticky="NEWS")
-            # allow mousewheel/trackpad to scroll text box
-            
             # add textbox for larger text input
-            text_box = Text(input_frame, width=50, height=10, padx=10, pady=5, borderwidth=2, relief='solid')
-            # create and configure text box - scrolls text box
-            scrollbar = ttk.Scrollbar(self.progress_window, orient='vertical', command=text_box.yview)
-            text_box.config(yscrollcommand=scrollbar.set)
-            scrollbar.config(command=text_box.yview)
-            scrollbar.grid(row=label_row_count, column=1, sticky="NSE")
-            text_box.grid(row = 0, column=0, sticky=W)
-            label_row_count += 1
+            text_box = ScrolledText(self.progress_window, width=80, height=10,wrap=WORD, autohide=True)
+
 
             # POPULATE MULTI-LINE TEXT BOX - UPDATE ONLY
             # check if current input field has a value to be assigned (when updating job progress instance)
@@ -255,21 +264,20 @@ class ProgressInstanceWindow():
                 # retrieve index of current single data item
                 col_index = self.full_data['col_list'].index(multi_line_item.lower().replace(" ", "_"))
                 # Add value to input box
-                text_box.insert("1.0", self.progress_instance[col_index])
-                input_frame.bind_all('<MouseWheel>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-            
+                text_box.insert(END, self.progress_instance[col_index])
+
             # add textbox to list to later retrieve input
             self.large_box_data.append(text_box)
-            
+
 
         # add single item (multi-line) data inputs to progress screen
         for item in self.large_box_data:
-            item.grid(row=input_row_count, column = 1, padx=5, pady=5)
-            input_row_count += 1
+            item.grid(row=label_row_count, column = 0, columnspan=2, padx=5, pady=5, sticky=W+E)
+            label_row_count += 1
 
         # ------------------------------------------------------------------
         # Save Progress Button
-        self.save_progress_btn = Button(self.progress_window, text="Save Progress", anchor=E)
+        self.save_progress_btn = Button(self.progress_window, text="Save Progress")
         self.save_progress_btn.grid(row=label_row_count, column=0, pady=10)
 
         if self.retrieve_progress_data_func is not None:
@@ -301,8 +309,11 @@ class ProgressInstanceWindow():
         self.data_converter = DataConverter()
         self.progress_instance_data = []
 
+        # 1) First field set as date for progress instance by default
+        self.progress_instance_data.append(self.single_data_list[0].entry.get())
+
         # 1) Retrieve Single Items
-        for item in self.single_data_list:
+        for item in self.single_data_list[1:]:
             self.progress_instance_data.append(item.get())
 
         # 2) Retrieve multi-line input data
@@ -335,7 +346,7 @@ class ProgressInstanceWindow():
         self.outer_window_reload_func(True)
 
         # print message to user that progres instance has been added to list (not saved in db)
-        messagebox.showinfo(message='Job Progress has been saved')
+        Messagebox.show_info(message='Job Progress has been saved')
 
 
 class JobInstanceQuickViewDeletion():
@@ -372,7 +383,7 @@ class JobInstanceQuickViewDeletion():
         # list to labels of single line items for job progress identification
         self.single_vals = []
         # individual deletion button
-        self.delete_btn = Button(self.outer_container, text = 'Delete', anchor='e', command=self.delete_single_progress)
+        self.delete_btn = Button(self.outer_container, text = 'Delete', command=self.delete_single_progress)
 
         # add count of number of job progress instance
         self.progress_count = Label(self.outer_container, text = progress_count, anchor=CENTER)
@@ -406,20 +417,20 @@ class JobInstanceQuickViewDeletion():
         col_count = 0
         
         # place CheckButton first
-        self.checkbox.grid(row=main_row_count, column=col_count, padx=5, pady=2)
+        self.checkbox.grid(row=main_row_count, column=col_count, padx=5, pady=5)
         col_count += 1
 
         # place count of current number of progress instances
-        self.progress_count.grid(row=main_row_count, column=col_count, sticky=W+E, padx=5, pady=2)
+        self.progress_count.grid(row=main_row_count, column=col_count, sticky=W+E, padx=5, pady=5)
         col_count += 1
 
         # place each single line field
         for attribute in self.single_vals:
-            attribute.grid(row=main_row_count, column = col_count, sticky=W+E, padx=5, pady=2)
+            attribute.grid(row=main_row_count, column = col_count, sticky=W+E, padx=5, pady=5)
             col_count += 1
 
         # place individual row deletion button
-        self.delete_btn.grid(row=main_row_count, column=col_count, padx=5, pady=2)
+        self.delete_btn.grid(row=main_row_count, column=col_count, padx=5, pady=5)
 
     def enable_clear_and_deleted_selected(self):
         # enable clear boxes and delete selected button if checkbox is checked
@@ -430,17 +441,14 @@ class JobInstanceQuickViewDeletion():
 
         # Change Colour of Job Instance text to highlight selected job
 
-        self.progress_count.config(fg = 'white')
-        self.progress_count.config(bg = 'red')
+        self.progress_count.config(bootstyle='inverse-danger')
 
         for attribute in self.single_vals:
-            attribute.config(fg = 'white')
-            attribute.config(bg = 'red')
+            attribute.configure(bootstyle='inverse-danger')
 
         # DISPLAY CONFIRMATION MESSAGE BEFORE DELETION
-        if(messagebox.askyesno('Permanent Deletion Warning!', 
-            message="Are you sure you want to delete this job?\nThis action cannot be undone",
-            default = 'no')):
+        if(Messagebox.yesno(title = "Permanent Deletion Warning!",
+            message="Are you sure you want to delete this job?\nThis action cannot be undone") == "Yes"):
             # delete progress instance
             self.db_controller.delete_job_progress_only([self.id])
             # reload outer window after deletion of job_instance
@@ -448,12 +456,10 @@ class JobInstanceQuickViewDeletion():
 
         else:
             # Deletion cancelled, change font colour back to black and background to white
-            self.progress_count.config(fg = 'black')
-            self.progress_count.config(bg = 'white')
+            self.progress_count.configure(bootstyle='default')
 
             for attribute in self.single_vals:
-                attribute.config(fg = 'black')
-                attribute.config(bg = 'white')
+                attribute.configure(bootstyle='default')
 
     # Open new window for job progress update
     def progress_update(self, event):
@@ -586,12 +592,12 @@ class AllJobProgress():
             if val.checked.get() == 1:
                 # add id num to id__list
                 id_list.append(val.id)
-                val.progress_count.config(fg = 'white')
-                val.progress_count.config(bg = 'red')
+                # change progress count colour to red (deletion warning)
+                val.progress_count.configure(bootstyle = "inverse-danger")
 
                 for attribute in val.single_vals:
-                    attribute.config(fg = 'white')
-                    attribute.config(bg = 'red')
+                    # change label colour to red (deletion warning)
+                    attribute.configure(bootstyle = "inverse-danger")
 
          # create gramatically correct message for Deletion Warning
         if len(id_list) == 1:
@@ -600,8 +606,7 @@ class AllJobProgress():
             display_message = f"Are you sure you want to delete {len(id_list)} jobs?\nThis action cannot be undone"
 
         # Display Yes or No Box to confirm Deletion
-        if(messagebox.askyesno('Permanent Deletion Warning!', 
-                               message=display_message, default = 'no')):
+        if Messagebox.yesno(title = 'Permanent Deletion Warning!', message=display_message) == "Yes":
 
             # call for progress instances deletion
             self.db_controller.delete_job_progress_only(id_list)
@@ -614,10 +619,10 @@ class AllJobProgress():
                 if val.checked.get() == 1:
                     # add id num to id__list
                     id_list.append(val.id)
-                    val.progress_count.config(fg = 'black')
-                    val.progress_count.config(bg = 'white')
+                    # Deletion cancelled, change count colour back to normal
+                    val.progress_count.configure(bootstyle = "default")
 
                     for attribute in val.single_vals:
-                        attribute.config(fg = 'black')
-                        attribute.config(bg = 'white')
+                        # Deletion cancelled, change label colour back to normal
+                        attribute.configure(bootstyle = "default")
 

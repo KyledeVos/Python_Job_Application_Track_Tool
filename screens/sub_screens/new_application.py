@@ -1,10 +1,9 @@
-from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
-from tkcalendar import *
+from ttkbootstrap import *
+from ttkbootstrap.scrolled import ScrolledText
+from ttkbootstrap.dialogs import Messagebox
 from datetime import date
 from ..parent_screens import FullScreen
-from .job_progress_instance import ProgressInstanceWindow, DataConverter, MenuInput
+from .job_progress_instance import ProgressInstanceWindow, DataConverter
 
 # New Job Application Sub-Screen
 class NewApplicationScreen(FullScreen):
@@ -29,53 +28,35 @@ class NewApplicationScreen(FullScreen):
 
             if 'date' in val_name:
                
-                # retrieve current datae to set as default
+                # retrieve current date to set as default
                 current_date = [int(val) for val in str(date.today()).split("-")]
                 current_year = current_date[0]
                 current_month=current_date[1]
                 current_day=current_date[2]
 
                 # Create Calendar widget for date retrieval
-                cal = Calendar(container, selectmode='day', year=current_year,
-                               month=current_month, day=current_day)
-
+                cal = DateEntry(container, bootstyle='danger', startdate=date(current_year, current_month, current_day))
                 self.single_data_inputs.append((Label(container, text="Date:", anchor=W), cal))
             else:
-                self.single_data_inputs.append((Label(container, text=val_name, anchor=W),
-                                            Entry(container, width=50, borderwidth=1, relief = 'solid')))
+                self.single_data_inputs.append((Label(container, text=val_name.title().replace("_", " "), anchor=W),
+                                            Entry(container, width=50, bootstyle="dark")))
             
         # large box data
         for val_name in self.job_attributes_titles['large_box_data']:
-            
-            # create frame to hold large_box_data textbox and scrollbar
-            large_box_frame = Frame(self.container, padx=10,)
-
-            text_box = Text(large_box_frame, width=40, height=10, padx=10, pady=5, 
-                            borderwidth=2, relief='solid')
-            text_box.grid(row =0, column=0, sticky='w')
-
-            # create and configure text box - scrolls text box
-            scrollbar = ttk.Scrollbar(self.container, orient='vertical', command=text_box.yview)
-            text_box.config(yscrollcommand=scrollbar.set)
-            scrollbar.config(command=text_box.yview)
-            # allow for scrolling when entering textbox
-            #large_box_frame.bind('<Enter>', lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-            # allow scrolling with the use of trackpad/ mouse scrollwheel
-            large_box_frame.bind_all('<MouseWheel>',lambda e: text_box.yview_scroll(-1 * int(e.delta / 60), "units"))
-
-            self.large_box_inputs.append((Label(self.container, text=val_name, anchor=W),
-                                            large_box_frame, scrollbar, text_box))
-
+            text_box = ScrolledText(self.container, width=80, height=10, wrap=WORD, autohide=True)
+            self.large_box_inputs.append((Label(self.container, text=val_name.title().replace("_", " "), anchor=W),
+                                            text_box))
+        # Menu Data
         for menu_option in self.job_attributes_titles['menu_data']:
             
-            value_holder = MenuInput(menu_option[1][0][1]).get_input_val()
             menu_options = [val[1] for val in menu_option[1]]
+
+            box = Combobox(container, bootstyle='success', values = menu_options)
+            box.current(0)
 
             # Form: (Label, input_holder, OptionMenu)
             self.menu_data_inputs.append((Label(container, text=menu_option[0], anchor=W), 
-                                     value_holder,
-                                     OptionMenu(container, value_holder, *menu_options)))
-        
+                                     box))
         
         # ---------------------------------------------------------------
         # JOB PROGRESS TRACK SECTION
@@ -88,14 +69,13 @@ class NewApplicationScreen(FullScreen):
         # list of buttons to be disabled/enabled during progress creation
         self.buttons_list = []
 
-        self.job_progress_frame = Frame(container, borderwidth=2, relief='solid', padx=5, pady=5)
-        self.add_progress_btn = Button(self.job_progress_frame, text='Add Progress Note', padx=5, pady=5, command=self.load_progress_window)
+        self.job_progress_frame = Frame(container, bootstyle = 'default')
+        self.add_progress_btn = Button(self.job_progress_frame, text='Add Progress Note', command=self.load_progress_window)
 
         self.buttons_list.append(self.add_progress_btn)
 
         self.progress_counter = len(self.progress_instance_list) + 1
-        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter - 1}",
-                                      padx=5, pady=5)
+        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter - 1}")
 
         # list to store single data inputs (one-line)
         self.single_data_list = []
@@ -110,7 +90,7 @@ class NewApplicationScreen(FullScreen):
 
         # ---------------------------------------------------------------
         # JOB NOTES SECTION
-        self.new_note_btn = Button(container, text='Add Job Note', anchor=W)
+        self.new_note_btn = Button(container, text='Add Job Note')
 
         # ---------------------------------------------------------------
         # Save Application Button
@@ -136,15 +116,18 @@ class NewApplicationScreen(FullScreen):
 
         progress_instance = []
 
-        # 1) Retrieve Single Items
-        for item in self.single_data_list:
+        # 1) Date Field set by default as first field for progress instance
+        progress_instance.append(self.single_data_list[0].entry.get())
+
+        # 2) Retrieve remaining Single Items
+        for item in self.single_data_list[1:]:
             progress_instance.append(item.get())
 
-        # 2) Retrieve multi-line input data
+        # 3) Retrieve multi-line input data
         for item in self.large_box_data:
             progress_instance.append(item.get("1.0", END).strip())
                 
-        # 3) Retrieve Foreign-Key (Menu-Based Data)
+        # 4) Retrieve Foreign-Key (Menu-Based Data)
         for menu_input in self.fk_data:
             menu_title = menu_input[0].cget('text')
             selected_option = menu_input[1].get()
@@ -161,7 +144,7 @@ class NewApplicationScreen(FullScreen):
         self.fk_data.clear()
 
         # print message to user that progres instance has been added to list (not saved in db)
-        messagebox.showinfo(message='Job Progress has been added on')
+        Messagebox.show_info(message='Job Progress has been added on')
 
         # re-enable buttons to add progress_instance, save new application and close progress window
         self.progress_window.enable_buttons_close_window()
@@ -172,21 +155,21 @@ class NewApplicationScreen(FullScreen):
         data_values = []
 
         for single_input in self.single_data_inputs[1:]:
-            # check if input type was for date, if so reset
+            # check if input type was for date, if so retrieve date
             if 'date' in single_input[0].cget('text').lower():
-                data_values.append(single_input[1].get_date())
+                data_values.append(single_input[1].entry.get())
             else:
                 data_values.append(single_input[1].get())
 
         for large_box_value in self.large_box_inputs:
-            data_values.append(large_box_value[3].get("1.0", END))
+            data_values.append(large_box_value[1].get("1.0", END))
 
         for menu_input in self.menu_data_inputs:
             menu_title = menu_input[0].cget('text')
             selected_option = menu_input[1].get()
             
             data_values.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.job_attributes_titles['menu_data']))
-
+        
         # save new job application and retrieve id
         job_id = self.db_controller.write_single_job_no_id(data_values)
         self.db_controller.write_job_progress(self.progress_instance_list , job_id)
@@ -196,29 +179,29 @@ class NewApplicationScreen(FullScreen):
             # check if input type was for date, if so ret
             if 'date' in input_field[0].cget('text').lower():
                 # retrieve current date - default setting
-                current_date = [int(val) for val in str(date.today()).split("-")]
+                current_date = [str(val) for val in str(date.today()).split("-")]
                 current_year = current_date[0]
                 current_month=current_date[1]
                 current_day=current_date[2]
                 # reset current date
-                input_field[1].selection_set(date(current_year, current_month, current_day))
+                input_field[1].entry.delete(0, END)
+                input_field[1].entry.insert(0, current_year+"/"+current_month+"/"+current_day)
             else:
                 # non-date field - clear input box
                 input_field[1].delete(0, END)
 
         for input_field in self.large_box_inputs:
-            input_field[3].delete("1.0", END)
+            input_field[1].delete("1.0", END)
 
         # Display Message to user that Application has been saved
-        messagebox.showinfo(message='Application has been saved')
+        Messagebox.show_info(message='Application has been saved')
 
         # clear progress instanc list after job application save
         self.progress_instance_list.clear()
         # reset progress counter
         self.progress_counter = 1
         self.progress_count_label.destroy()
-        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter - 1}",
-                                      padx=5, pady=5)
+        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter - 1}")
         self.load_window()
 
 
@@ -227,12 +210,12 @@ class NewApplicationScreen(FullScreen):
         # load single data inputs
         for single_tup in self.single_data_inputs[1:]:
             
-            # check for date field
-            if 'date' in single_tup[0].cget('text').lower():   
-                single_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
-                self.row_count += 1
-            else:
-                single_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
+            # # check for date field
+            # if 'date' in single_tup[0].cget('text').lower():   
+            #     single_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=10, sticky=W+E)
+            #     self.row_count += 1
+            # else:
+            single_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=10, sticky=W+E)
             
             single_tup[1].grid(row = self.row_count, column = 1 , sticky=W+E)
             self.row_count += 1
@@ -242,14 +225,12 @@ class NewApplicationScreen(FullScreen):
             large_box_item_tup[0].grid(row = self.row_count, column = 0, padx = 5, pady = 10, sticky=W+E)
             self.row_count += 1
             large_box_item_tup[1].grid(row = self.row_count, column = 0, columnspan = 2, padx = 5, pady = 2, sticky=W+E)
-            large_box_item_tup[2].grid(row = self.row_count, column = 1, sticky="NSE")
             self.row_count += 1
 
-        
         # load menu data inputs
         for menu_tup in self.menu_data_inputs:
             menu_tup[0].grid(row=self.row_count, column = 0, padx=2, pady=5, sticky=W+E)
-            menu_tup[2].grid(row = self.row_count, column = 1 , sticky=W)
+            menu_tup[1].grid(row = self.row_count, column = 1 , sticky=W)
             self.row_count += 1
 
         # load job progress section (in main application)

@@ -1,6 +1,5 @@
-from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
+from ttkbootstrap import *
+from ttkbootstrap.dialogs import Messagebox
 from ..parent_screens import FullScreen
 
 # Delete an Application
@@ -15,16 +14,16 @@ class DeleteApplication(FullScreen):
         self.deletion_items = []
 
         # top-level buttons
-        self.top_level_holder = Frame(container, borderwidth=2)
-        self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes",anchor=E)
-        self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected', anchor=E)
+        self.top_level_holder = Frame(container, bootstyle = 'default')
+        self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes", bootstyle='primary')
+        self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected', bootstyle='danger')
 
     def deselect_all(self):
         for item in self.deletion_items:
             item.uncheck_box()
         # disbaled clear box and delete all buttons
-        self.clear_boxes_btn.config(state=DISABLED)
-        self.delete_selected_btn.config(state=DISABLED)
+        self.clear_boxes_btn.configure(state='disabled')
+        self.delete_selected_btn.configure(state='disabled')
 
     def delete_selected_jobs(self):
 
@@ -37,8 +36,8 @@ class DeleteApplication(FullScreen):
             display_message = f"Are you sure you want to delete {len(id_list)} jobs?\nThis action cannot be undone"
 
         # Display Yes or No Box to confirm Deletion
-        if(messagebox.askyesno('Permanent Deletion Warning!', 
-                               message=display_message, default = 'no')):
+        if(Messagebox.yesno(title='Permanent Deletion Warning!', 
+                               message=display_message)) == "Yes":
             # delete all job progress notes associated with job_id
             self.db_controller.delete_job_progress_data(id_list)
             # delete job application data
@@ -51,26 +50,27 @@ class DeleteApplication(FullScreen):
             self.load_window()
 
     def delete_clear_box_disable(self):
+        
         selected_box = False
         for item in self.deletion_items:
             if item.get_selection() == 1:
                 selected_box = True
                 break
 
-        if selected_box == True and self.clear_boxes_btn.cget('state') == 'disabled' and self.delete_selected_btn.cget('state') == 'disabled':
-            self.clear_boxes_btn.config(state=ACTIVE)
-            self.delete_selected_btn.config(state=ACTIVE)
+        if selected_box == True:
+            self.clear_boxes_btn.configure(state='active')
+            self.delete_selected_btn.configure(state='active')
 
-        elif selected_box == FALSE and self.clear_boxes_btn.cget('state') == 'active' and self.delete_selected_btn.cget('state') == 'active':
-            self.clear_boxes_btn.config(state=DISABLED)
-            self.delete_selected_btn.config(state=DISABLED)
+        elif selected_box == False:
+            self.clear_boxes_btn.configure(state='disabled')
+            self.delete_selected_btn.configure(state='disabled')
 
 
     def load_window(self):
         
         # configure functions for clear_boxes and delete_selected
-        self.clear_boxes_btn.config(command=self.deselect_all, state=DISABLED)
-        self.delete_selected_btn.config(command=self.delete_selected_jobs, state = DISABLED)
+        self.clear_boxes_btn.configure(command=self.deselect_all, state='disabled')
+        self.delete_selected_btn.configure(command=self.delete_selected_jobs, state = 'disabled')
 
         # ---------------------------------------------------------------
         # DATA RETRIEVAL
@@ -95,11 +95,11 @@ class DeleteApplication(FullScreen):
                     self.delete_clear_box_disable = delete_clear_box_disable
                     self.container = container
 
-                    self.containing_box = Frame(container, bg='blue')
+                    self.containing_box = Frame(container, bootstyle = 'default')
 
                     self.checked = IntVar()
-                    self.checkBox = Checkbutton(self.containing_box, variable=self.checked, command=delete_clear_box_disable)
-                    self.delete_job_btn = Button(container, text='Delete')
+                    self.checkBox = Checkbutton(self.containing_box, variable=self.checked, onvalue=1, offvalue=0, command=delete_clear_box_disable)
+                    self.delete_job_btn = Button(self.containing_box, text='Delete', bootstyle='danger')
 
                     self.id = job_data_tup[0]
                     self.label_list = []
@@ -113,7 +113,7 @@ class DeleteApplication(FullScreen):
                     # configure individual deletion button command
                     self.delete_job_btn.config(command=self.delete_job)
 
-                    self.containing_box.grid(row=row, column=0)
+                    self.containing_box.grid(row=row, column=0, pady=5)
                     column_count = column
                     self.checkBox.grid(row=row, column=column_count, pady=2)
                     column_count += 1
@@ -126,9 +126,8 @@ class DeleteApplication(FullScreen):
 
                 def delete_job(self):
                     # Display Yes or No Box to confirm Deletion
-                    if(messagebox.askyesno('Permanent Deletion Warning!', 
-                               message="Are you sure you want to delete this job?\nThis action cannot be undone",
-                               default = 'no')):
+                    if(Messagebox.yesno(title='Permanent Deletion Warning!', 
+                               message="Are you sure you want to delete this job?\nThis action cannot be undone") == "Yes"):
                         
                         # delete all job progress notes associated with job_id
                         self.db_controller.delete_job_progress_data([self.id])

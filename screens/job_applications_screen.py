@@ -1,6 +1,4 @@
-from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
+from ttkbootstrap import *
 from .parent_screens import FullScreen, SectionedLeftMinor
 from .sub_screens.new_application import NewApplicationScreen
 from .sub_screens.delete_screen import DeleteApplication
