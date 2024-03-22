@@ -105,13 +105,9 @@ class NewApplicationScreen(FullScreen):
         self.buttons_list.append(self.save_new_application)
 
     def disable_outer_scroll(self, event):
-        print('disable outer scroll')
         self.scrollable.disable_scrolling()
 
-        
-
     def re_enable_outer_scroll(self, event):
-        print("enable outer scroll")
         self.scrollable.enable_scrolling()
 
     def load_progress_window(self):
@@ -212,6 +208,9 @@ class NewApplicationScreen(FullScreen):
 
         # Display Message to user that Application has been saved
         Messagebox.show_info(message='Application has been saved')
+
+        # move screen back to top of scroll
+        self.scrollable.yview_moveto(0.0)
 
         # clear progress instanc list after job application save
         self.progress_instance_list.clear()
