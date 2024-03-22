@@ -53,17 +53,20 @@ class ScreenController():
 
         # Main Menu Dropdown Sub-Section ----------------------------------------------------------
 
-        # Main Menu Dropdown
+        # get menu names (keys) from screen.dict -> Dictionary housing constructors for each screen
         self.main_menu_keys = list(self.screen_dict.keys())
 
         self.main_menu = Menubutton(self.page_title_frame, text = self.main_menu_keys[0], style="primary")
         self.menu = Menu(self.main_menu)
 
+        # variable to track selected main screen
         self.option_variable = StringVar()
 
+        # set each main screen as a radiobutton
         for menu_option in self.main_menu_keys:
             self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.option_variable, command=lambda: self.change_main_screen(self.option_variable))
 
+        # allows association of menu containing radio buttons for screen to MenuButton Widget
         self.main_menu['menu'] = self.menu
         self.main_menu.grid(row=0, column=0, sticky=W+E, padx=5)
 
@@ -82,7 +85,7 @@ class ScreenController():
         for screen in self.app_screen.grid_slaves():
             screen.grid_forget()
 
-        # Keep Menu Dropdown text as Menu
+        # Update Main Menu text to name of new main screen
         self.main_menu.config(text=menu_option.get())
 
         # change main screen
@@ -90,4 +93,5 @@ class ScreenController():
 
 
     def start_main_screen(self):
+        # start running of Application GUI
         self.root_window.mainloop()
