@@ -7,3 +7,4 @@ persistence_modules/__pycache__/db_initializer.cpython-312.pyc
 persistence_modules/__pycache__/db_reader.cpython-312.pyc
 screens/sub_screens/__pycache__/job_view_screen.cpython-312.pyc
 screens/sub_screens/__pycache__/new_application.cpython-312.pyc
+screens/__pycache__/job_applications_screen.cpython-312.pyc
