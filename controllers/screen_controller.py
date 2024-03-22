@@ -1,4 +1,4 @@
-from tkinter import *
+from ttkbootstrap import *
 
 # Main Screens
 from screens.home_screen import HomeScreen
@@ -10,7 +10,7 @@ from screens.gen_notes import GeneralNotesScreen
 class ScreenController():
 
     def __init__(self, db_controller) -> None:
-        self.root_window = Tk()
+        self.root_window = Window()
         self.page_title_frame = None
         self.page_title = None
         self.app_screen = None
@@ -25,7 +25,7 @@ class ScreenController():
         self.configure_root_sections()
 
     def configure_root_window(self):
-        self.root_window.geometry("800x600")
+        self.root_window.geometry("1200x600")
         self.root_window.minsize(700, 200)
         self.root_window.grid_columnconfigure(0, weight=1)
         self.root_window.rowconfigure(0, weight=0)
@@ -34,16 +34,16 @@ class ScreenController():
     def configure_root_sections(self):
 
         # Title Frame to Hold Menu Tab and Application Name
-        self.page_title_frame = LabelFrame(self.root_window, borderwidth=2, relief="solid", bg="blue", padx=5, pady=5)
+        self.page_title_frame = LabelFrame(self.root_window, bootstyle = 'default')
         self.page_title_frame.grid_columnconfigure(1, weight=1)
         self.page_title_frame.grid(row=0, column=0, sticky=W+E, padx=5, pady=10)
 
         # Application Title Sub-Section
-        self.page_title = Label(self.page_title_frame, text="Personal Job Search Tracker",borderwidth=1, relief="solid")
+        self.page_title = Label(self.page_title_frame, text="Personal Job Search Tracker", bootstyle = 'default')
         self.page_title.grid(row=0, column=1, sticky=W+E)
 
         # Application Screen
-        self.app_screen = LabelFrame(self.root_window)
+        self.app_screen = LabelFrame(self.root_window, bootstyle = 'default')
         self.app_screen.grid_columnconfigure(0, weight=1)
         self.app_screen.grid_rowconfigure(0, weight=1)
         self.app_screen.grid(row=1, column=0, sticky="NEWS")
@@ -54,13 +54,19 @@ class ScreenController():
         # Main Menu Dropdown Sub-Section ----------------------------------------------------------
 
         # Main Menu Dropdown
-        menu_option = StringVar()
-        menu_option.set('Menu')
-        main_menu = OptionMenu(self.page_title_frame, menu_option, command=self.change_main_screen, *self.screen_dict)
-        main_menu.config(width = 4)
-        main_menu.grid(row=0, column=0, sticky=W+E, padx=5)
+        self.main_menu_keys = list(self.screen_dict.keys())
 
-        # Home (loadup) screen should always have key of 'Home'
+        self.main_menu = Menubutton(self.page_title_frame, text = self.main_menu_keys[0], style="primary")
+        self.menu = Menu(self.main_menu)
+
+        self.option_variable = StringVar()
+
+        for menu_option in self.main_menu_keys:
+            self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.option_variable, command=lambda: self.change_main_screen(self.option_variable))
+
+        self.main_menu['menu'] = self.menu
+        self.main_menu.grid(row=0, column=0, sticky=W+E, padx=5)
+
         # load home screen
         self.current_screen = self.screen_dict['Home'].load_window()
 
@@ -76,18 +82,12 @@ class ScreenController():
         for screen in self.app_screen.grid_slaves():
             screen.grid_forget()
 
-        self.screen_dict[menu_option].load_window()
-        
         # Keep Menu Dropdown text as Menu
-        menu_option = StringVar()
-        menu_option.set('Menu')
-        main_menu = OptionMenu(self.page_title_frame, menu_option, command=self.change_main_screen, *self.screen_dict)
-        main_menu.config(width = 4)
-        main_menu.grid(row=0, column=0, sticky=W+E, padx=5)
+        self.main_menu.config(text=menu_option.get())
+
+        # change main screen
+        self.screen_dict[menu_option.get()].load_window()
 
 
     def start_main_screen(self):
         self.root_window.mainloop()
-
-
-
