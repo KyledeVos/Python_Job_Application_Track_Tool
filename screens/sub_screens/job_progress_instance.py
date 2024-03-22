@@ -27,9 +27,12 @@ class DataConverter():
 
 class RecentJobProgress():
 
-    def __init__(self, outer_frame, recent_job_progress) -> None:
+    def __init__(self, outer_frame, recent_job_progress, outer_scrollable) -> None:
         self.outer_frame = outer_frame
         self.recent_job_progress = recent_job_progress
+        # Instance of ScrollableScreen (from parent screens) to control enable/disable of outer scrollbar mouse wheel control
+        # when scrolling in Recent Progress Text box(s)
+        self.outer_scrollable = outer_scrollable
 
     def retrieve_recent_progress_frame(self):
             
@@ -64,6 +67,12 @@ class RecentJobProgress():
                 # create frame to hold large_box_data textbox and scrollbar
                 text_box = ScrolledText(self.progress_data_frame, width=80, height=10,wrap=WORD, autohide=True)
                 text_box.insert(END, self.recent_job_progress['val_list'][count])
+
+                # add event handler to disable outer scrollbar control from mousewheel when cursor enters textbox
+                text_box.bind("<Enter>", self.disable_outer_scroll, "+")
+                # add event handler to re-enable outer scrollbar control from mousewheel when cursor leaves textbox
+                text_box.bind("<Leave>", self.re_enable_outer_scroll, "+")
+
                 # recent job progress allows for read only - disable edit functionality for text boxes
                 # text_box.configure(state=DISABLED)
 
@@ -86,6 +95,12 @@ class RecentJobProgress():
 
         # return progress frame containing recent job progress info
         return self.progress_data_frame
+    
+    def disable_outer_scroll(self, event):
+        self.outer_scrollable.disable_scrolling()
+
+    def re_enable_outer_scroll(self, event):
+        self.outer_scrollable.enable_scrolling()
     
     def place_progress_frame(self, row_count):
 

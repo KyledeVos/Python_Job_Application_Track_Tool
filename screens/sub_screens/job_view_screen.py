@@ -164,6 +164,11 @@ class JobView(FullScreen):
             text_box = ScrolledText(self.basic_info_frame, width=80, height=10, wrap=WORD, autohide=True)
             text_box.insert(END, data_tup[1])
 
+            # add event handles to disable/enable outer scroll bar when entering/leaving text box
+            # allowing only text box scroll bar to function with mouse wheel
+            text_box.bind("<Enter>", self.disable_outer_scroll, "+")
+            text_box.bind("<Leave>", self.re_enable_outer_scroll, "+")
+
             self.large_box_inputs.append((Label(self.basic_info_frame, text=data_tup[0].title().replace("_", ""), anchor='w'),
                                            text_box))
         
@@ -194,7 +199,7 @@ class JobView(FullScreen):
         # check if current job has job progress data
         if self.recent_job_progress != None:
             # Create recent job progress instance
-            self.recent_progress = RecentJobProgress(container, self.recent_job_progress)
+            self.recent_progress = RecentJobProgress(container, self.recent_job_progress, self.left_minor_subscreen.scrollable_screen.scrollable)
             # retrieve recent progress frame containing recent progress data
             self.recent_progress_section = self.recent_progress.retrieve_recent_progress_frame()
 
@@ -202,6 +207,12 @@ class JobView(FullScreen):
         # ----------------------------------------------------------------------------
         # JOB GENERAL NOTES SECTION
             # LATER
+
+    def disable_outer_scroll(self, event):
+        self.left_minor_subscreen.scrollable_screen.scrollable.disable_scrolling()
+
+    def re_enable_outer_scroll(self, event):
+        self.left_minor_subscreen.scrollable_screen.scrollable.enable_scrolling()
 
     def add_job_progress(self):
 
