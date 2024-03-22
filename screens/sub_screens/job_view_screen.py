@@ -431,7 +431,7 @@ class JobView(FullScreen):
         self.recent_job_progress = self.db_controller.retrieve_job_progress_data(self.job_id, True, True)
         # if there is remaining job progress data, reload recent progress section
         if self.recent_job_progress is not None:
-            self.recent_progress = RecentJobProgress(self.container, self.recent_job_progress)
+            self.recent_progress = RecentJobProgress(self.container, self.recent_job_progress, self.left_minor_subscreen.scrollable_screen.scrollable)
             self.recent_progress_section = self.recent_progress.retrieve_recent_progress_frame()
         
         # load window already handles checks for no job progress data
