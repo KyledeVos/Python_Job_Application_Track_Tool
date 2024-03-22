@@ -8,11 +8,15 @@ from .job_progress_instance import ProgressInstanceWindow, DataConverter
 # New Job Application Sub-Screen
 class NewApplicationScreen(FullScreen):
 
-    def __init__(self, container, db_controller):
+    def __init__(self, container, db_controller, left_sub_window):
         super().__init__(container)
         self.db_controller = db_controller
+        self.left_sub_window = left_sub_window
         self.data_converter = DataConverter()
         self.container = container
+
+        # create access to outer scroll screen needed to enable and disable outer scrolling during scroll of Textboxes
+        self.scrollable = self.left_sub_window.scrollable_screen.scrollable
 
         self.row_count = 0
 
@@ -44,8 +48,11 @@ class NewApplicationScreen(FullScreen):
         # large box data
         for val_name in self.job_attributes_titles['large_box_data']:
             text_box = ScrolledText(self.container, width=80, height=10, wrap=WORD, autohide=True)
+            text_box.bind("<Enter>", self.disable_outer_scroll, "+")
+            text_box.bind("<Leave>", self.re_enable_outer_scroll, "+")
             self.large_box_inputs.append((Label(self.container, text=val_name.title().replace("_", " "), anchor=W),
                                             text_box))
+            
         # Menu Data
         for menu_option in self.job_attributes_titles['menu_data']:
             
@@ -96,6 +103,16 @@ class NewApplicationScreen(FullScreen):
         # Save Application Button
         self.save_new_application = Button(container, text="Save New Application", command=self.save_data)
         self.buttons_list.append(self.save_new_application)
+
+    def disable_outer_scroll(self, event):
+        print('disable outer scroll')
+        self.scrollable.disable_scrolling()
+
+        
+
+    def re_enable_outer_scroll(self, event):
+        print("enable outer scroll")
+        self.scrollable.enable_scrolling()
 
     def load_progress_window(self):
         # initializes all widgets in progress window and populates single_data_list, large_box_data
