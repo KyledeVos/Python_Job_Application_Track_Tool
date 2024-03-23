@@ -4,6 +4,7 @@ from ttkbootstrap.dialogs import Messagebox
 from datetime import date
 from ..parent_screens import FullScreen
 from .job_progress_instance import ProgressInstanceWindow, DataConverter
+from .job_notes import NewJobNote
 
 # New Job Application Sub-Screen
 class NewApplicationScreen(FullScreen):
@@ -112,8 +113,9 @@ class NewApplicationScreen(FullScreen):
         self.job_notes_main_frame = Frame(container, bootstyle='default')
 
         # frame housing top note buttons - 
-
-        self.new_note_btn = Button(self.job_notes_main_frame, text=new_note_text, width= sub_button_width)
+        self.new_note_btn = Button(self.job_notes_main_frame, text=new_note_text,
+                                   command=self.load_new_note_window, width= sub_button_width)
+        self.new_note_screen = NewJobNote(self.db_controller, None, None)
 
         # ---------------------------------------------------------------
         # Save Application Button
@@ -131,6 +133,11 @@ class NewApplicationScreen(FullScreen):
         # initializes all widgets in progress window and populates single_data_list, large_box_data
         # and fk_data lists with values
         self.progress_window.create_window()
+
+    def load_new_note_window(self):
+        # initializes all widgets in new_note_screen and populates single_data_list, large_box_data
+        # and fk_data lists with values
+        self.new_note_screen.create_note_window()
 
 
     def retrieve_progress_data(self):
