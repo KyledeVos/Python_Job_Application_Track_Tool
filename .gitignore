@@ -10,3 +10,5 @@ screens/sub_screens/__pycache__/new_application.cpython-312.pyc
 screens/__pycache__/job_applications_screen.cpython-312.pyc
 screens/sub_screens/__pycache__/job_progress_instance.cpython-312.pyc
 controllers/__pycache__/screen_controller.cpython-312.pyc
+screens/__pycache__/parent_screens.cpython-312.pyc
+screens/sub_screens/__pycache__/delete_screen.cpython-312.pyc
