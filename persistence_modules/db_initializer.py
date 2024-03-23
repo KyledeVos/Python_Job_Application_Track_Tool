@@ -86,10 +86,12 @@ class DbInitializer():
 
         cursor.execute("""CREATE TABLE IF NOT EXISTS job_notes(
         id INTEGER PRIMARY KEY,
-        job_id INTEGER NOT NULL,
-        description TEXT NOT NULL,
+        date TEXT NOT NULL,
+        title TEXT NOT NULL,
         to_do BOOLEAN,
         complete BOOLEAN,
+        description TEXT NOT NULL,
+        job_id INTEGER NOT NULL,
         FOREIGN KEY(job_id) REFERENCES job_applications(id)
         )""")
         connection.commit()
