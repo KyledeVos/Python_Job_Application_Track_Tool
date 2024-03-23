@@ -93,7 +93,7 @@ class DbReader():
         return combined_data
         
 
-    def retrieve_configured_job_progress_columns(self, cursor, table_name, single_data, larger_data_inputs,fk_tables):
+    def retrieved_configured_columns(self, cursor, table_name, single_data, larger_data_inputs,fk_tables):
 
         # retrieve all column names:
         all_cols = self.retrieve_column_names(cursor, table_name)
