@@ -93,26 +93,30 @@ class DbReader():
         return combined_data
         
 
-    def retrieved_configured_columns(self, cursor, table_name, single_data, larger_data_inputs,fk_tables):
+    def retrieved_configured_columns(self, cursor, table_name, single_data = None, bool_data = None,
+                                      larger_data_inputs = None ,fk_tables = None):
 
         # retrieve all column names:
         all_cols = self.retrieve_column_names(cursor, table_name)
         
         # lists to hold seperated data for dictionary:
         single_data_list = []
+        bool_data_list = []
         larger_box_data = []
         fk_data = []
 
         # dictionary to hold data as:
-        # {'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]] }
+        # {'single_data': [()], 'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]] }
         column_names_dict = {}
 
         # Retrieve and Configure Data for single columns and larger box area columns
         for name in all_cols:
-            if name in single_data:
-                single_data_list.append(name.title().replace("_", " "))
-            elif name in larger_data_inputs:
-                larger_box_data.append(name.title().replace("_", " "))
+            if single_data is not None:
+                if name in single_data:
+                    single_data_list.append(name.title().replace("_", " "))
+            if larger_box_data is not None:
+                if name in larger_data_inputs:
+                    larger_box_data.append(name.title().replace("_", " "))
 
         # retrieve foreign table data
         if fk_tables is not None:
@@ -123,6 +127,7 @@ class DbReader():
 
         # add all data from lists to column_names_dict
         column_names_dict['single_data'] = tuple(single_data_list)
+        column_names_dict['bool_data'] = tuple(bool_data_list)
         column_names_dict['larger_box_data'] = tuple(larger_box_data)
         column_names_dict['fk_data'] = fk_data
 
