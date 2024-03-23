@@ -1,5 +1,5 @@
 from ttkbootstrap import *
-from ttkbootstrap.dialogs import Messagebox
+from ttkbootstrap.dialogs import Messagebox, MessageDialog
 from ..parent_screens import FullScreen
 
 # Delete an Application
@@ -35,9 +35,13 @@ class DeleteApplication(FullScreen):
         else:
             display_message = f"Are you sure you want to delete {len(id_list)} jobs?\nThis action cannot be undone"
 
+        # Create New Window to display deletion warning message before deleting jobs with 'No' set as Primary
+        deletion_box = MessageDialog(title="Permanent Deletion Warning", message=display_message,
+                                     buttons=["Yes", "No:Primary"])
+        deletion_box.show()
+
         # Display Yes or No Box to confirm Deletion
-        if(Messagebox.yesno(title='Permanent Deletion Warning!', 
-                               message=display_message)) == "Yes":
+        if deletion_box.result == "Yes":
             # delete all job progress notes associated with job_id
             self.db_controller.delete_job_progress_data(id_list)
             # delete job application data
@@ -125,9 +129,14 @@ class DeleteApplication(FullScreen):
                     self.delete_job_btn.grid(row=row_count, column=column_count)
 
                 def delete_job(self):
-                    # Display Yes or No Box to confirm Deletion
-                    if(Messagebox.yesno(title='Permanent Deletion Warning!', 
-                               message="Are you sure you want to delete this job?\nThis action cannot be undone") == "Yes"):
+                    
+                    # Create A deletion warning window (set No as default option)
+                    deletion_box = MessageDialog(title="Deletion Warning", message="Sure you want to delete", 
+                                                 parent=None, buttons=["No:Primary", "Yes"])
+                    deletion_box.show()
+
+                    # Check for Deletion Confirmation
+                    if deletion_box.result== "Yes":
                         
                         # delete all job progress notes associated with job_id
                         self.db_controller.delete_job_progress_data([self.id])
