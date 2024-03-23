@@ -93,45 +93,20 @@ class DbReader():
         return combined_data
         
 
-    def retrieved_configured_columns(self, cursor, table_name, single_data = None, bool_data = None,
-                                      larger_data_inputs = None ,fk_tables = None):
+    def retrieve_fk_data_columns(self, cursor, fk_tables = None):
 
-        # retrieve all column names:
-        all_cols = self.retrieve_column_names(cursor, table_name)
-        
-        # lists to hold seperated data for dictionary:
-        single_data_list = []
-        bool_data_list = []
-        larger_box_data = []
+        # list to hold each foreign key data for job instance ComboBoxes
         fk_data = []
-
-        # dictionary to hold data as:
-        # {'single_data': [()], 'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]] }
-        column_names_dict = {}
-
-        # Retrieve and Configure Data for single columns and larger box area columns
-        for name in all_cols:
-            if single_data is not None:
-                if name in single_data:
-                    single_data_list.append(name.title().replace("_", " "))
-            if larger_box_data is not None:
-                if name in larger_data_inputs:
-                    larger_box_data.append(name.title().replace("_", " "))
 
         # retrieve foreign table data
         if fk_tables is not None:
             for fk_tup in fk_tables['fk_table_data']:
-                    #fk_tup[0] = desired column name, fk_tup[1] = table name
+                    #fk_tup[0] = table name , fk_tup[1] = desired column name
                     data_list = list(cursor.execute(f"SELECT id, {fk_tup[1]} FROM {fk_tup[0]}").fetchall())
                     fk_data.append([fk_tup[1].title().replace("_", " "), data_list])
 
-        # add all data from lists to column_names_dict
-        column_names_dict['single_data'] = tuple(single_data_list)
-        column_names_dict['bool_data'] = tuple(bool_data_list)
-        column_names_dict['larger_box_data'] = tuple(larger_box_data)
-        column_names_dict['fk_data'] = fk_data
-
-        return column_names_dict
+        return fk_data
+    
     
     # Helper Function to remove desired columns and matching value using index
     def remove_col_and_val(self, col_data, val_data, remove_cols, return_One = False):
