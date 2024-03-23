@@ -115,10 +115,11 @@ class DbReader():
                 larger_box_data.append(name.title().replace("_", " "))
 
         # retrieve foreign table data
-        for fk_tup in fk_tables['fk_table_data']:
-                #fk_tup[0] = desired column name, fk_tup[1] = table name
-                data_list = list(cursor.execute(f"SELECT id, {fk_tup[1]} FROM {fk_tup[0]}").fetchall())
-                fk_data.append([fk_tup[1].title().replace("_", " "), data_list])
+        if fk_tables is not None:
+            for fk_tup in fk_tables['fk_table_data']:
+                    #fk_tup[0] = desired column name, fk_tup[1] = table name
+                    data_list = list(cursor.execute(f"SELECT id, {fk_tup[1]} FROM {fk_tup[0]}").fetchall())
+                    fk_data.append([fk_tup[1].title().replace("_", " "), data_list])
 
         # add all data from lists to column_names_dict
         column_names_dict['single_data'] = tuple(single_data_list)
