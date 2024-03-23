@@ -65,6 +65,14 @@ class NewApplicationScreen(FullScreen):
             self.menu_data_inputs.append((Label(container, text=menu_option[0], anchor=W), 
                                      box))
         
+        # -------------------------------------------------------------------
+        # Lower buttons Text
+        progress_text = "Add Progress Note"
+        new_note_text = "Add To-Do Note"
+
+        # determine max required width from above buttons, used to make all buttons the same width
+        sub_button_width = max(len(progress_text), len(new_note_text)) + 2
+        
         # ---------------------------------------------------------------
         # JOB PROGRESS TRACK SECTION
         
@@ -77,7 +85,9 @@ class NewApplicationScreen(FullScreen):
         self.buttons_list = []
 
         self.job_progress_frame = Frame(container, bootstyle = 'default')
-        self.add_progress_btn = Button(self.job_progress_frame, text='Add Progress Note', command=self.load_progress_window)
+        
+        self.add_progress_btn = Button(self.job_progress_frame, text=progress_text, 
+                                       command=self.load_progress_window, width=sub_button_width)
 
         self.buttons_list.append(self.add_progress_btn)
 
@@ -97,11 +107,18 @@ class NewApplicationScreen(FullScreen):
 
         # ---------------------------------------------------------------
         # JOB NOTES SECTION
-        self.new_note_btn = Button(container, text='Add Job Note')
+
+        # Main frame holding job notes section
+        self.job_notes_main_frame = Frame(container, bootstyle='default')
+
+        # frame housing top note buttons - 
+
+        self.new_note_btn = Button(self.job_notes_main_frame, text=new_note_text, width= sub_button_width)
 
         # ---------------------------------------------------------------
         # Save Application Button
-        self.save_new_application = Button(container, text="Save New Application", command=self.save_data)
+        text = "Save New Application"
+        self.save_new_application = Button(container, text=text, command=self.save_data, width=len(text) + 2)
         self.buttons_list.append(self.save_new_application)
 
     def disable_outer_scroll(self, event):
@@ -256,6 +273,13 @@ class NewApplicationScreen(FullScreen):
             self.progress_count_label.grid(row=0, column=1, padx=10, pady=2)
         self.row_count += 1
 
+        # load new job note section
+        self.job_notes_main_frame.grid(row=self.row_count, column=0, columnspan=2, padx=2, pady=5, sticky=W+E)
+        self.row_count += 1
+
+        # load add note button
+        self.new_note_btn.grid(row=0, column=0, padx=2, pady=5)
+
         # ------------------------------------------------------------------------
         # BUTTONS
-        self.save_new_application.grid(row=self.row_count, column=0, sticky=W+E)
+        self.save_new_application.grid(row=self.row_count, column=0, columnspan=2)
