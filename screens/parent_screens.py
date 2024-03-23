@@ -31,8 +31,8 @@ class SectionedLeftMinor():
         self.enclosing_window.grid_columnconfigure(1, weight=2)
         self.enclosing_window.grid_rowconfigure(1, weight = 1)
             
-        self.window_title = Label(self.enclosing_window, text = frame_title )
-        self.window_title.grid(row=0, column=0, columnspan=2, sticky="NEWS")
+        self.window_title = Label(self.enclosing_window, text = frame_title, anchor=CENTER )
+        self.window_title.grid(row=0, column=0, columnspan=2, sticky=W+E)
 
     def load_left_minor(self):
         self.left_minor_window.grid(row = 1, column= 0, sticky="NEWS")
