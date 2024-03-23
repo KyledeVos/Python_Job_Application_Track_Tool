@@ -301,7 +301,7 @@ class JobView(FullScreen):
         # print(self.all_job_progress_data)
 
         # BUTTON to return to job view screen - removes covering frame
-        self.back_btn = Button(self.cover_frame, text= "<- Go Back", command=self.back_to_applications)
+        self.back_btn = Button(self.cover_frame, text= "<- Back to Applications", command=self.back_to_applications)
 
         # clear boxes and delete selected job progress button
         self.top_level_holder = Frame(self.cover_frame, bootstyle = 'default')
