@@ -88,7 +88,6 @@ class DbInitializer():
         id INTEGER PRIMARY KEY,
         date TEXT NOT NULL,
         title TEXT NOT NULL,
-        to_do BOOLEAN,
         complete BOOLEAN,
         description TEXT NOT NULL,
         job_id INTEGER NOT NULL,
