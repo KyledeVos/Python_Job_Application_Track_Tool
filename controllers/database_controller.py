@@ -46,6 +46,29 @@ class JobProgressDefaults():
         self.col_not_display = ["job_id"]
         # Data Update - set columns that can be updated
         self.update_cols = ['date', 'description', 'comm_id']
+
+class JobNotesDefaults():
+    # Class allows for centralized control of job progress attributes
+
+    def __init__(self):
+
+        # NOTE: Fields that require calendar widget for display MUST include 'date' as a substring 
+        # of field name
+
+        # Set Default Table Name
+        self.table_name = 'job_notes'
+        # set names of columns with data for one line
+        self.single_data = ['date', 'title']
+        # set names of columns holding booleans
+        self.bool_data = ['complete']
+        # set column names for data needing larger area input box
+        self.larger_data_inputs = ['description']
+        # set names of foreign key tables with corresponding column name
+        self.fk_tables = None
+        # set names of columns to not be displayed (none must be blank list)
+        self.col_not_display = ["job_id"]
+        # Data Update - set columns that can be updated
+        self.update_cols = ['date', 'title', 'description']
         
 
 class DatabaseController():
@@ -146,22 +169,28 @@ class DatabaseController():
     def retrieve_job_progress_column_names(self):
 
         # Use of this method assumes columns in table are ordered as:
-        # id column, Single Data, Singe Data needing larger area input box, foreign key id's
+        # id column, Single Data, Boolean Data, Single Data needing larger area input box, foreign key Data
 
         # Retrieve default values for job_progress instance
         progress_default_instance = JobProgressDefaults()
+
+        # dictionary to hold summarized data
+        column_names_dict = {}
+        # retrieve single data column names
+        column_names_dict['single_data'] = tuple([val.title().replace("_", " ") for val in progress_default_instance.single_data])
+        # retrieve large box dat column names
+        column_names_dict['larger_box_data'] = tuple([val.title().replace("_", " ") for val in progress_default_instance.larger_data_inputs])
         
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
-        # retrieve configured table column names data
-        # Data to be configured as:
-        # {'single_data': [()], 'larger_box_data':[()], 'fk_data':[[()]]}
-        data = self.db_reader.retrieve_configured_job_progress_columns(
-            self.cursor, progress_default_instance.table_name, progress_default_instance.single_data,
-                progress_default_instance.larger_data_inputs, progress_default_instance.fk_tables)
+
+        # retrieve fk_data
+        data = self.db_reader.retrieve_fk_data_columns(
+            self.cursor, progress_default_instance.fk_tables)
         self.connection.close()
 
-        return data
+        column_names_dict['fk_data'] = tuple(data)
+        return column_names_dict
     
 
     def retrieve_job_progress_cols_exact(self):
