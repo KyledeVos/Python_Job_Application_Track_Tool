@@ -102,10 +102,6 @@ class NewApplicationScreen(FullScreen):
         # list to store single data inputs needing larger input box
         self.large_box_data = []
 
-        # new progress window screen
-        self.progress_window = ProgressInstanceWindow(self.progress_attributes, None, self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, self.load_window, self.retrieve_progress_data, None)       
-
         # ---------------------------------------------------------------
         # JOB NOTES SECTION
 
@@ -146,7 +142,10 @@ class NewApplicationScreen(FullScreen):
     def load_progress_window(self):
         # initializes all widgets in progress window and populates single_data_list, large_box_data
         # and fk_data lists with values
-        self.progress_window.create_window()
+        self.progress_window = ProgressInstanceWindow(self.progress_attributes, None, self.db_controller, self.single_data_list, None, 
+                                                      self.large_box_data, self.fk_data, self.buttons_list, self.load_window,
+                                                      self.retrieve_progress_data, None)  
+        self.progress_window.configure_window_open()
 
     def load_new_note_window(self):
         # initializes all widgets in new_note_screen and populates single_data_list, large_box_data
@@ -166,7 +165,6 @@ class NewApplicationScreen(FullScreen):
         self.row_count += 1
 
         progress_instance = []
-
         # 1) Date Field set by default as first field for progress instance
         progress_instance.append(self.single_data_list[0].entry.get())
 
