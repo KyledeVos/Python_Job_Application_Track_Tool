@@ -232,8 +232,8 @@ class JobView(FullScreen):
         self.large_box_data = []
 
         # new progress window screen
-        self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, lambda: self.reload_window(False), self.retrieve_and_save_progress_data, None, None)
+        self.progress_window = ProgressInstanceWindow(self.progress_attributes, None, self.db_controller, self.single_data_list, self.large_box_data,
+                                                      self.fk_data, self.buttons_list, lambda: self.reload_window(False), self.retrieve_and_save_progress_data, None)
         
         # load progress window
         self.progress_window.create_window()
