@@ -221,7 +221,7 @@ class SubWindowBasic():
             # retrieve index of current single data item
             col_index = self.all_columns.index(large_box_item.lower().replace(" ", "_"))
             # Add value to input box
-            text_box.insert(END, self.columns_categorized[col_index])
+            text_box.insert(END, self.set_data[col_index])
 
         return (label, text_box)
 
