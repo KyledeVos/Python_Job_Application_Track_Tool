@@ -123,7 +123,7 @@ class DatabaseController():
         self.connection.close()
 
     # -----------------------------------------------------------------
-    # Database Reading
+    # Database Reading General
 
     def retrieve_single_col(self, column_name, table_name):
         self.connection = sqlite3.connect(self.database)
@@ -168,6 +168,9 @@ class DatabaseController():
     # Job Progress Section
     def retrieve_job_progress_column_names(self):
 
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+
         # Use of this method assumes columns in table are ordered as:
         # id column, Single Data, Boolean Data, Single Data needing larger area input box, foreign key Data
 
@@ -181,8 +184,7 @@ class DatabaseController():
         # retrieve large box dat column names
         column_names_dict['larger_box_data'] = tuple([val.title().replace("_", " ") for val in progress_default_instance.larger_data_inputs])
         
-        self.connection = sqlite3.connect(self.database)
-        self.cursor = self.connection.cursor()
+        
 
         # retrieve fk_data
         data = self.db_reader.retrieve_fk_data_columns(
@@ -226,7 +228,25 @@ class DatabaseController():
         return data
         
     # -------------------------------------------------------------------------------------------------
+    # Job Notes (To-Do) Section
+    def retrieve_job_notes_column_names(self):
+        
+        job_notes_default = JobNotesDefaults()
+        
+        # dictionary to hold summarized data
+        column_names_dict = {}
+        # retrieve single data column names
+        column_names_dict['single_data'] = tuple([val.title().replace("_", " ") for val in job_notes_default.single_data])
+        # retrieve large box dat column names
+        column_names_dict['larger_box_data'] = tuple([val.title().replace("_", " ") for val in job_notes_default.larger_data_inputs])
+        # retrieve boolean columns
+        column_names_dict['boolean_data'] = tuple([val.title().replace("_", " ") for val in job_notes_default.bool_data])
+        # set fk_data to empty list
+        column_names_dict['fk_data'] = []
 
+        return column_names_dict
+
+    # -------------------------------------------------------------------------------------------------
     def retrieve_job_display_cols(self):
 
         # Set Default Values
