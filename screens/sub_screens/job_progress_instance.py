@@ -141,10 +141,14 @@ class ProgressInstanceWindow(SubWindowBasic):
                   large_box_data, fk_data, btns_list, outer_window_reload_func = None, 
                   retrieve_progress_data_func = None,  progress_instance = None) -> None:
         
-        super().__init__("New Progress Note", progress_attributes, all_columns, db_controller, 
+        if retrieve_progress_data_func is not None:
+            super().__init__("New Progress Note", progress_attributes, all_columns, db_controller, 
                          single_data_list, boolean_data_list, large_box_data, fk_data, btns_list, "Save Progress Note",
                            outer_window_reload_func, retrieve_progress_data_func, progress_instance)
-
+        else:
+            super().__init__("New Progress Note", progress_attributes, all_columns, db_controller, 
+                single_data_list, boolean_data_list, large_box_data, fk_data, btns_list, "Save Progress Note",
+                outer_window_reload_func, self.save_progress_data, progress_instance)
 
 
     def save_progress_data(self):
@@ -171,12 +175,17 @@ class ProgressInstanceWindow(SubWindowBasic):
             self.progress_instance_data.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.columns_categorized['fk_data']))
 
         # clear lists
-        self.single_data_list.clear()
-        self.large_box_data.clear()
-        self.fk_data.clear()
+        if self.single_data_list:
+            self.single_data_list.clear()
+        if self.large_box_data:
+            self.large_box_data.clear()
+        if self.boolean_data_list:
+            self.boolean_data_list.clear()
+        if self.fk_data:
+            self.fk_data.clear()
 
         # add id to progress_instance
-        self.progress_instance_data.append(self.progress_instance[0])
+        self.progress_instance_data.append(self.set_data[0])
 
         column_names = self.db_controller.retrieve_job_progress_cols_exact()
 
@@ -316,8 +325,11 @@ class JobInstanceQuickViewDeletion():
 
         # list of buttons to be disabled during job progress view/ update
         self.buttons_list = [self.clear_boxes_btn, self.delete_selected__btn, self.return_to_all_jobs_btn]
-        self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.full_data['col_list'], self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, self.outer_window_reload_func, None, self.progress_instance)
+        self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.full_data['col_list'],
+                                                    self.db_controller, self.single_data_list, None,
+                                                    self.large_box_data, self.fk_data, 
+                                                    self.buttons_list, self.outer_window_reload_func, 
+                                                    None, self.progress_instance)
         self.progress_window.configure_window_open()
 
 class AllJobProgress():
