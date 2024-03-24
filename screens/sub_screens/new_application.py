@@ -103,11 +103,20 @@ class NewApplicationScreen(FullScreen):
         self.large_box_data = []
 
         # new progress window screen
-        self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, self.load_window, self.retrieve_progress_data, None, None)       
+        self.progress_window = ProgressInstanceWindow(self.progress_attributes, None, self.db_controller, self.single_data_list, self.large_box_data,
+                                                      self.fk_data, self.buttons_list, self.load_window, self.retrieve_progress_data, None)       
 
         # ---------------------------------------------------------------
         # JOB NOTES SECTION
+
+        # retrieve column names for job notes window
+        self.job_notes_fields = self.db_controller.retrieve_job_notes_column_names()
+
+        # lists to hold inputs recieved from new job note
+        self.note_single_data = []
+        self.note_large_box_data = []
+        self.note_boolean_data = []
+        
 
         # Main frame holding job notes section
         self.job_notes_main_frame = Frame(container, bootstyle='default')
@@ -115,7 +124,12 @@ class NewApplicationScreen(FullScreen):
         # frame housing top note buttons - 
         self.new_note_btn = Button(self.job_notes_main_frame, text=new_note_text,
                                    command=self.load_new_note_window, width= sub_button_width)
-        self.new_note_screen = NewJobNote(self.db_controller, None, None)
+        
+        # add button to list of buttons to disable during new note creation window
+        self.buttons_list.append(self.new_note_btn)
+        self.new_note_screen = NewJobNote(self.job_notes_fields, self.db_controller, self.note_single_data,
+                                           self.note_large_box_data, self.note_boolean_data, self.buttons_list, 
+                                           self.load_window, None, None)
 
         # ---------------------------------------------------------------
         # Save Application Button
@@ -227,8 +241,13 @@ class NewApplicationScreen(FullScreen):
                 # non-date field - clear input box
                 input_field[1].delete(0, END)
 
+        # clear combo--box fields
         for input_field in self.large_box_inputs:
             input_field[1].delete("1.0", END)
+
+        # reset menu options to first option
+        for menu_option in self.menu_data_inputs:
+            menu_option[1].current(0)
 
         # Display Message to user that Application has been saved
         Messagebox.show_info(message='Application has been saved')
