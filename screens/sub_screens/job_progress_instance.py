@@ -136,10 +136,12 @@ class RecentJobProgress():
 
 class ProgressInstanceWindow():
 
-    def __init__(self, progress_attributes, db_controller, single_data_list, large_box_data,
-                 fk_data, btns_list, outer_window_reload_func = None, retrieve_progress_data_func = None, full_data = None,  progress_instance = None) -> None:
-        self.db_controller = db_controller
+    def __init__(self, progress_attributes, all_columns, db_controller, single_data_list, large_box_data,
+                 fk_data, btns_list, outer_window_reload_func = None, retrieve_progress_data_func = None,  progress_instance = None) -> None:
+        
         self.progress_attributes = progress_attributes
+        self.all_columns = all_columns
+        self.db_controller = db_controller
         self.progress_instance = progress_instance
         self.single_data_list = single_data_list
         self.large_box_data = large_box_data
@@ -147,7 +149,6 @@ class ProgressInstanceWindow():
         self.btns_list = btns_list
         self.retrieve_progress_data_func = retrieve_progress_data_func
         self.outer_window_reload_func = outer_window_reload_func
-        self.full_data = full_data
 
     def create_window(self):
         # new window to open progress input
@@ -164,10 +165,9 @@ class ProgressInstanceWindow():
         # does not result in progress data being saved
         self.progress_window.protocol("WM_DELETE_WINDOW", self.enable_buttons_close_window)
 
-        # -----------------------------------------------------------------------------
-        # Initial Window Configuration
+
+        # track main rows for grid placements of widgets
         label_row_count = 0
-        input_row_count = 0
 
         # --------------------------------------------------------------------------------
         # SINGLE ITEMS - SINGLE LINE
@@ -181,7 +181,7 @@ class ProgressInstanceWindow():
             if 'date' in single_item.lower():
 
                 # check for existing data for date (update/view of progress instance)
-                if self.full_data is None: 
+                if self.progress_instance is None: 
                     # retrieve current date to set as default
                     current_date = [int(val) for val in str(date.today()).split("-")]
                     set_year = current_date[0]
@@ -190,7 +190,7 @@ class ProgressInstanceWindow():
 
                 else:
                     # retrieve index of current single data item
-                    col_index = self.full_data['col_list'].index(single_item.lower().replace(" ", "_"))
+                    col_index = self.all_columns.index(single_item.lower().replace(" ", "_"))
                     # retrieve date
                     split_date = [int(val) for val in self.progress_instance[col_index].split("/")]
                     set_year = split_date[0]
@@ -206,9 +206,9 @@ class ProgressInstanceWindow():
 
                 # POPULATE SINGLE LINE ENTRY BOX - UPDATE ONLY
                 # check if current input field has a value to be assigned (when updating job progress instance)
-                if self.full_data is not None:
+                if self.progress_instance is not None:
                     # retrieve index of current single data item
-                    col_index = self.full_data['col_list'].index(single_item.lower().replace(" ", "_"))
+                    col_index = self.all_columns.index(single_item.lower().replace(" ", "_"))
                     # Add value to input box
                     item_input.insert(0, self.progress_instance[col_index])
 
@@ -236,11 +236,11 @@ class ProgressInstanceWindow():
 
             # POPULATE OPTION MENU WITH CURRENT SET VALUE - UPDATE ONLY
             # check if current input field has a value to be assigned (when updating job progress instance)
-            if self.full_data is not None:
+            if self.progress_instance is not None:
                 # retrieve index of current single data item
-                col_index = self.full_data['col_list'].index(menu_option[0].lower().replace(" ", "_"))
+                col_index = self.all_columns.index(menu_option[0].lower().replace(" ", "_"))
                 # retrieve name of current set option
-                set_val_name = self.full_data['val_list'][0][col_index][0]
+                set_val_name = self.progress_instance[col_index][0]
 
                 for count, data_tup in enumerate(menu_option[1]):
                     # iterate through options for menu comparing names until match is found
@@ -275,9 +275,9 @@ class ProgressInstanceWindow():
 
             # POPULATE MULTI-LINE TEXT BOX - UPDATE ONLY
             # check if current input field has a value to be assigned (when updating job progress instance)
-            if self.full_data is not None:
+            if self.progress_instance is not None:
                 # retrieve index of current single data item
-                col_index = self.full_data['col_list'].index(multi_line_item.lower().replace(" ", "_"))
+                col_index = self.all_columns.index(multi_line_item.lower().replace(" ", "_"))
                 # Add value to input box
                 text_box.insert(END, self.progress_instance[col_index])
 
@@ -488,9 +488,8 @@ class JobInstanceQuickViewDeletion():
 
         # list of buttons to be disabled during job progress view/ update
         self.buttons_list = [self.clear_boxes_btn, self.delete_selected__btn, self.return_to_all_jobs_btn]
-
-        self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, self.outer_window_reload_func, None, self.full_data, self.progress_instance)
+        self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.full_data['col_list'], self.db_controller, self.single_data_list, self.large_box_data,
+                                                      self.fk_data, self.buttons_list, self.outer_window_reload_func, None, self.progress_instance)
         self.progress_window.create_window()   
 
 class AllJobProgress():
