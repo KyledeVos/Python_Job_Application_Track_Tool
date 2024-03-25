@@ -216,8 +216,11 @@ class JobView(FullScreen):
 
     def add_job_progress(self):
 
-        # retrieve job progress config data
+        # retrieve job progress config data - categorized column names
         self.progress_attributes = self.db_controller.retrieve_job_progress_column_names()
+
+        # retrieve names of all columns for job progress
+        self.all_progress_cols = self.db_controller.retrieve_job_progress_data(self.job_id, False, False)['col_list']
 
         # hold list of progress data after save  
         self.progress_instance_list = []
@@ -232,11 +235,14 @@ class JobView(FullScreen):
         self.large_box_data = []
 
         # new progress window screen
-        self.progress_window = ProgressInstanceWindow(self.progress_attributes, None, self.db_controller, self.single_data_list, self.large_box_data,
-                                                      self.fk_data, self.buttons_list, lambda: self.reload_window(False), self.retrieve_and_save_progress_data, None)
+        self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.all_progress_cols,
+                                                      self.db_controller, self.single_data_list, None, 
+                                                      self.large_box_data, self.fk_data, self.buttons_list, 
+                                                      lambda: self.reload_window(False), 
+                                                      self.retrieve_and_save_progress_data, None)
         
         # load progress window
-        self.progress_window.create_window()
+        self.progress_window.configure_window_open()
         
     def retrieve_and_save_progress_data(self):
         # progress data retrieval order designed to match database format as:
