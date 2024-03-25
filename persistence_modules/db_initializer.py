@@ -87,6 +87,7 @@ class DbInitializer():
         cursor.execute("""CREATE TABLE IF NOT EXISTS job_notes(
         id INTEGER PRIMARY KEY,
         date TEXT NOT NULL,
+        due_date TEXT NOT NULL,
         title TEXT NOT NULL,
         complete BOOLEAN,
         description TEXT NOT NULL,
