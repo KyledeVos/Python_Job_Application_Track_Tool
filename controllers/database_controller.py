@@ -38,6 +38,8 @@ class JobProgressDefaults():
         self.table_name = 'progress'
         # set names of columns with data for one line
         self.single_data = ['date', 'title']
+        # set names of columns for boolean data
+        self.boolean_data = []
         # set column names for data needing larger area input box
         self.larger_data_inputs = ['description']
         # set names of foreign key tables with corresponding column name
@@ -58,9 +60,9 @@ class JobNotesDefaults():
         # Set Default Table Name
         self.table_name = 'job_notes'
         # set names of columns with data for one line
-        self.single_data = ['date', 'title']
+        self.single_data = ['date', 'due_date', 'title']
         # set names of columns holding booleans
-        self.bool_data = ['complete']
+        self.boolean_data = ['complete']
         # set column names for data needing larger area input box
         self.larger_data_inputs = ['description']
         # set names of foreign key tables with corresponding column name
@@ -68,7 +70,7 @@ class JobNotesDefaults():
         # set names of columns to not be displayed (none must be blank list)
         self.col_not_display = ["job_id"]
         # Data Update - set columns that can be updated
-        self.update_cols = ['date', 'title', 'description']
+        self.update_cols = ['date',  'due_date', 'title', 'description']
         
 
 class DatabaseController():
@@ -181,6 +183,8 @@ class DatabaseController():
         column_names_dict = {}
         # retrieve single data column names
         column_names_dict['single_data'] = tuple([val.title().replace("_", " ") for val in progress_default_instance.single_data])
+        # retrieve boolean data column names
+        column_names_dict['boolean_data'] = tuple([val.title().replace("_", " ") for val in progress_default_instance.boolean_data])
         # retrieve large box dat column names
         column_names_dict['larger_box_data'] = tuple([val.title().replace("_", " ") for val in progress_default_instance.larger_data_inputs])
         
@@ -237,10 +241,11 @@ class DatabaseController():
         column_names_dict = {}
         # retrieve single data column names
         column_names_dict['single_data'] = tuple([val.title().replace("_", " ") for val in job_notes_default.single_data])
+        # retrieve boolean columns
+        column_names_dict['boolean_data'] = tuple([val.title().replace("_", " ") for val in job_notes_default.boolean_data])
         # retrieve large box dat column names
         column_names_dict['larger_box_data'] = tuple([val.title().replace("_", " ") for val in job_notes_default.larger_data_inputs])
-        # retrieve boolean columns
-        column_names_dict['boolean_data'] = tuple([val.title().replace("_", " ") for val in job_notes_default.bool_data])
+
         # set fk_data to empty list
         column_names_dict['fk_data'] = []
 
@@ -331,6 +336,21 @@ class DatabaseController():
             self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, progress_instance + [job_id])
         self.connection.close()
 
+    def write_job_to_do_note(self, note_data, job_id):
+        # Set Default Values
+        table_name = "job_notes"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+
+        # retrieve all column names (except id) for table
+        column_names = self.db_reader.retrieve_column_names(self.cursor, table_name)[1:]
+        # ['date', 'title', 'description', 'comm_id', 'job_id']
+
+        # seperate and write individual progress instances
+        for note_instance in note_data:
+            self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, note_instance + [job_id])
+        self.connection.close()
 
     def update_job_application(self, column_list, values):
 
