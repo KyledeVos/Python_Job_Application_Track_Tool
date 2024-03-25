@@ -141,13 +141,16 @@ class ProgressInstanceWindow(SubWindowBasic):
                   large_box_data, fk_data, btns_list, outer_window_reload_func = None, 
                   retrieve_progress_data_func = None,  progress_instance = None) -> None:
         
+        # CReating New Progress Note
         if retrieve_progress_data_func is not None:
             super().__init__("New Progress Note", progress_attributes, all_columns, db_controller, 
                          single_data_list, boolean_data_list, large_box_data, fk_data, btns_list, "Save Progress Note",
                            outer_window_reload_func, retrieve_progress_data_func, progress_instance)
+        
+        # Updating/Viewing Current Progress Note
         else:
-            super().__init__("New Progress Note", progress_attributes, all_columns, db_controller, 
-                single_data_list, boolean_data_list, large_box_data, fk_data, btns_list, "Save Progress Note",
+            super().__init__("Viewing Progress Note", progress_attributes, all_columns, db_controller, 
+                single_data_list, boolean_data_list, large_box_data, fk_data, btns_list, "Update Progress Note",
                 outer_window_reload_func, self.save_progress_data, progress_instance)
 
 
@@ -179,10 +182,10 @@ class ProgressInstanceWindow(SubWindowBasic):
             self.single_data_list.clear()
         if self.large_box_data:
             self.large_box_data.clear()
-        if self.boolean_data_list:
-            self.boolean_data_list.clear()
         if self.fk_data:
             self.fk_data.clear()
+        if self.boolean_data_list:
+            self.boolean_data_list.clear()
 
         # add id to progress_instance
         self.progress_instance_data.append(self.set_data[0])

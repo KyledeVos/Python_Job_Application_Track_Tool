@@ -73,6 +73,9 @@ class NewApplicationScreen(FullScreen):
 
         # determine max required width from above buttons, used to make all buttons the same width
         sub_button_width = max(len(progress_text), len(new_note_text)) + 2
+
+        # list of buttons to be disabled/enabled during sub_window opening (progress and job note windows)
+        self.buttons_list = []
         
         # ---------------------------------------------------------------
         # JOB PROGRESS TRACK SECTION
@@ -82,8 +85,6 @@ class NewApplicationScreen(FullScreen):
 
         # hold list of progress data after save  
         self.progress_instance_list = []
-        # list of buttons to be disabled/enabled during progress creation
-        self.buttons_list = []
 
         self.job_progress_frame = Frame(container, bootstyle = 'default')
         
@@ -92,11 +93,13 @@ class NewApplicationScreen(FullScreen):
 
         self.buttons_list.append(self.add_progress_btn)
 
-        self.progress_counter = len(self.progress_instance_list) + 1
-        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter - 1}")
+        self.progress_counter = len(self.progress_instance_list)
+        self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter}")
 
         # list to store single data inputs (one-line)
         self.single_data_list = []
+        # list to store boolean data inputs
+        self.boolean_datalist = []
         # list to store foreign key inputs
         self.fk_data = []
         # list to store single data inputs needing larger input box
@@ -108,12 +111,15 @@ class NewApplicationScreen(FullScreen):
         # retrieve column names for job notes window
         self.job_notes_fields = self.db_controller.retrieve_job_notes_column_names()
 
+        # hold list of job note data after save  
+        self.job_note_instance_list = []
+
         # lists to hold inputs recieved from new job note
         self.note_single_data = []
-        self.note_large_box_data = []
         self.note_boolean_data = []
+        self.note_large_box_data = []
+        self.note_fk_data = []
         
-
         # Main frame holding job notes section
         self.job_notes_main_frame = Frame(container, bootstyle='default')
 
@@ -123,9 +129,10 @@ class NewApplicationScreen(FullScreen):
         
         # add button to list of buttons to disable during new note creation window
         self.buttons_list.append(self.new_note_btn)
-        self.new_note_screen = NewJobNote(self.job_notes_fields, self.db_controller, self.note_single_data,
-                                           self.note_large_box_data, self.note_boolean_data, self.buttons_list, 
-                                           self.load_window, None, None)
+
+        self.to_do_counter = len(self.progress_instance_list)
+        self.to_do_counter_label = Label(self.job_notes_main_frame, text=f"To-Do Notes: {self.to_do_counter}")
+
 
         # ---------------------------------------------------------------
         # Save Application Button
@@ -150,17 +157,20 @@ class NewApplicationScreen(FullScreen):
     def load_new_note_window(self):
         # initializes all widgets in new_note_screen and populates single_data_list, large_box_data
         # and fk_data lists with values
-        self.new_note_screen.create_note_window()
+        self.new_note_screen = NewJobNote(self.job_notes_fields, None, self.db_controller, self.note_single_data, 
+                                          self.note_boolean_data, self.note_large_box_data, self.note_fk_data,
+                                          self.buttons_list, self.load_window, self.retrieve_to_do_data, None)
+        self.new_note_screen.configure_window_open()
 
 
     def retrieve_progress_data(self):
         # progress data retrieval order designed to match database format as:
-        # single,line inputs, multil-line data-inputs (text boxes), foreign-tables menu inputs, 
+        # single line inputs, boolean_data inputs, multil-line data-inputs (text boxes), foreign-tables menu inputs, 
 
         # list to store current progress note data (appended to progress_instance_list at end)
         self.progress_counter += 1
         # correct progress count label in main application
-        self.progress_count_label.config(text=f"Progress Notes: {self.progress_counter - 1}")
+        self.progress_count_label.config(text=f"Progress Notes: {self.progress_counter}")
         self.progress_count_label.grid(row=0, column=1, padx=10, pady=2)
         self.row_count += 1
 
@@ -172,11 +182,15 @@ class NewApplicationScreen(FullScreen):
         for item in self.single_data_list[1:]:
             progress_instance.append(item.get())
 
-        # 3) Retrieve multi-line input data
+        # 3) Retrieve boolean Data Items
+            for item in self.boolean_datalist:
+                progress_instance.append(item.get())
+
+        # 4) Retrieve multi-line input data
         for item in self.large_box_data:
             progress_instance.append(item.get("1.0", END).strip())
                 
-        # 4) Retrieve Foreign-Key (Menu-Based Data)
+        # 5) Retrieve Foreign-Key (Menu-Based Data)
         for menu_input in self.fk_data:
             menu_title = menu_input[0].cget('text')
             selected_option = menu_input[1].get()
@@ -188,15 +202,78 @@ class NewApplicationScreen(FullScreen):
         self.progress_instance_list.append(progress_instance)
 
         # clear lists
-        self.single_data_list.clear()
-        self.large_box_data.clear()
-        self.fk_data.clear()
+        if self.single_data_list:
+            self.single_data_list.clear()
+        if self.boolean_datalist:
+            self.boolean_datalist.clear()
+        if self.large_box_data:
+            self.large_box_data.clear()
+        if self.fk_data:
+            self.fk_data.clear()
 
         # print message to user that progres instance has been added to list (not saved in db)
         Messagebox.show_info(message='Job Progress has been added on')
 
         # re-enable buttons to add progress_instance, save new application and close progress window
         self.progress_window.enable_buttons_close_window()
+
+    def retrieve_to_do_data(self):
+        # progress data retrieval order designed to match database format as:
+        # single,line inputs, multil-line data-inputs (text boxes), foreign-tables menu inputs, 
+
+        # list to store current progress note data (appended to progress_instance_list at end)
+        self.to_do_counter += 1
+        # correct progress count label in main application
+        self.to_do_counter_label.config(text=f"To-Do Notes: {self.to_do_counter}")
+        self.to_do_counter_label.grid(row=0, column=1, padx=10, pady=2)
+        self.row_count += 1
+
+        note_instance = []
+        # 1) Current Date Field set by default as first field for note instance
+        note_instance.append(self.note_single_data[0].entry.get())
+
+        # 2) Dealine Date Field set by default as second field for note instance
+        note_instance.append(self.note_single_data[1].entry.get())
+
+        # 3) Retrieve remaining Single Items
+        for item in self.note_single_data[2:]:
+            note_instance.append(item.get())
+
+        # 4) Retrieve Boolean Items Data
+        for item in self.note_boolean_data:
+            note_instance.append(item.get())
+
+        # 5) Retrieve multi-line input data
+        for item in self.note_large_box_data:
+            note_instance.append(item.get("1.0", END).strip())
+                
+        # 6) Retrieve Foreign-Key (Menu-Based Data)
+        for menu_input in self.fk_data:
+            menu_title = menu_input[0].cget('text')
+            selected_option = menu_input[1].get()
+        
+            note_instance.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.job_notes_fields['fk_data']))
+
+        # Add Progress instance to list of instances
+        # NOTE - current implementation still needs job_id retrieved only after save of new job application
+        print(note_instance)
+        self.job_note_instance_list.append(note_instance)
+
+        # clear lists
+        if self.note_single_data:
+            self.single_data_list.clear()
+        if self.note_boolean_data:
+            self.note_boolean_data.clear()
+        if self.note_large_box_data:
+            self.note_large_box_data.clear()
+        if self.note_fk_data:
+            self.note_fk_data.clear()
+
+        # print message to user that new note instance has been added to list (not saved in db)
+        Messagebox.show_info(message='Note has been added on')
+
+        # re-enable buttons to add progress_instance, save new application and close progress window
+        self.new_note_screen.enable_buttons_close_window()
 
 
     def save_data(self):
@@ -221,7 +298,10 @@ class NewApplicationScreen(FullScreen):
         
         # save new job application and retrieve id
         job_id = self.db_controller.write_single_job_no_id(data_values)
+        # write new job progress(s)
         self.db_controller.write_job_progress(self.progress_instance_list , job_id)
+        # write new job to_do note(s)
+        self.db_controller.write_job_to_do_note(self.job_note_instance_list, job_id)
 
         # clear input fields after save
         for input_field in self.single_data_inputs:

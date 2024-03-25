@@ -26,9 +26,9 @@ class SubWindowBasic():
 
         # lists to be populated with data after save
         self.single_data_list = single_data_list
-        self.boolean_data_list = boolean_data_list
         self.large_box_data = large_box_data
         self.fk_data = fk_data
+        self.boolean_data_list = boolean_data_list
 
         # buttons that may need to be displayed from calling window while sub_window is open
         self.btns_list = btns_list
@@ -51,67 +51,85 @@ class SubWindowBasic():
         # track main rows for grid placements of widgets
         label_row_count = 0
 
-        # --------------------------------------------------------------------------------
         # SINGLE ITEMS - SINGLE LINE
         # create single data labels and input boxes (one-line)
-        for single_item in self.columns_categorized['single_data']:
+        if self.columns_categorized['single_data']:
+            for single_item in self.columns_categorized['single_data']:
+                
+                # Add Label
+                item_descr = Label(self.sub_window, text=single_item, anchor=W)
+
+                # Configuration for Date Field
+                if 'date' in single_item.lower():
+                    # create 
+                    item_input = self.add_date_field(single_item)
+
+                # non-date, single_line fields     
+                else:
+                    item_input = self.add_single_line_field(single_item)
             
-            # Add Label
-            item_descr = Label(self.sub_window, text=single_item, anchor=W)
+                # add frame, label and input box to window
+                item_descr.grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=5)
+                label_row_count += 1
+                item_input.grid(row=label_row_count, column=0, sticky=W+E, padx=(20,0), pady=5)
+                label_row_count += 1
 
-            # Configuration for Date Field
-            if 'date' in single_item.lower():
-                # create 
-                item_input = self.add_date_field(single_item)
-
-            # non-date, single_line fields     
-            else:
-                item_input = self.add_single_line_field(single_item)
-        
-            # add frame, label and input box to window
-            item_descr.grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=5)
-            label_row_count += 1
-            item_input.grid(row=label_row_count, column=0, sticky=W+E, padx=(20,0), pady=5)
-            label_row_count += 1
         # --------------------------------------------------------------------------------
         # FOREIGN TABLES - SELECTION INPUT FROM MENU
-            
-        for menu_option in self.columns_categorized['fk_data']:
-            # add frame to hold label and ComboBox - necessary for spacing and stylings
-            holding_frame = Frame(self.sub_window, bootstyle = 'default')
+        if self.columns_categorized['fk_data']:
+            for menu_option in self.columns_categorized['fk_data']:
+                # add frame to hold label and ComboBox - necessary for spacing and stylings
+                holding_frame = Frame(self.sub_window, bootstyle = 'default')
 
-            # add menu label and ComboBox(contains selection options) to fk_data
-            # Form: (Label, OptionMenu)
-            current_menu_field = self.add_menu_field(menu_option, holding_frame)
-            self.fk_data.append(current_menu_field)
+                # add menu label and ComboBox(contains selection options) to fk_data
+                # Form: (Label, OptionMenu)
+                current_menu_field = self.add_menu_field(menu_option, holding_frame)
+                self.fk_data.append(current_menu_field)
 
-            # place holding frame
-            holding_frame.grid(row=label_row_count, column=0, columnspan=2, sticky=W+E)
-            label_row_count += 1
-            
-            # load menu options to sub_window
-            # current_menu_field[0] - Column Name, current_menu_field[1] - ComboBox
-            current_menu_field[0].grid(row=0, column = 0, sticky=W+E, pady=10)
-            current_menu_field[1].grid(row=0, column = 1, padx=5, pady=10, sticky=W)
+                # place holding frame
+                holding_frame.grid(row=label_row_count, column=0, columnspan=2, sticky=W+E)
+                label_row_count += 1
+                
+                # load menu options to sub_window
+                # current_menu_field[0] - Column Name, current_menu_field[1] - ComboBox
+                current_menu_field[0].grid(row=0, column = 0, sticky=W+E, pady=10)
+                current_menu_field[1].grid(row=0, column = 1, padx=5, pady=10, sticky=W)
 
         # --------------------------------------------------------------------------------
         # SINGLE ITEMS - MULTI LINE
         # create single item data labels and input boxes needing larger box
-        for multi_line_item in self.columns_categorized['larger_box_data']:
-            
-            # request creation of large box item consisting of (label, textbox)
-            large_box_item = self.add_large_box_field(multi_line_item)
+        if self.columns_categorized['larger_box_data']:
+            for multi_line_item in self.columns_categorized['larger_box_data']:
+                
+                # request creation of large box item consisting of (label, textbox)
+                large_box_item = self.add_large_box_field(multi_line_item)
 
-            # add textbox to list to later retrieve input (large_box_item[1] = textbox)
-            self.large_box_data.append(large_box_item[1])
+                # add textbox to list to later retrieve input (large_box_item[1] = textbox)
+                self.large_box_data.append(large_box_item[1])
 
-            # place large box item (label and textBox) on window screen
-            # large_box_item[0] = label
-            large_box_item[0].grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=(10, 5))
-            label_row_count += 1
-            # large_box_item[1] = textbox
-            large_box_item[1].grid(row=label_row_count, column = 0, columnspan=2, padx=5, pady=5, sticky=W+E)
-            label_row_count += 1
+                # place large box item (label and textBox) on window screen
+                # large_box_item[0] = label
+                large_box_item[0].grid(row=label_row_count, column=0, sticky=W+E, padx=5, pady=(10, 5))
+                label_row_count += 1
+                # large_box_item[1] = textbox
+                large_box_item[1].grid(row=label_row_count, column = 0, columnspan=2, padx=5, pady=5, sticky=W+E)
+                label_row_count += 1
+
+         # --------------------------------------------------------------------------------
+        # BOOLEAN ITEMS
+        if self.columns_categorized['boolean_data']:
+            for item in self.columns_categorized['boolean_data']:
+
+                # selection item[0] = IntVar, selection_item[1] = Checkbutton
+                selection_item = self.add_boolean_toggle(item)
+                # append intvar to boolean list
+                self.boolean_data_list.append(selection_item[0])
+
+                # place Checkbutton on screen
+                selection_item[1].grid(row=label_row_count, column=0)
+                label_row_count += 1
+
+        # --------------------------------------------------------------------------------
 
         # ------------------------------------------------------------------
         # Save Data Button
@@ -224,6 +242,15 @@ class SubWindowBasic():
             text_box.insert(END, self.set_data[col_index])
 
         return (label, text_box)
+    
+# ------------------------------------------------------------------------------------------
+    def add_boolean_toggle(self, item_name):
+        
+        selection = IntVar()
+        toggle_check = Checkbutton(self.sub_window, bootstyle = "success, round-toggle",
+                                   text= item_name, variable=selection, onvalue=1, offvalue=0)
+        
+        return(selection, toggle_check)
 
 # ------------------------------------------------------------------------------------------
     def enable_buttons_close_window(self):

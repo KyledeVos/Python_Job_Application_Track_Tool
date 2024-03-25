@@ -6,9 +6,11 @@ cursor = connection.cursor()
 
 reader = DbReader()
 
+print(cursor.execute("SELECT * FROM job_notes").fetchall())
+
 # print(reader.retrieve_column_names(cursor, 'job_applications'))
 # print(cursor.execute('SELECT * FROM progress').fetchall())
-print(cursor.execute('SELECT * FROM progress where job_id=6 order by id DESC LIMIT 1').fetchall())
+# print(cursor.execute('SELECT * FROM progress where job_id=6 order by id DESC LIMIT 1').fetchall())
 
 
 # # print(cursor.execute('SELECT * FROM job_applications').fetchall())

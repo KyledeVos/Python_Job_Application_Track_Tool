@@ -1,5 +1,6 @@
 pip_installs.txt
 test.db
+db_tester
 screens/testing.py
 
 controllers/__pycache__/database_controller.cpython-312.pyc
