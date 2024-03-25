@@ -206,7 +206,12 @@ class JobView(FullScreen):
                     
         # ----------------------------------------------------------------------------
         # JOB GENERAL NOTES SECTION
-            # LATER
+        self.notes_title = Label(container, text = "To-Do Notes", anchor='w')
+        
+        # Buttons
+        self.notes_top_btn_container = Frame(container)
+        self.view_all_notes_btn = Button(self.notes_top_btn_container, text="View All")
+        self.add_note_btn = Button(self.notes_top_btn_container, text="Add Note")
 
     def disable_outer_scroll(self, event):
         self.left_minor_subscreen.scrollable_screen.scrollable.disable_scrolling()
@@ -425,6 +430,18 @@ class JobView(FullScreen):
         if self.recent_job_progress != None:
             # Place Recent Job Progress Section
             self.row_count = self.recent_progress.place_progress_frame(self.row_count)
+
+        
+        # # --- LATEST TO-DO NOTE INFO  ---  
+        self.notes_title.grid(row=self.row_count, column=0, sticky="NEWS", padx=5, pady=5)
+        self.row_count += 1
+
+        # place notes top button container
+        self.notes_top_btn_container.grid(row=self.row_count, column=0, sticky="NEWS", padx=5, pady=5)
+        self.row_count += 1
+        # place notes top function buttons
+        self.view_all_notes_btn.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
+        self.add_note_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
 
     def reload_window(self, reload_view_all = True):
         # reload window after any changes have been made
