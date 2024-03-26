@@ -4,6 +4,7 @@ from ttkbootstrap.dialogs import Messagebox
 from datetime import date
 from ..parent_screens import FullScreen
 from .job_progress_instance import RecentJobProgress, AllJobProgress, ProgressInstanceWindow
+from .job_notes import AllNotesView
 
 
 # HELPER CLASS FOR MENU BASED DATA
@@ -210,8 +211,15 @@ class JobView(FullScreen):
         
         # Buttons
         self.notes_top_btn_container = Frame(container)
-        self.view_all_notes_btn = Button(self.notes_top_btn_container, text="View All")
         self.add_note_btn = Button(self.notes_top_btn_container, text="Add Note")
+        self.delete_notes_btn = Button(self.notes_top_btn_container, text="Note Deletion Management")
+
+        # container housing to do notes (summarized)
+        self.to_do_notes_container = Frame(container)
+
+        # Initialize AllNotesView instance
+        all_notes_data = AllNotesView(self.to_do_notes_container, self.db_controller, self.job_id)
+
 
     def disable_outer_scroll(self, event):
         self.left_minor_subscreen.scrollable_screen.scrollable.disable_scrolling()
@@ -440,8 +448,10 @@ class JobView(FullScreen):
         self.notes_top_btn_container.grid(row=self.row_count, column=0, sticky="NEWS", padx=5, pady=5)
         self.row_count += 1
         # place notes top function buttons
-        self.view_all_notes_btn.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
-        self.add_note_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
+        self.add_note_btn.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
+        self.delete_notes_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
+        
+
 
     def reload_window(self, reload_view_all = True):
         # reload window after any changes have been made
