@@ -251,7 +251,7 @@ class DatabaseController():
 
         return column_names_dict
     
-    def retrieve_to_do_note_summary_data(self, job_id):
+    def retrieve_to_do_note_summary_data(self, job_id, include_all=True):
 
         # Default values
         table_name = "job_notes"
@@ -266,10 +266,10 @@ class DatabaseController():
         self.cursor = self.connection.cursor()
 
         # add column names to col_val_data dict
-        col_val_data['columns'] = JobNotesDefaults().single_data + ['complete']
+        col_val_data['columns'] = [val.title().replace("_", " ") for val in JobNotesDefaults().single_data]+ ['Status']
 
         # retrieve values for designated columns
-        col_val_data['values'] = self.db_reader.retrieve_col_specific_id_ref(self.cursor, data_cols, table_name, "job_id", job_id)
+        col_val_data['values'] = self.db_reader.retrieve_col_specific_id_ref(self.cursor, data_cols, table_name, "job_id", job_id, include_all)
 
         self.connection.close()
 
