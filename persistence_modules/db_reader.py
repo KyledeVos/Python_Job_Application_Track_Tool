@@ -20,6 +20,9 @@ class DbReader():
     def retrieve_id_single_col(self, cursor, column, table_name):
          return cursor.execute(f"SELECT id, {column} FROM {table_name}").fetchall()
     
+    def retrieve_col_specific_id_ref(self, cursor, column_names, table_name, search_name, search_val):
+        return cursor.execute(f"SELECT {column_names} FROM {table_name} WHERE {search_name} = {search_val}").fetchall()
+    
     def retrieve_single_row(self, cursor, id, table_name):
         return cursor.execute(f"SELECT * FROM {table_name} WHERE id={id}").fetchone()
         
