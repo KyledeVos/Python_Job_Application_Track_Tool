@@ -250,6 +250,31 @@ class DatabaseController():
         column_names_dict['fk_data'] = []
 
         return column_names_dict
+    
+    def retrieve_to_do_note_summary_data(self, job_id):
+
+        # Default values
+        table_name = "job_notes"
+        # data dict to hold column names and associated values
+        col_val_data = {}
+        # single_data column_names
+        data_cols = ", ".join(JobNotesDefaults().single_data)
+        # add name of column for status (complete)
+        data_cols += ", complete"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+
+        # add column names to col_val_data dict
+        col_val_data['columns'] = JobNotesDefaults().single_data + ['complete']
+
+        # retrieve values for designated columns
+        col_val_data['values'] = self.db_reader.retrieve_col_specific_id_ref(self.cursor, data_cols, table_name, "job_id", job_id)
+
+        self.connection.close()
+
+        return col_val_data
+
 
     # -------------------------------------------------------------------------------------------------
     def retrieve_job_display_cols(self):
