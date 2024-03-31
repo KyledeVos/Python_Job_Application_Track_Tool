@@ -89,8 +89,8 @@ class DbInitializer():
         date TEXT NOT NULL,
         due_date TEXT NOT NULL,
         title TEXT NOT NULL,
+        status BOOLEAN,
         description TEXT NOT NULL,
-        complete BOOLEAN,
         job_id INTEGER NOT NULL,
         FOREIGN KEY(job_id) REFERENCES job_applications(id)
         )""")

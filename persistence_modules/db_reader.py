@@ -19,17 +19,7 @@ class DbReader():
 
     def retrieve_id_single_col(self, cursor, column, table_name):
          return cursor.execute(f"SELECT id, {column} FROM {table_name}").fetchall()
-    
-    def retrieve_col_specific_id_ref(self, cursor, column_names, table_name, search_name, search_val, include_all):
-        # include all job notes
-        if include_all:
-            return cursor.execute(f"SELECT {column_names} FROM {table_name} WHERE {search_name} = {search_val}").fetchall()
-        
-        # only include job_notes that are incomplete
-        else:
-            return cursor.execute(
-                f"SELECT {column_names} FROM {table_name} WHERE {search_name} = {search_val} AND complete = 0").fetchall()
-    
+       
     def retrieve_single_row(self, cursor, id, table_name):
         return cursor.execute(f"SELECT * FROM {table_name} WHERE id={id}").fetchone()
         
@@ -221,9 +211,23 @@ class DbReader():
             remaining_data['column_info'].append(('fk_columns', fk_cols))
 
         return remaining_data
+    
+
+    def retrieve_job_notes_data(self, cursor, table_name, search_column, search_val):
+
+        return cursor.execute(f"SELECT * FROM {table_name} where {search_column} = {search_val}").fetchall()
 
 
+    def check_incomplete_notes(self, cursor, table_name, status_field, search_field, search_val):
+        status_vals =  cursor.execute(f"SELECT {status_field} from {table_name} where {search_field} == {search_val}").fetchall()
+        
+        for val_tup in status_vals:
+            if 0 in val_tup:
+                return True
             
+        return False
+
+
 
 
 

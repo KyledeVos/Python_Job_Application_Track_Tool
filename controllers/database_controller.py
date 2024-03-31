@@ -62,7 +62,7 @@ class JobNotesDefaults():
         # set names of columns with data for one line
         self.single_data = ['date', 'due_date', 'title']
         # set names of columns holding booleans
-        self.boolean_data = ['complete']
+        self.boolean_data = ['status']
         # set column names for data needing larger area input box
         self.larger_data_inputs = ['description']
         # set names of foreign key tables with corresponding column name
@@ -251,30 +251,56 @@ class DatabaseController():
 
         return column_names_dict
     
-    def retrieve_to_do_note_summary_data(self, job_id, include_all=True):
-
+    def retrieve_all_job_note_data(self, job_id):
         # Default values
         table_name = "job_notes"
         # data dict to hold column names and associated values
         col_val_data = {}
-        # single_data column_names
-        data_cols = ", ".join(JobNotesDefaults().single_data)
-        # add name of column for status (complete)
-        data_cols += ", complete"
+        # columns to not include in display
+        cols_not_display = JobNotesDefaults().col_not_display
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
 
-        # add column names to col_val_data dict
-        col_val_data['columns'] = [val.title().replace("_", " ") for val in JobNotesDefaults().single_data]+ ['Status']
+        # retrieve and check if note data exists for job application
+        note_data = self.db_reader.retrieve_job_notes_data(self.cursor, table_name, 'job_id', job_id)
 
-        # retrieve values for designated columns
-        col_val_data['values'] = self.db_reader.retrieve_col_specific_id_ref(self.cursor, data_cols, table_name, "job_id", job_id, include_all)
+        if not note_data:
+                self.connection.close()
+                return None
+
+        # At this point, job application has existing note data
+        col_val_data['note_values'] = note_data
+
+        # retrieve categorized column names
+        col_val_data['categorized_column_names'] = self.retrieve_job_notes_column_names()
+        
+
+        # retrieve all column names and remove columns to not be displayed
+        col_val_data['all_column_names'] = [val for val in 
+                                            self.db_reader.retrieve_column_names(self.cursor, table_name)
+                                            if val not in cols_not_display]
 
         self.connection.close()
 
         return col_val_data
 
+
+    def is_incomplete_notes(self, job_id):
+
+        # Set Defaults
+        table_name = "job_notes"
+        # name of field marked for status 
+        status_field = "status"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+
+        is_incomplete_data = self.db_reader.check_incomplete_notes(self.cursor, table_name, status_field, "job_id", job_id)
+
+        self.connection.close()
+
+        return is_incomplete_data
 
     # -------------------------------------------------------------------------------------------------
     def retrieve_job_display_cols(self):
@@ -375,6 +401,7 @@ class DatabaseController():
         # seperate and write individual progress instances
         for note_instance in note_data:
             self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, note_instance + [job_id])
+            print(note_instance)
         self.connection.close()
 
     def update_job_application(self, column_list, values):

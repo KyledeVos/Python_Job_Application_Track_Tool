@@ -212,14 +212,19 @@ class JobView(FullScreen):
         # Buttons
         self.notes_top_btn_container = Frame(container)
         self.add_note_btn = Button(self.notes_top_btn_container, text="Add Note")
-        self.delete_notes_btn = Button(self.notes_top_btn_container, text="Note Deletion Management")
+        self.view_all_notes_btn = Button(self.notes_top_btn_container, text="View All Notes")
 
         # container housing to do notes (summarized)
         self.to_do_notes_container = Frame(container)
 
-        # Initialize AllNotesView instance
-        all_notes_data = AllNotesView(self.to_do_notes_container, self.db_controller, self.job_id)
+        # list of buttons to be disabled during view of job note window
+        job_notes_button_disable_list = [self.update_application_btn, self.view_all_btn, self.add_progress_btn,
+                                             self.add_note_btn, self.view_all_notes_btn]
 
+        # Initialize AllNotesView instance
+        self.all_notes_instance = AllNotesView(self.to_do_notes_container, self.db_controller, self.job_id, 
+                                               job_notes_button_disable_list, False)
+        self.all_notes_instance.retrieve_note_data()
 
     def disable_outer_scroll(self, event):
         self.left_minor_subscreen.scrollable_screen.scrollable.disable_scrolling()
@@ -340,7 +345,6 @@ class JobView(FullScreen):
         # call for load of recent job progress section - column title and progress rows
         main_row_count = self.all_job_progress_instance.load_all_progress_window(main_row_count)
 
-
     def load_all_progress_top_screen(self):
         
         # load return to job view button
@@ -440,7 +444,7 @@ class JobView(FullScreen):
             self.row_count = self.recent_progress.place_progress_frame(self.row_count)
 
         
-        # # --- LATEST TO-DO NOTE INFO  ---  
+        # # --- INCOMPLETE TO-DO NOTES ---  
         self.notes_title.grid(row=self.row_count, column=0, sticky="NEWS", padx=5, pady=5)
         self.row_count += 1
 
@@ -449,10 +453,16 @@ class JobView(FullScreen):
         self.row_count += 1
         # place notes top function buttons
         self.add_note_btn.grid(row=0, column=0, sticky="NEWS", padx=5, pady=5)
-        self.delete_notes_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
+        self.view_all_notes_btn.grid(row=0, column=1, sticky="NEWS", padx=5, pady=5)
+
+        # place frame holding to_do_notes section
+        self.to_do_notes_container.grid(row=self.row_count, column=0, sticky="NEWS")
+        self.row_count += 1 
+
+        # call for load of job to_do notes
+        self.all_notes_instance.load_all_to_do_notes()
         
-
-
+        
     def reload_window(self, reload_view_all = True):
         # reload window after any changes have been made
 

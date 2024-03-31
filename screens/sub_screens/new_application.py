@@ -256,7 +256,6 @@ class NewApplicationScreen(FullScreen):
 
         # Add Progress instance to list of instances
         # NOTE - current implementation still needs job_id retrieved only after save of new job application
-        print(note_instance)
         self.job_note_instance_list.append(note_instance)
 
         # clear lists
