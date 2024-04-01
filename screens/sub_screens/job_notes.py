@@ -31,12 +31,14 @@ class NewJobNote(SubWindowBasic):
 # --------------------------------------------------------------------------------------
 class AllNotesView():
 
-    def __init__(self, outer_container, db_controller, job_id, outer_buttons_list, include_all = True) -> None:
+    def __init__(self, outer_container, db_controller, job_id, outer_buttons_list, 
+                 outer_window_reload_func, include_all = True) -> None:
 
         self.outer_container = outer_container
         self.db_controller = db_controller
         self.job_id = job_id
         self.outer_buttons_list = outer_buttons_list
+        self.outer_window_reload_func = outer_window_reload_func
         self.include_all = include_all
 
         self.notes_all_data = None
@@ -110,7 +112,8 @@ class AllNotesView():
 
                     job_note_view = NewJobNote(self.categorized_columns, self.all_columns, self.db_controller,
                                                self.note_single_data, self.note_boolean_data, self.note_large_box_data,
-                                                self.note_fk_data, self.outer_buttons_list, None, None,  self.set_data)
+                                                self.note_fk_data, self.outer_buttons_list, self.outer_window_reload_func,
+                                                  None,  self.set_data)
                     job_note_view.configure_window_open()
 
                 #         def __init__(self, columns_categorized, all_columns, db_controller, single_data_list,
@@ -194,13 +197,11 @@ class AllNotesView():
                     current_label = Label(self.outer_container, text=display_text)
                     current_note.append(current_label)
 
-
-
                 # Create job roww instance to uniquely track if of current job note
                 # needed to load job note detailed view window, and call for placement of row labels 
                 JobRow(job_note_instance[0], current_note, notes_row_placement, 
                        self.notes_all_data['categorized_column_names'], self.notes_all_data['all_column_names'], 
-                       self.db_controller, self.outer_buttons_list, None, None, job_note_instance).load_row()
+                       self.db_controller, self.outer_buttons_list, self.outer_window_reload_func, None, job_note_instance).load_row()
                 notes_row_placement += 1
 
 
