@@ -3,7 +3,7 @@ from ttkbootstrap.scrolled import ScrolledText
 from ttkbootstrap.dialogs import Messagebox
 from datetime import date
 from .sub_window import SubWindowBasic
-import copy
+from .job_progress_instance import DataConverter
 
 class NewJobNote(SubWindowBasic):
 
@@ -12,7 +12,7 @@ class NewJobNote(SubWindowBasic):
                  retrieve_note_data_func = None, current_instance = None,  ) -> None:
         
         # Creating new To_Do Note
-        if retrieve_note_data_func is not None:
+        if current_instance is None:
             super().__init__("New Note", columns_categorized, all_columns, db_controller, 
                              single_data_list, boolean_data_list, large_box_data, fk_data,
                              btns_list, "Save Note", outer_window_reload_func,
@@ -23,10 +23,7 @@ class NewJobNote(SubWindowBasic):
             super().__init__("Viewing Note", columns_categorized, all_columns, db_controller, 
                     single_data_list, boolean_data_list, large_box_data, fk_data,
                     btns_list, "Update Note", outer_window_reload_func,
-                    self.save_note_data, current_instance)
-
-    def save_note_data():
-        print("save note data")
+                    retrieve_note_data_func, current_instance)
 
 # --------------------------------------------------------------------------------------
 class AllNotesView():
@@ -101,6 +98,9 @@ class AllNotesView():
                     # current values for job note
                     self.set_data = set_data
 
+                    # converter for menu based data
+                    self.data_converter = DataConverter()
+
                 def load_row(self):
                     for label in self.job_note_lables:
                         label.grid(row = self.note_row_placement, column = self.column_placement, padx=5, pady=5, sticky=W+E)
@@ -110,15 +110,67 @@ class AllNotesView():
                 def open_job_view_window(self, event):
                     print(self.job_note_id)
 
-                    job_note_view = NewJobNote(self.categorized_columns, self.all_columns, self.db_controller,
+                    self.job_note_view = NewJobNote(self.categorized_columns, self.all_columns, self.db_controller,
                                                self.note_single_data, self.note_boolean_data, self.note_large_box_data,
                                                 self.note_fk_data, self.outer_buttons_list, self.outer_window_reload_func,
-                                                  None,  self.set_data)
-                    job_note_view.configure_window_open()
+                                                  self.retrieve_job_note_data_update,  self.set_data)
+                    self.job_note_view.configure_window_open()
 
                 #         def __init__(self, columns_categorized, all_columns, db_controller, single_data_list,
                 #  boolean_data_list, large_box_data, fk_data, btns_list, outer_window_reload_func = None, 
                 #  retrieve_note_data_func = None, current_instance = None,  ) -> None:
+                    
+                def retrieve_job_note_data_update(self):
+                    # list to store current progress note data (appended to progress_instance_list at end)
+                    note_instance = []
+                    # 1) Current Date Field set by default as first field for note instance
+                    note_instance.append(self.note_single_data[0].entry.get())
+
+                    # 2) Dealine Date Field set by default as second field for note instance
+                    note_instance.append(self.note_single_data[1].entry.get())
+
+                    # 3) Retrieve remaining Single Items
+                    for item in self.note_single_data[2:]:
+                        note_instance.append(item.get())
+
+                    # 4) Retrieve Boolean Items Data
+                    for item in self.note_boolean_data:
+                        note_instance.append(item.get())
+
+                    # 5) Retrieve multi-line input data
+                    for item in self.note_large_box_data:
+                        note_instance.append(item.get("1.0", END).strip())
+                            
+                    # 6) Retrieve Foreign-Key (Menu-Based Data)
+                    for menu_input in self.note_fk_data:
+                        menu_title = menu_input[0].cget('text')
+                        selected_option = menu_input[1].get()
+                    
+                        note_instance.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.note_fk_data['fk_data']))
+
+
+                    # clear lists
+                    if self.note_single_data:
+                        self.note_single_data.clear()
+                    if self.note_boolean_data:
+                        self.note_boolean_data.clear()
+                    if self.note_large_box_data:
+                        self.note_large_box_data.clear()
+                    if self.note_fk_data:
+                        self.note_fk_data.clear()
+
+                    # update job_note_instance in datbase
+                    print(self.job_note_id)
+                    self.db_controller.update_job_note_instance(self.all_columns[1:], note_instance + [self.job_note_id])
+
+                    # print message to user that new note instance has been added to list (not saved in db)
+                    Messagebox.show_info(message='Note has been updated')
+
+                    # re-enable buttons to add progress_instance, save new application and close progress window
+                    self.outer_window_reload_func()
+                    self.job_note_view.enable_buttons_close_window()
+                    print(note_instance)
+
 
 
             # retrieve single data columns for summary display of note data
@@ -204,18 +256,8 @@ class AllNotesView():
                        self.db_controller, self.outer_buttons_list, self.outer_window_reload_func, None, job_note_instance).load_row()
                 notes_row_placement += 1
 
-
                 # # clear current note list for next job note instance
                 current_note.clear()
-
-
-
-
-
-                            
-
-                    
-
 
 
     def toggle_view_all(self):

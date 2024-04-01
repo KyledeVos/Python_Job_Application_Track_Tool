@@ -190,7 +190,7 @@ class JobView(FullScreen):
         self.update_application_btn = Button(self.basic_info_frame, text="Save Changes", command=self.update_basic_data)
 
         # ----------------------------------------------------------------------------
-        # JOB PROGRESS SECTION - MOST RECENT PROGRESS
+        # JOB PROGRESS SECTION - MOST RECENT PROGRESS   
         self.progress_title = Label(container, text = "Job Progress Info", anchor='w')
         
         # Buttons
@@ -223,7 +223,8 @@ class JobView(FullScreen):
 
         # Initialize AllNotesView instance
         self.all_notes_instance = AllNotesView(self.to_do_notes_container, self.db_controller, self.job_id, 
-                                               job_notes_button_disable_list, False)
+                                               job_notes_button_disable_list, lambda: self.reload_window(False), 
+                                               False)
         self.all_notes_instance.retrieve_note_data()
 
     def disable_outer_scroll(self, event):
@@ -485,6 +486,10 @@ class JobView(FullScreen):
         # if reload_view_all is True:
             # reload overlying progress window only if there is still progress data
             self.view_all_job_progress()
+
+        # 3) call for reload of job to_do notes data
+        self.all_notes_instance.retrieve_note_data()
+        self.all_notes_instance.load_all_to_do_notes()
 
     def update_basic_data(self):
 

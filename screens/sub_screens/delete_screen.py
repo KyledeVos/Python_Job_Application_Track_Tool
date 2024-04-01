@@ -44,6 +44,8 @@ class DeleteApplication(FullScreen):
         if deletion_box.result == "Yes":
             # delete all job progress notes associated with job_id
             self.db_controller.delete_job_progress_data(id_list)
+            # delete all job progress notes associated with job_id
+            self.db_controller.delete_job_notes(id_list)
             # delete job application data
             self.db_controller.delete_job_data(id_list)
 
@@ -140,6 +142,8 @@ class DeleteApplication(FullScreen):
                         
                         # delete all job progress notes associated with job_id
                         self.db_controller.delete_job_progress_data([self.id])
+                        # delete all job progress notes associated with job_id
+                        self.db_controller.delete_job_notes([self.id])
                         # delete job application data
                         self.db_controller.delete_job_data([self.id])
                     # reload window after row deletion

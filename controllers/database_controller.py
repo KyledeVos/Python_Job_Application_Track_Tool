@@ -301,6 +301,7 @@ class DatabaseController():
         self.connection.close()
 
         return is_incomplete_data
+    
 
     # -------------------------------------------------------------------------------------------------
     def retrieve_job_display_cols(self):
@@ -431,6 +432,25 @@ class DatabaseController():
         self.db_writer.update_row(self.connection, self.cursor, table_name, column_list, values)
         self.connection.close()
 
+    def update_job_note_instance(self, column_list, values):
+
+        # Set Defaults
+        table_name = "job_notes"
+
+        job_note_defaults = JobNotesDefaults()
+        for column in column_list:
+            if column in job_note_defaults.col_not_display:
+                column_list.remove(column)
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        self.db_writer.update_row(self.connection, self.cursor, table_name, column_list, values)
+
+        self.connection.close()
+
+    # ----------------------------------------------------------------
+    # JOB APPLICATION DELETION
+
     def delete_job_data(self, id_values):
 
         # Set default values
@@ -441,6 +461,9 @@ class DatabaseController():
         self.db_writer.delete_job_application(self.connection, self.cursor, table_name, id_values)
         self.connection.close()
 
+    # ----------------------------------------------------------------
+    # JOB PROGRESS DELETION
+    
     # Delete All Job Progress data for associated job instance
     def delete_job_progress_data(self, id_list):
 
@@ -454,11 +477,26 @@ class DatabaseController():
 
     # Delete job progress (not associated job instance)
     def delete_job_progress_only(self, id_list):
-                # Set default values
+
+        # Set default values
         table_name = "progress"
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
         self.db_writer.delete_single_job_progress(self.connection, self.cursor, table_name, id_list)
+        self.connection.close()
+
+    
+    # ----------------------------------------------------------------
+    # JOB NOTES DELETION
+        
+    def delete_job_notes(self, id_list):
+
+        # Set default values
+        table_name = "job_notes"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        self.db_writer.delete_job_progress(self.connection, self.cursor, table_name, id_list)
         self.connection.close()
         
