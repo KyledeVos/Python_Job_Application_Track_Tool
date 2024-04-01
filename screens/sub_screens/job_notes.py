@@ -71,7 +71,8 @@ class AllNotesView():
                     for label to load job note view window for update of note"""
 
                 def __init__(self, job_note_id, job_note_labels, note_row_placement, 
-                             categorized_columns, all_columns, db_controller, outer_buttons_list):
+                             categorized_columns, all_columns, db_controller, outer_buttons_list, 
+                             outer_window_reload_func, retrieve_data_func, set_data):
                     self.job_note_id = job_note_id
                     self.job_note_lables = job_note_labels
                     self.note_row_placement = note_row_placement
@@ -91,6 +92,13 @@ class AllNotesView():
                     # list of buttons to be disabled when job view window is open
                     self.outer_buttons_list = outer_buttons_list
 
+                    # function to reload calling window
+                    self.outer_window_reload_func = outer_window_reload_func
+                    self.retrieve_data_func = retrieve_data_func
+
+                    # current values for job note
+                    self.set_data = set_data
+
                 def load_row(self):
                     for label in self.job_note_lables:
                         label.grid(row = self.note_row_placement, column = self.column_placement, padx=5, pady=5, sticky=W+E)
@@ -102,7 +110,7 @@ class AllNotesView():
 
                     job_note_view = NewJobNote(self.categorized_columns, self.all_columns, self.db_controller,
                                                self.note_single_data, self.note_boolean_data, self.note_large_box_data,
-                                                self.note_fk_data, self.outer_buttons_list)
+                                                self.note_fk_data, self.outer_buttons_list, None, None,  self.set_data)
                     job_note_view.configure_window_open()
 
                 #         def __init__(self, columns_categorized, all_columns, db_controller, single_data_list,
@@ -154,6 +162,14 @@ class AllNotesView():
 
             for count, job_note_instance in enumerate(self.notes_all_data['note_values']):
 
+                # Perform check for incomplete to-do note
+                # NOTE: Current implementation has set 'status' within the boolean_col_indices list used
+                # to check for completion of to-do note item
+                status_index = self.notes_all_data['all_column_names'].index('status')
+                if job_note_instance[status_index] == 1 and incomplete_only == True:
+                    continue
+
+
                 current_note = []
                 # Add row count column value
                 current_label = Label(self.outer_container, text=str(count + 1))
@@ -184,7 +200,7 @@ class AllNotesView():
                 # needed to load job note detailed view window, and call for placement of row labels 
                 JobRow(job_note_instance[0], current_note, notes_row_placement, 
                        self.notes_all_data['categorized_column_names'], self.notes_all_data['all_column_names'], 
-                       self.db_controller, self.outer_buttons_list).load_row()
+                       self.db_controller, self.outer_buttons_list, None, None, job_note_instance).load_row()
                 notes_row_placement += 1
 
 
