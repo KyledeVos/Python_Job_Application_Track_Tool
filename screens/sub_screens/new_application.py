@@ -221,13 +221,14 @@ class NewApplicationScreen(FullScreen):
         # progress data retrieval order designed to match database format as:
         # single,line inputs, multil-line data-inputs (text boxes), foreign-tables menu inputs, 
 
-        # list to store current progress note data (appended to progress_instance_list at end)
+        
         self.to_do_counter += 1
         # correct progress count label in main application
         self.to_do_counter_label.config(text=f"To-Do Notes: {self.to_do_counter}")
         self.to_do_counter_label.grid(row=0, column=1, padx=10, pady=2)
         self.row_count += 1
 
+        # list to store current progress note data (appended to progress_instance_list at end)
         note_instance = []
         # 1) Current Date Field set by default as first field for note instance
         note_instance.append(self.note_single_data[0].entry.get())
@@ -338,6 +339,13 @@ class NewApplicationScreen(FullScreen):
         self.progress_counter = 1
         self.progress_count_label.destroy()
         self.progress_count_label = Label(self.job_progress_frame, text=f"Progress Notes: {self.progress_counter - 1}")
+        
+        # reset to-do notes counter
+        self.to_do_counter = 1
+        self.to_do_counter_label.destroy()
+        self.to_do_counter_label = Label(self.job_notes_main_frame, text=f"To-Do Notes: {self.to_do_counter}")
+
+
         self.load_window()
 
 
