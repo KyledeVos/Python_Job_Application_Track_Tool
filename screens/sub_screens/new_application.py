@@ -249,11 +249,12 @@ class NewApplicationScreen(FullScreen):
             note_instance.append(item.get("1.0", END).strip())
                 
         # 6) Retrieve Foreign-Key (Menu-Based Data)
-        for menu_input in self.fk_data:
-            menu_title = menu_input[0].cget('text')
-            selected_option = menu_input[1].get()
-        
-            note_instance.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.job_notes_fields['fk_data']))
+        if self.fk_data:
+            for menu_input in self.fk_data:
+                menu_title = menu_input[0].cget('text')
+                selected_option = menu_input[1].get()
+            
+                note_instance.append(self.data_converter.return_id_from_name(selected_option, menu_title, self.job_notes_fields['fk_data']))
 
         # Add Progress instance to list of instances
         # NOTE - current implementation still needs job_id retrieved only after save of new job application

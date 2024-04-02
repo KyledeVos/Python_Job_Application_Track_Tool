@@ -251,7 +251,7 @@ class DatabaseController():
 
         return column_names_dict
     
-    def retrieve_all_job_note_data(self, job_id):
+    def retrieve_all_job_note_data(self, job_id, is_data_present = False):
         # Default values
         table_name = "job_notes"
         # data dict to hold column names and associated values
@@ -265,25 +265,27 @@ class DatabaseController():
         # retrieve and check if note data exists for job application
         note_data = self.db_reader.retrieve_job_notes_data(self.cursor, table_name, 'job_id', job_id)
 
-        if not note_data:
-                self.connection.close()
-                return None
+        if is_data_present:
+            if not note_data:
+                    self.connection.close()
+                    return None
+        else:
 
-        # At this point, job application has existing note data
-        col_val_data['note_values'] = note_data
+            # At this point, job application has existing note data
+            col_val_data['note_values'] = note_data
 
-        # retrieve categorized column names
-        col_val_data['categorized_column_names'] = self.retrieve_job_notes_column_names()
-        
+            # retrieve categorized column names
+            col_val_data['categorized_column_names'] = self.retrieve_job_notes_column_names()
+            
 
-        # retrieve all column names and remove columns to not be displayed
-        col_val_data['all_column_names'] = [val for val in 
-                                            self.db_reader.retrieve_column_names(self.cursor, table_name)
-                                            if val not in cols_not_display]
+            # retrieve all column names and remove columns to not be displayed
+            col_val_data['all_column_names'] = [val for val in 
+                                                self.db_reader.retrieve_column_names(self.cursor, table_name)
+                                                if val not in cols_not_display]
 
-        self.connection.close()
+            self.connection.close()
 
-        return col_val_data
+            return col_val_data
 
 
     def is_incomplete_notes(self, job_id):
@@ -388,7 +390,7 @@ class DatabaseController():
             self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, progress_instance + [job_id])
         self.connection.close()
 
-    def write_job_to_do_note(self, note_data, job_id):
+    def write_job_to_do_note(self, note_data, job_id, multiple_notes = True):
         # Set Default Values
         table_name = "job_notes"
 
@@ -400,10 +402,13 @@ class DatabaseController():
         # ['date', 'title', 'description', 'comm_id', 'job_id']
 
         # seperate and write individual progress instances
-        for note_instance in note_data:
-            self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, note_instance + [job_id])
-            print(note_instance)
-        self.connection.close()
+        if multiple_notes:
+            for note_instance in note_data:
+                self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, note_instance + [job_id])
+            self.connection.close()
+        else:
+            self.db_writer.write_single_row(self.connection, self.cursor, table_name, column_names, note_data + [job_id])
+            self.connection.close()
 
     def update_job_application(self, column_list, values):
 

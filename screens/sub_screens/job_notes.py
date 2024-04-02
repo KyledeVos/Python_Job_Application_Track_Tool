@@ -50,7 +50,6 @@ class AllNotesView():
 
         # Attempt Retrieval of all job to_do notes data -> None indicates no present job notes data
         self.notes_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id)
-        print(self.notes_all_data)
 
     def load_all_to_do_notes(self, incomplete_only = True):
 
@@ -116,10 +115,6 @@ class AllNotesView():
                                                   self.retrieve_job_note_data_update,  self.set_data)
                     self.job_note_view.configure_window_open()
 
-                #         def __init__(self, columns_categorized, all_columns, db_controller, single_data_list,
-                #  boolean_data_list, large_box_data, fk_data, btns_list, outer_window_reload_func = None, 
-                #  retrieve_note_data_func = None, current_instance = None,  ) -> None:
-                    
                 def retrieve_job_note_data_update(self):
                     # list to store current progress note data (appended to progress_instance_list at end)
                     note_instance = []
@@ -160,7 +155,6 @@ class AllNotesView():
                         self.note_fk_data.clear()
 
                     # update job_note_instance in datbase
-                    print(self.job_note_id)
                     self.db_controller.update_job_note_instance(self.all_columns[1:], note_instance + [self.job_note_id])
 
                     # print message to user that new note instance has been added to list (not saved in db)
@@ -169,9 +163,6 @@ class AllNotesView():
                     # re-enable buttons to add progress_instance, save new application and close progress window
                     self.outer_window_reload_func()
                     self.job_note_view.enable_buttons_close_window()
-                    print(note_instance)
-
-
 
             # retrieve single data columns for summary display of note data
             self.single_data_cols = [val.lower().replace("_", "_") for val in self.notes_all_data['categorized_column_names']['single_data']]

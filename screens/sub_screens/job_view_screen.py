@@ -4,7 +4,7 @@ from ttkbootstrap.dialogs import Messagebox
 from datetime import date
 from ..parent_screens import FullScreen
 from .job_progress_instance import RecentJobProgress, AllJobProgress, ProgressInstanceWindow
-from .job_notes import AllNotesView
+from .job_notes import AllNotesView, NewJobNote
 
 
 # HELPER CLASS FOR MENU BASED DATA
@@ -211,7 +211,7 @@ class JobView(FullScreen):
         
         # Buttons
         self.notes_top_btn_container = Frame(container)
-        self.add_note_btn = Button(self.notes_top_btn_container, text="Add Note")
+        self.add_note_btn = Button(self.notes_top_btn_container, text="Add Note", command=self.add_job_note)
         self.view_all_notes_btn = Button(self.notes_top_btn_container, text="View All Notes")
 
         # container housing to do notes (summarized)
@@ -226,6 +226,96 @@ class JobView(FullScreen):
                                                job_notes_button_disable_list, lambda: self.reload_window(False), 
                                                False)
         self.all_notes_instance.retrieve_note_data()
+
+    def add_job_note(self):
+
+        # retrieve all note data 
+        self.note_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id)
+
+        # lists to store retrieved data
+        self.add_note_single_list = []
+        self.add_note_boolean_list = []
+        self.add_note_large_box_list = []
+        self.add_note_fk_data = []
+
+        # list of buttons to be disabled during view of job note window
+        job_notes_button_disable_list = [self.update_application_btn, self.view_all_btn, self.add_progress_btn,
+                                             self.add_note_btn, self.view_all_notes_btn]
+
+        
+        
+    # def __init__(self, columns_categorized, all_columns, db_controller, single_data_list,
+    #              boolean_data_list, large_box_data, fk_data, btns_list, outer_window_reload_func = None, 
+    #              retrieve_note_data_func = None, current_instance = None,  ) -> None:
+        
+        self.new_note = NewJobNote(self.note_all_data["categorized_column_names"], self.note_all_data["all_column_names"], 
+                              self.db_controller, self.add_note_single_list, self.add_note_boolean_list,
+                                self.add_note_large_box_list, self.add_note_fk_data, job_notes_button_disable_list, 
+                                lambda: self.reload_window(False), self.retrieve_to_do_data, None)
+        self.new_note.configure_window_open()
+
+    def retrieve_to_do_data(self):
+        # progress data retrieval order designed to match database format as:
+        # single,line inputs, multil-line data-inputs (text boxes), foreign-tables menu inputs, 
+
+        # list to store current progress note data (appended to progress_instance_list at end)
+        note_instance = []
+        # 1) Current Date Field set by default as first field for note instance
+        if self.add_note_single_list:
+            note_instance.append(self.add_note_single_list[0].entry.get())
+
+        # 2) Dealine Date Field set by default as second field for note instance
+        if self.add_note_single_list:
+            note_instance.append(self.add_note_single_list[1].entry.get())
+
+        # 3) Retrieve remaining Single Items
+        for item in self.add_note_single_list[2:]:
+            note_instance.append(item.get())
+
+        # 4) Retrieve Boolean Items Data
+        for item in self.add_note_boolean_list:
+            note_instance.append(item.get())
+
+        # 5) Retrieve multi-line input data
+        for item in self.add_note_large_box_list:
+            note_instance.append(item.get("1.0", END).strip())
+                
+        # 6) Retrieve Foreign-Key (Menu-Based Data)
+        if self.add_note_fk_data:
+            for menu_input in self.add_note_fk_data:
+                menu_title = menu_input[0].cget('text')
+                selected_option = menu_input[1].get()
+            
+                note_instance.append(self.data_converter.return_id_from_name(selected_option, menu_title,
+                                                    self.note_all_data['categorized_column_names']['fk_data']))
+
+        # clear lists
+        if self.add_note_single_list:
+            self.add_note_single_list.clear()
+        if self.add_note_boolean_list:
+            self.add_note_boolean_list.clear()
+        if self.add_note_large_box_list:
+            self.add_note_large_box_list.clear()
+        if self.add_note_fk_data:
+            self.add_note_fk_data.clear()
+        
+        print(f'retrieved data: {note_instance}')
+
+        # write new job progress(s)
+        self.db_controller.write_job_to_do_note(note_instance , self.job_id, False)
+
+        # print message to user that new note instance has been added to list (not saved in db)
+        Messagebox.show_info(message='Note has been Saved')
+
+        # re-enable buttons to add note_instance and close progress window
+        self.new_note.enable_buttons_close_window()
+
+        self.all_notes_instance.retrieve_note_data()
+        self.all_notes_instance.load_all_to_do_notes()
+
+        
+    # --------------------------------------------------------------------------------------
+
 
     def disable_outer_scroll(self, event):
         self.left_minor_subscreen.scrollable_screen.scrollable.disable_scrolling()
