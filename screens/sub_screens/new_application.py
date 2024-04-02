@@ -272,7 +272,7 @@ class NewApplicationScreen(FullScreen):
         # print message to user that new note instance has been added to list (not saved in db)
         Messagebox.show_info(message='Note has been added on')
 
-        # re-enable buttons to add progress_instance, save new application and close progress window
+        # re-enable buttons to add new note instance, save new application and close progress window
         self.new_note_screen.enable_buttons_close_window()
 
 
