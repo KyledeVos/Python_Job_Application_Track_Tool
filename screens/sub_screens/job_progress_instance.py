@@ -198,9 +198,9 @@ class ProgressInstanceWindow(SubWindowBasic):
         # re-enable buttons to add progress_instance and close progress window
         self.enable_buttons_close_window()
         # reload windows - needed for reset of scrollbar
-        self.outer_window_reload_func(True)
+        self.outer_window_reload_func()
 
-        # print message to user that progres instance has been added to list (not saved in db)
+        # print message to user that progress instance has been added to list (not saved in db)
         Messagebox.show_info(message='Job Progress has been saved')
 
 
@@ -354,7 +354,7 @@ class AllJobProgress():
         self.delete_selected_btn.config(command = self.delete_selected_progress)
 
         # create frame to hold column titles
-        self.job_progress_frame = Frame(self.outer_container, borderwidth=2, relief='solid')
+        self.job_progress_frame = Frame(self.outer_container)
         # list to hold column names display
         self.display_columns = None
 

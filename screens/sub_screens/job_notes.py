@@ -51,19 +51,19 @@ class AllNotesView():
         # Attempt Retrieval of all job to_do notes data -> None indicates no present job notes data
         self.notes_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id)
 
-    def load_all_to_do_notes(self, incomplete_only = True):
-
+    def load_all_to_do_notes(self, row_count =0, incomplete_only = True):
+        
         if self.notes_all_data is None:
             # No present note data, display message
-            Label(self.outer_container, text="No To-Do Items").grid(row=0, column=0, padx=5, pady=5, sticky=W+E)
+            Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
 
         # if only incomplete notes display is desired, check if there were incomplete notes present
         elif incomplete_only and self.incomplete_notes_present is False:
-                Label(self.outer_container, text="No To-Do Items").grid(row=0, column=0, padx=5, pady=5, sticky=W+E)
+                Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
 
         # 
         else:
-
+            
             class JobRow():
                 """Inner Class housing row labels and controls load of labels to window. Configures click event handle
                     for label to load job note view window for update of note"""
@@ -161,14 +161,13 @@ class AllNotesView():
                     Messagebox.show_info(message='Note has been updated')
 
                     # re-enable buttons to add progress_instance, save new application and close progress window
-                    self.outer_window_reload_func()
                     self.job_note_view.enable_buttons_close_window()
 
             # retrieve single data columns for summary display of note data
             self.single_data_cols = [val.lower().replace("_", "_") for val in self.notes_all_data['categorized_column_names']['single_data']]
 
             # track placement of rows
-            notes_row_placement = 0
+            notes_row_placement = row_count
             # track column placements for each rows
             column_placement = 0
 
@@ -250,8 +249,12 @@ class AllNotesView():
                 # # clear current note list for next job note instance
                 current_note.clear()
 
+            # return final row placement for possible additional widgets after job rows
+            return notes_row_placement
+
 
     def toggle_view_all(self):
         # switch between view all notes and view only incomplete notes
         self.include_all = not self.include_all
+
 

@@ -212,19 +212,19 @@ class JobView(FullScreen):
         # Buttons
         self.notes_top_btn_container = Frame(container)
         self.add_note_btn = Button(self.notes_top_btn_container, text="Add Note", command=self.add_job_note)
-        self.view_all_notes_btn = Button(self.notes_top_btn_container, text="View All Notes")
+        self.view_all_notes_btn = Button(self.notes_top_btn_container, text="Notes Management", command=self.view_all_to_do_notes)
 
         # container housing to do notes (summarized)
         self.to_do_notes_container = Frame(container)
 
         # list of buttons to be disabled during view of job note window
-        job_notes_button_disable_list = [self.update_application_btn, self.view_all_btn, self.add_progress_btn,
+        self.job_notes_button_disable_list = [self.update_application_btn, self.view_all_btn, self.add_progress_btn,
                                              self.add_note_btn, self.view_all_notes_btn]
 
         # Initialize AllNotesView instance
         self.all_notes_instance = AllNotesView(self.to_do_notes_container, self.db_controller, self.job_id, 
-                                               job_notes_button_disable_list, lambda: self.reload_window(False), 
-                                               False)
+                                               self.job_notes_button_disable_list, 
+                                               lambda: self.reload_all_notes(), False)
         self.all_notes_instance.retrieve_note_data()
 
     def add_job_note(self):
@@ -241,17 +241,12 @@ class JobView(FullScreen):
         # list of buttons to be disabled during view of job note window
         job_notes_button_disable_list = [self.update_application_btn, self.view_all_btn, self.add_progress_btn,
                                              self.add_note_btn, self.view_all_notes_btn]
-
-        
-        
-    # def __init__(self, columns_categorized, all_columns, db_controller, single_data_list,
-    #              boolean_data_list, large_box_data, fk_data, btns_list, outer_window_reload_func = None, 
-    #              retrieve_note_data_func = None, current_instance = None,  ) -> None:
-        
+  
         self.new_note = NewJobNote(self.note_all_data["categorized_column_names"], self.note_all_data["all_column_names"], 
                               self.db_controller, self.add_note_single_list, self.add_note_boolean_list,
                                 self.add_note_large_box_list, self.add_note_fk_data, job_notes_button_disable_list, 
-                                lambda: self.reload_window(False), self.retrieve_to_do_data, None)
+                                lambda: self.reload_all_notes(), 
+                                self.retrieve_to_do_data, None)
         self.new_note.configure_window_open()
 
     def retrieve_to_do_data(self):
@@ -347,7 +342,7 @@ class JobView(FullScreen):
         self.progress_window = ProgressInstanceWindow(self.progress_attributes, self.all_progress_cols,
                                                       self.db_controller, self.single_data_list, None, 
                                                       self.large_box_data, self.fk_data, self.buttons_list, 
-                                                      lambda: self.reload_window(False), 
+                                                      lambda: self.reload_window(reload_view_all=False), 
                                                       self.retrieve_and_save_progress_data, None)
         
         # load progress window
@@ -386,7 +381,7 @@ class JobView(FullScreen):
         self.db_controller. write_job_progress([progress_instance], self.job_id)
 
         # reload windows 
-        self.reload_window(True)
+        self.reload_window(reload_view_all=True)
 
         # print message to user that progres instance has been added to list (not saved in db)
         Messagebox.show_info(message='Job Progress has been saved')
@@ -394,6 +389,14 @@ class JobView(FullScreen):
         # re-enable buttons to add progress_instance, save new application and close progress window
         self.progress_window.enable_buttons_close_window()
 
+
+    def back_to_applications(self):
+        # remove covering frame holding all job progress info
+        self.cover_frame.grid_forget()
+
+        # reset page title for view all job applications
+        self.left_minor_subscreen.window_title.config(text="Job Application Details")
+        
             
     def view_all_job_progress(self):
 
@@ -426,17 +429,17 @@ class JobView(FullScreen):
         # Initialize instance of view all job Progress
         self.all_job_progress_instance = AllJobProgress(self.cover_frame, self.db_controller, self.all_job_progress_data, 
                                                         self.clear_boxes_btn, self.delete_selected_btn, self.back_btn, self.job_id,
-                                                        self.reload_window)
+                                                        lambda: self.reload_window(reload_view_all=True))
         # call for creation of frame housing all job_progress data
         self.all_job_progress_instance.view_all_job_progress_notes()
 
         # call for load of screen widgets, retrieving last set main row count
-        main_row_count = self.load_all_progress_top_screen()
+        main_row_count = self.load_over_lay_top()
 
         # call for load of recent job progress section - column title and progress rows
         main_row_count = self.all_job_progress_instance.load_all_progress_window(main_row_count)
 
-    def load_all_progress_top_screen(self):
+    def load_over_lay_top(self):
         
         # load return to job view button
         main_row_count = 0
@@ -456,16 +459,40 @@ class JobView(FullScreen):
         # return incremented main row count for calling method placement of further widgets
         return main_row_count
 
-    def back_to_applications(self):
-        # remove covering frame holding all job progress info
-        self.cover_frame.grid_forget()
 
-        # reset page title for view all job applications
-        self.left_minor_subscreen.window_title.config(text="Job Application Details")
-        
-        # recall job progress window load - needed for additional add of job progress to load
-        # most recent progress
-        self.load_window()
+    def view_all_to_do_notes(self):
+
+        # cover job view screen for view of all job notes data
+        self.cover_frame = Frame(self.container, bootstyle = 'default')
+        self.cover_frame.grid_columnconfigure(1, weight=1)
+        self.cover_frame.grid(row=0, rowspan=self.row_count, columnspan=2, column=0, sticky="NEWS")
+
+        # move scroll window back to top of page
+        self.left_minor_subscreen.scrollable_screen.reset_scroll_window()
+
+        # change window title
+        self.left_minor_subscreen.window_title.config(text="Job Notes")
+
+        # BUTTON to return to job view screen - removes covering frame
+        self.back_btn = Button(self.cover_frame, text= "<- Back to Application", command=self.back_to_applications)
+
+        # clear boxes and delete selected job progress button
+        self.top_level_holder = Frame(self.cover_frame, bootstyle = 'default')
+        self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes")
+        self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected')
+
+        # Initialize instance of all notes view
+        self.deletion_view_instance = AllNotesView(self.cover_frame, self.db_controller, self.job_id, 
+                                               self.job_notes_button_disable_list, 
+                                               lambda: self.reload_all_notes(call_location="all_notes_view"), True)
+    
+        # call for load of screen widgets, retrieving last set main row count
+        main_row_count = self.load_over_lay_top()
+
+        self.deletion_view_instance.retrieve_note_data()
+        self.deletion_view_instance.load_all_to_do_notes(row_count=main_row_count)
+
+
 
     def enable_deselect_and_delete_all(self):
         self.clear_boxes_btn.config(state=ACTIVE)
@@ -562,6 +589,7 @@ class JobView(FullScreen):
         
         # 1) Reload underlying job application screen to perform
         # possible update to most recent job progress instance
+
         self.recent_job_progress = self.db_controller.retrieve_job_progress_data(self.job_id, True, True)
         # if there is remaining job progress data, reload recent progress section
         if self.recent_job_progress is not None:
@@ -571,7 +599,7 @@ class JobView(FullScreen):
         # load window already handles checks for no job progress data
         self.load_window()
 
-        # 2) Reload overlying view all job progress screen
+        # 2) Reload overlying view all job progress screen if progress screen is being used
         if self.recent_job_progress is not None and reload_view_all is True:
         # if reload_view_all is True:
             # reload overlying progress window only if there is still progress data
@@ -580,6 +608,25 @@ class JobView(FullScreen):
         # 3) call for reload of job to_do notes data
         self.all_notes_instance.retrieve_note_data()
         self.all_notes_instance.load_all_to_do_notes()
+
+
+    def reload_all_notes(self, call_location = ""):
+        # reload window after any changes have been made
+
+        # clear previous screen
+        self.left_minor_subscreen.clear_right_major()
+
+        # reload job view screen for any changes made to do_notes_data
+        self.load_window()
+        # call for reload of job to_do notes data
+        self.all_notes_instance.retrieve_note_data()
+        self.all_notes_instance.load_all_to_do_notes()
+        
+        # allows for reload of all_notes_view overlay screen when viewing from all_notes view screen
+        if call_location == "all_notes_view":
+            self.view_all_to_do_notes()
+
+
 
     def update_basic_data(self):
 
