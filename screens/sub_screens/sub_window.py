@@ -119,10 +119,12 @@ class SubWindowBasic():
         # BOOLEAN ITEMS
         if self.columns_categorized['boolean_data']:
             for item in self.columns_categorized['boolean_data']:
-
+                
+                
                 # selection item[0] = IntVar, selection_item[1] = Checkbutton
                 selection_item = self.add_boolean_toggle(item)
                 # append intvar to boolean list
+                #print(selection_item[0].get())
                 self.boolean_data_list.append(selection_item[0])
 
                 # place Checkbutton on screen
@@ -247,6 +249,10 @@ class SubWindowBasic():
     def add_boolean_toggle(self, item_name):
         
         selection = IntVar()
+        if self.set_data is not None:
+            col_index = self.all_columns.index(item_name.lower().replace(" ", "_"))
+            selection.set(self.set_data[col_index])
+
         toggle_check = Checkbutton(self.sub_window, bootstyle = "success, round-toggle",
                                    text= item_name, variable=selection, onvalue=1, offvalue=0)
         

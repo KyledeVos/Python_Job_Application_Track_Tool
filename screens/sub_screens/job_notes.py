@@ -29,7 +29,8 @@ class NewJobNote(SubWindowBasic):
 class AllNotesView():
 
     def __init__(self, outer_container, db_controller, job_id, outer_buttons_list, 
-                 outer_window_reload_func, include_all = True) -> None:
+                 outer_window_reload_func, include_all = True, deletion_functionality = False,
+                 clr_boxes_btn = None, delete_all_btn = None) -> None:
 
         self.outer_container = outer_container
         self.db_controller = db_controller
@@ -37,6 +38,12 @@ class AllNotesView():
         self.outer_buttons_list = outer_buttons_list
         self.outer_window_reload_func = outer_window_reload_func
         self.include_all = include_all
+
+        # possible arguments for deletion functionality of window
+        # NOTE: deletion_functionality of True must have supplied clr_boxes_btn and delete_all_btn
+        self.deletion_functionality = deletion_functionality
+        self.clr_boxes_btn = clr_boxes_btn
+        self.delete_all_btn = delete_all_btn
 
         self.notes_all_data = None
 
@@ -51,14 +58,14 @@ class AllNotesView():
         # Attempt Retrieval of all job to_do notes data -> None indicates no present job notes data
         self.notes_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id)
 
-    def load_all_to_do_notes(self, row_count =0, incomplete_only = True):
+    def load_all_to_do_notes(self, row_count =0):
         
         if self.notes_all_data is None:
             # No present note data, display message
             Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
 
         # if only incomplete notes display is desired, check if there were incomplete notes present
-        elif incomplete_only and self.incomplete_notes_present is False:
+        elif self.include_all and self.incomplete_notes_present is False:
                 Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
 
         # 
@@ -107,7 +114,6 @@ class AllNotesView():
                         self.column_placement += 1
 
                 def open_job_view_window(self, event):
-                    print(self.job_note_id)
 
                     self.job_note_view = NewJobNote(self.categorized_columns, self.all_columns, self.db_controller,
                                                self.note_single_data, self.note_boolean_data, self.note_large_box_data,
@@ -157,11 +163,13 @@ class AllNotesView():
                     # update job_note_instance in datbase
                     self.db_controller.update_job_note_instance(self.all_columns[1:], note_instance + [self.job_note_id])
 
+                    # re-enable buttons to add progress_instance, save new application and close progress window
+                    self.job_note_view.enable_buttons_close_window()
+
                     # print message to user that new note instance has been added to list (not saved in db)
                     Messagebox.show_info(message='Note has been updated')
 
-                    # re-enable buttons to add progress_instance, save new application and close progress window
-                    self.job_note_view.enable_buttons_close_window()
+
 
             # retrieve single data columns for summary display of note data
             self.single_data_cols = [val.lower().replace("_", "_") for val in self.notes_all_data['categorized_column_names']['single_data']]
@@ -172,6 +180,11 @@ class AllNotesView():
             column_placement = 0
 
             # ----------- COLUMN TITLES ----------- 
+            
+            if self.deletion_functionality:
+                # Add additional empty column to hold checkbox for selction of job notes for deletion
+                column_placement += 1
+
             # Add additional column for count of number of to_do notes
             Label(self.outer_container, text="Number").grid(row=notes_row_placement, column = column_placement, padx=5, pady=5, sticky=W+E)
             column_placement += 1
@@ -211,7 +224,7 @@ class AllNotesView():
                 # NOTE: Current implementation has set 'status' within the boolean_col_indices list used
                 # to check for completion of to-do note item
                 status_index = self.notes_all_data['all_column_names'].index('status')
-                if job_note_instance[status_index] == 1 and incomplete_only == True:
+                if job_note_instance[status_index] == 1 and self.include_all == False:
                     continue
 
 

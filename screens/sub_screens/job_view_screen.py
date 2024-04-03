@@ -484,7 +484,8 @@ class JobView(FullScreen):
         # Initialize instance of all notes view
         self.deletion_view_instance = AllNotesView(self.cover_frame, self.db_controller, self.job_id, 
                                                self.job_notes_button_disable_list, 
-                                               lambda: self.reload_all_notes(call_location="all_notes_view"), True)
+                                               lambda: self.reload_all_notes(call_location="all_notes_view"),
+                                                True, True)
     
         # call for load of screen widgets, retrieving last set main row count
         main_row_count = self.load_over_lay_top()
