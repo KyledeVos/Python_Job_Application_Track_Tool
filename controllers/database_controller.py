@@ -265,10 +265,11 @@ class DatabaseController():
         # retrieve and check if note data exists for job application
         note_data = self.db_reader.retrieve_job_notes_data(self.cursor, table_name, 'job_id', job_id)
 
-        if is_data_present:
-            if not note_data:
-                    self.connection.close()
-                    return None
+       
+        if is_data_present is True and not note_data:
+                self.connection.close()
+                return None
+        
         else:
 
             # At this point, job application has existing note data

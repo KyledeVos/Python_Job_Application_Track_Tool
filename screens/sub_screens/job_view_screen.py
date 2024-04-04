@@ -225,7 +225,7 @@ class JobView(FullScreen):
         self.all_notes_instance = AllNotesView(self.to_do_notes_container, self.db_controller, self.job_id, 
                                                self.job_notes_button_disable_list, 
                                                lambda: self.reload_all_notes(), False)
-        self.all_notes_instance.retrieve_note_data()
+        self.all_notes_instance.retrieve_note_data(incomplete_only=True)
 
     def add_job_note(self):
 
@@ -294,8 +294,6 @@ class JobView(FullScreen):
         if self.add_note_fk_data:
             self.add_note_fk_data.clear()
         
-        print(f'retrieved data: {note_instance}')
-
         # write new job progress(s)
         self.db_controller.write_job_to_do_note(note_instance , self.job_id, False)
 
@@ -490,7 +488,7 @@ class JobView(FullScreen):
         # call for load of screen widgets, retrieving last set main row count
         main_row_count = self.load_over_lay_top()
 
-        self.deletion_view_instance.retrieve_note_data()
+        self.deletion_view_instance.retrieve_note_data(incomplete_only=False, is_data_present=True)
         self.deletion_view_instance.load_all_to_do_notes(row_count=main_row_count)
 
 

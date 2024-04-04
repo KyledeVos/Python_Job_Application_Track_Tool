@@ -50,22 +50,29 @@ class AllNotesView():
         self.incomplete_notes_present = None
         
 
-    def retrieve_note_data(self):
+    def retrieve_note_data(self, incomplete_only = False, is_data_present=False):
         
         # update state of incomplete notes present
         self.incomplete_notes_present = self.db_controller.is_incomplete_notes(self.job_id)
+        if self.incomplete_notes_present is False and incomplete_only is True:
+            self.notes_all_data == None
+            return
 
         # Attempt Retrieval of all job to_do notes data -> None indicates no present job notes data
-        self.notes_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id)
+        self.notes_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id, is_data_present)
+        print(f"notes all data: {self.notes_all_data}")
 
     def load_all_to_do_notes(self, row_count =0):
-        
+
+
         if self.notes_all_data is None:
+            print("catch 1")
             # No present note data, display message
             Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
 
         # if only incomplete notes display is desired, check if there were incomplete notes present
-        elif self.include_all and self.incomplete_notes_present is False:
+        elif self.include_all and self.notes_all_data is None:
+                print("catch 2")
                 Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
 
         # 
