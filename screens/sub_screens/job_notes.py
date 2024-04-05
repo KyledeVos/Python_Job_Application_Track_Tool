@@ -131,6 +131,7 @@ class AllNotesView():
 
                     # index to start loading data labels
                     start_index = 0
+                    end_index = len(self.job_note_lables)
                     
                     # check if job_note deletion functionality is required
                     if self.delete_window:
@@ -139,7 +140,15 @@ class AllNotesView():
                         self.column_placement += 1
                         start_index += 1
 
-                    for label in self.job_note_lables[start_index:]:
+                        # final item will be row deletion button, decrement end index by one (stops open_job_view_function being
+                        # assigned to deletion button below)
+                        end_index -=1
+
+                        self.row_deletion_btn = self.job_note_lables[end_index]
+                        self.row_deletion_btn.grid(row = self.note_row_placement, column = end_index, padx=5, pady=5, sticky=W+E)
+                        self.row_deletion_btn.configure(command = lambda:print("row deletion"))
+
+                    for label in self.job_note_lables[start_index:end_index]:
                         label.grid(row = self.note_row_placement, column = self.column_placement, padx=5, pady=5, sticky=W+E)
                         label.bind("<Button-1>", lambda e: self.open_job_view_window(e))
                         self.column_placement += 1
@@ -303,7 +312,12 @@ class AllNotesView():
                     current_label = Label(self.outer_container, text=display_text)
                     current_note.append(current_label)
 
-                # Create job roww instance to uniquely track if of current job note
+                # check if deletion functionality is required, if so add button for row deletion
+                if self.deletion_functionality:
+                    row_deletion_btn = Button(self.outer_container, text="Delete", bootstyle='danger')
+                    current_note.append(row_deletion_btn)
+
+                # Create job row instance to uniquely track if of current job note
                 # needed to load job note detailed view window, and call for placement of row labels 
                 JobRow(job_note_instance[0], current_note, notes_row_placement, 
                        self.notes_all_data['categorized_column_names'], self.notes_all_data['all_column_names'], 
@@ -371,14 +385,12 @@ class AllNotesView():
             # call for reload of job notes screen
             self.retrieve_note_data(incomplete_only=False, is_data_present=True)
             self.load_all_to_do_notes()
+            # reload outer screen to remove deleted notes from screen view
             self.outer_window_reload_func()
 
             # disable clear boxes button and delete_all_button after deletion
             self.clear_boxes_btn.configure(state='disabled')
             self.delete_all_btn.configure(state='disabled')
-
-
-
 
 
     def toggle_view_all(self):
