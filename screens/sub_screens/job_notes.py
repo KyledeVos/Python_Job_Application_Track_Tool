@@ -1,6 +1,6 @@
 from ttkbootstrap import *
 from ttkbootstrap.scrolled import ScrolledText
-from ttkbootstrap.dialogs import Messagebox
+from ttkbootstrap.dialogs import Messagebox, MessageDialog
 from datetime import date
 from .sub_window import SubWindowBasic
 from .job_progress_instance import DataConverter
@@ -30,7 +30,7 @@ class AllNotesView():
 
     def __init__(self, outer_container, db_controller, job_id, outer_buttons_list, 
                  outer_window_reload_func, include_all = True, deletion_functionality = False,
-                 clr_boxes_btn = None, delete_all_btn = None) -> None:
+                 clear_boxes_btn = None, delete_all_btn = None) -> None:
 
         self.outer_container = outer_container
         self.db_controller = db_controller
@@ -42,17 +42,21 @@ class AllNotesView():
         # possible arguments for deletion functionality of window
         # NOTE: deletion_functionality of True must have supplied clr_boxes_btn and delete_all_btn
         self.deletion_functionality = deletion_functionality
-        self.clr_boxes_btn = clr_boxes_btn
+        self.clear_boxes_btn = clear_boxes_btn
         self.delete_all_btn = delete_all_btn
 
         self.notes_all_data = None
 
         self.incomplete_notes_present = None
 
-        # if deletion of job notes functionality is required, create list to house all job notes
-        # checkbuttons and variables
+        # if deletion of job notes functionality is required
         if deletion_functionality:
+            # create list to house all job notes checkbuttons and variables
             self.all_notes_deletion_check_data = []
+            # configure clear boxes button
+            self.clear_boxes_btn.configure(command = self.clear_notes_boxes)
+            # configure delete selected notes button
+            self.delete_all_btn.configure(command = self.delete_selected_job_notes)
 
         
 
@@ -256,7 +260,6 @@ class AllNotesView():
 
             for job_note_instance in self.notes_all_data['note_values']:
                 
-                
                 # Perform check for incomplete to-do note
                 # NOTE: Current implementation has set 'status' within the boolean_col_indices list used
                 # to check for completion of to-do note item
@@ -273,7 +276,8 @@ class AllNotesView():
                     checkBox = Checkbutton(self.outer_container, variable=checked, onvalue=1, offvalue=0, 
                                            command=self.enable_disable_clear_deleted_btns)
                     current_note.append((checked, checkBox))
-                    self.all_notes_deletion_check_data.append([checked, checkBox])
+                    # add checked, checkbox and note id (job_instance[0] to list)
+                    self.all_notes_deletion_check_data.append([checked, checkBox, job_note_instance[0]])
 
                 # Add row count column value
                 current_label = Label(self.outer_container, text=str(count))
@@ -326,11 +330,54 @@ class AllNotesView():
         
         # if at least one note has been selected, enable clear and delete_selected btns
         if btns_enable:
-            self.clr_boxes_btn.configure(state='active')
+            self.clear_boxes_btn.configure(state='active')
             self.delete_all_btn.configure(state='active')
         else:
-            self.clr_boxes_btn.configure(state='disabled')
+            self.clear_boxes_btn.configure(state='disabled')
             self.delete_all_btn.configure(state='disabled')
+
+    def clear_notes_boxes(self):
+
+        # check if checkbutton is on, if so switch off
+        for deletion_item in self.all_notes_deletion_check_data:
+            if deletion_item[0].get() == 1:
+                deletion_item[0].set(0)
+
+        # disable clear boxes button and delete_all_button
+        self.clear_boxes_btn.configure(state='disabled')
+        self.delete_all_btn.configure(state='disabled')
+
+    def delete_selected_job_notes(self):
+
+        # Create A deletion warning window (set No as default option)
+        deletion_box = MessageDialog(title="Deletion Warning", 
+                                     message="Deletion cannot be undone\nAre you sure you want to delete", 
+                                    parent=None, buttons=["Yes","No:Primary"])
+        deletion_box.show()
+
+        # Check for Deletion Confirmation
+        if deletion_box.result== "Yes":
+
+            delete_id_list = []
+
+            # iterate through all job notes retrieving id's for notes selected for deletion
+            for deletion_item in self.all_notes_deletion_check_data:
+                if deletion_item[0].get() == 1:
+                    # add id of selected job note to deletion list
+                    delete_id_list.append(deletion_item[2])
+
+            self.db_controller.delete_only_job_note(delete_id_list)
+
+            # call for reload of job notes screen
+            self.retrieve_note_data(incomplete_only=False, is_data_present=True)
+            self.load_all_to_do_notes()
+            self.outer_window_reload_func()
+
+            # disable clear boxes button and delete_all_button after deletion
+            self.clear_boxes_btn.configure(state='disabled')
+            self.delete_all_btn.configure(state='disabled')
+
+
 
 
 

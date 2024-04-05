@@ -424,7 +424,7 @@ class JobView(FullScreen):
         # clear boxes and delete selected job progress button
         self.top_level_holder = Frame(self.cover_frame, bootstyle = 'default')
         self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes", command=self.clear_all_boxes)
-        self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected')
+        self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected', bootstyle='danger')
         
         # Initialize instance of view all job Progress
         self.all_job_progress_instance = AllJobProgress(self.cover_frame, self.db_controller, self.all_job_progress_data, 
@@ -434,12 +434,12 @@ class JobView(FullScreen):
         self.all_job_progress_instance.view_all_job_progress_notes()
 
         # call for load of screen widgets, retrieving last set main row count
-        main_row_count = self.load_over_lay_top()
+        main_row_count = self.load_over_lay_top(self.clear_boxes_btn, self.delete_selected_btn, self.top_level_holder)
 
         # call for load of recent job progress section - column title and progress rows
         main_row_count = self.all_job_progress_instance.load_all_progress_window(main_row_count)
 
-    def load_over_lay_top(self):
+    def load_over_lay_top(self, clear_box_btn, delete_selected_btn, container):
         
         # load return to job view button
         main_row_count = 0
@@ -449,15 +449,15 @@ class JobView(FullScreen):
         # load top holder holding clear boxes and delete selected buttons
         self.top_level_holder.grid(row=main_row_count, column=1, padx=10, pady=10, sticky='e')
         main_row_count += 1
-        self.clear_boxes_btn.grid(row=0, column=0)
-        self.delete_selected_btn.grid(row=0, column=1, padx=5)
+        clear_box_btn.grid(row=0, column=0)
+        delete_selected_btn.grid(row=0, column=1, padx=5)
 
-        self.job_info_frame.grid(row=main_row_count, column=0, columnspan=2, padx=5)
+        container.grid(row=main_row_count, column=0, columnspan=2, padx=5)
         main_row_count += 1
 
          # configure functions for clear_boxes and delete_selected as disabled on window load up
-        self.clear_boxes_btn.config(command=self.clear_all_boxes, state=DISABLED)
-        self.delete_selected_btn.config(state = DISABLED)
+        clear_box_btn.config(state=DISABLED)
+        delete_selected_btn.config(state = DISABLED)
 
         # return incremented main row count for calling method placement of further widgets
         return main_row_count
@@ -481,8 +481,8 @@ class JobView(FullScreen):
 
         # clear boxes and delete selected job progress button
         self.top_level_holder = Frame(self.cover_frame, bootstyle = 'default')
-        self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes")
-        self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected')
+        self.clear_notes_btn = Button(self.top_level_holder, text="Clear Boxes")
+        self.delete_selected_notes_btn = Button(self.top_level_holder, text = 'Delete Selected', bootstyle='danger')
 
         # frame for job_info data
         self.job_info_frame = Frame(self.cover_frame, bootstyle='default')
@@ -491,10 +491,10 @@ class JobView(FullScreen):
         self.deletion_view_instance = AllNotesView(self.job_info_frame, self.db_controller, self.job_id, 
                                                self.job_notes_button_disable_list, 
                                                lambda: self.reload_all_notes(call_location="all_notes_view"),
-                                                True, True, self.clear_boxes_btn, self.delete_selected_btn)
+                                                True, True, self.clear_notes_btn, self.delete_selected_notes_btn)
     
         # call for load of screen widgets, retrieving last set main row count
-        main_row_count = self.load_over_lay_top()
+        main_row_count = self.load_over_lay_top(self.clear_notes_btn, self.delete_selected_notes_btn, self.job_info_frame)
 
         self.deletion_view_instance.retrieve_note_data(incomplete_only=False, is_data_present=True)
         self.deletion_view_instance.load_all_to_do_notes(row_count=main_row_count)

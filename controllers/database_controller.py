@@ -505,4 +505,13 @@ class DatabaseController():
         self.cursor = self.connection.cursor()
         self.db_writer.delete_job_progress(self.connection, self.cursor, table_name, id_list)
         self.connection.close()
-        
+
+
+    def delete_only_job_note(self, id_list):
+        # Set default values
+        table_name = "job_notes"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        self.db_writer.delete_only_job_note(self.connection, self.cursor, table_name, id_list)
+        self.connection.close()

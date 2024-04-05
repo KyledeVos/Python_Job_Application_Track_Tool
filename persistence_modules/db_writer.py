@@ -57,3 +57,8 @@ class DbWriter():
             cursor.execute(f"DELETE FROM {table_name} WHERE job_id = ?", (id,))
             connection.commit()
 
+    def delete_only_job_note(self, connection, cursor, table_name, id_list):
+        for id in id_list:
+            cursor.execute(f"DELETE FROM {table_name} WHERE id = ?", (id,))
+            connection.commit()
+
