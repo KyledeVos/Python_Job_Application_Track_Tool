@@ -48,10 +48,11 @@ class AllNotesView():
         self.notes_all_data = None
 
         self.incomplete_notes_present = None
+
         
 
     def retrieve_note_data(self, incomplete_only = False, is_data_present=False):
-        
+
         # update state of incomplete notes present
         self.incomplete_notes_present = self.db_controller.is_incomplete_notes(self.job_id)
         if self.incomplete_notes_present is False and incomplete_only is True:
@@ -60,19 +61,19 @@ class AllNotesView():
 
         # Attempt Retrieval of all job to_do notes data -> None indicates no present job notes data
         self.notes_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id, is_data_present)
-        print(f"notes all data: {self.notes_all_data}")
 
     def load_all_to_do_notes(self, row_count =0):
 
+        for label in self.outer_container.grid_slaves():
+            label.grid_remove()
+
 
         if self.notes_all_data is None:
-            print("catch 1")
             # No present note data, display message
             Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
 
         # if only incomplete notes display is desired, check if there were incomplete notes present
         elif self.include_all and self.notes_all_data is None:
-                print("catch 2")
                 Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
 
         # 
@@ -167,7 +168,7 @@ class AllNotesView():
                     if self.note_fk_data:
                         self.note_fk_data.clear()
 
-                    # update job_note_instance in datbase
+                    # update job_note_instance in database
                     self.db_controller.update_job_note_instance(self.all_columns[1:], note_instance + [self.job_note_id])
 
                     # re-enable buttons to add progress_instance, save new application and close progress window
@@ -177,7 +178,6 @@ class AllNotesView():
                     Messagebox.show_info(message='Note has been updated')
 
 
-
             # retrieve single data columns for summary display of note data
             self.single_data_cols = [val.lower().replace("_", "_") for val in self.notes_all_data['categorized_column_names']['single_data']]
 
@@ -185,6 +185,13 @@ class AllNotesView():
             notes_row_placement = row_count
             # track column placements for each rows
             column_placement = 0
+
+            # check for remaining incomplete notes
+            # Check required here when updating notes
+            if not self.db_controller.is_incomplete_notes(self.job_id) and self.include_all is False:
+                Label(self.outer_container, text="No To-Do Items").grid(row=notes_row_placement, column=0, padx=5, pady=5, sticky=W+E)
+                notes_row_placement += 1
+                return notes_row_placement
 
             # ----------- COLUMN TITLES ----------- 
             
@@ -225,8 +232,12 @@ class AllNotesView():
             for boolean_name in self.notes_all_data['categorized_column_names']['boolean_data']:
                 boolean_col_indices.append(self.notes_all_data['all_column_names'].index(boolean_name.lower().replace(" ", "_")))
 
-            for count, job_note_instance in enumerate(self.notes_all_data['note_values']):
+            # keep track of row count
+            count = 1
 
+            for job_note_instance in self.notes_all_data['note_values']:
+                
+                
                 # Perform check for incomplete to-do note
                 # NOTE: Current implementation has set 'status' within the boolean_col_indices list used
                 # to check for completion of to-do note item
@@ -234,11 +245,11 @@ class AllNotesView():
                 if job_note_instance[status_index] == 1 and self.include_all == False:
                     continue
 
-
                 current_note = []
                 # Add row count column value
-                current_label = Label(self.outer_container, text=str(count + 1))
+                current_label = Label(self.outer_container, text=str(count))
                 current_note.append(current_label)
+                count += 1
 
                 # add single data item values first
                 for data_index in single_data_col_indices:

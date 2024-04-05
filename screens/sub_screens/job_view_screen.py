@@ -224,8 +224,10 @@ class JobView(FullScreen):
         # Initialize AllNotesView instance
         self.all_notes_instance = AllNotesView(self.to_do_notes_container, self.db_controller, self.job_id, 
                                                self.job_notes_button_disable_list, 
-                                               lambda: self.reload_all_notes(), False)
+                                               lambda: self.reload_all_notes(), include_all=False,
+                                                deletion_functionality= False)
         self.all_notes_instance.retrieve_note_data(incomplete_only=True)
+
 
     def add_job_note(self):
 
@@ -450,6 +452,9 @@ class JobView(FullScreen):
         self.clear_boxes_btn.grid(row=0, column=0)
         self.delete_selected_btn.grid(row=0, column=1, padx=5)
 
+        self.job_info_frame.grid(row=main_row_count, column=0, columnspan=2, padx=5)
+        main_row_count += 1
+
          # configure functions for clear_boxes and delete_selected as disabled on window load up
         self.clear_boxes_btn.config(command=self.clear_all_boxes, state=DISABLED)
         self.delete_selected_btn.config(state = DISABLED)
@@ -479,8 +484,11 @@ class JobView(FullScreen):
         self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes")
         self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected')
 
+        # frame for job_info data
+        self.job_info_frame = Frame(self.cover_frame, bootstyle='default')
+
         # Initialize instance of all notes view
-        self.deletion_view_instance = AllNotesView(self.cover_frame, self.db_controller, self.job_id, 
+        self.deletion_view_instance = AllNotesView(self.job_info_frame, self.db_controller, self.job_id, 
                                                self.job_notes_button_disable_list, 
                                                lambda: self.reload_all_notes(call_location="all_notes_view"),
                                                 True, True)
@@ -618,6 +626,7 @@ class JobView(FullScreen):
         # reload job view screen for any changes made to do_notes_data
         self.load_window()
         # call for reload of job to_do notes data
+
         self.all_notes_instance.retrieve_note_data()
         self.all_notes_instance.load_all_to_do_notes()
         
