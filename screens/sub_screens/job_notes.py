@@ -94,7 +94,8 @@ class AllNotesView():
 
                 def __init__(self, job_note_id, job_note_labels, note_row_placement, 
                              categorized_columns, all_columns, db_controller, outer_buttons_list, 
-                             outer_window_reload_func, retrieve_data_func, set_data, delete_window = False):
+                             outer_window_reload_func, retrieve_data_func, set_data, delete_window = False,
+                            retrieve_note_data = None, load_note_window = None):
                     self.job_note_id = job_note_id
                     self.job_note_lables = job_note_labels
                     self.note_row_placement = note_row_placement
@@ -124,6 +125,10 @@ class AllNotesView():
                     # boolean specifying if row includes deletion functionality
                     self.delete_window = delete_window
 
+                    # functions to reload notes window (application only with deletion functionality)
+                    self.retrieve_note_data = retrieve_note_data
+                    self.load_note_window = load_note_window
+
                     # converter for menu based data
                     self.data_converter = DataConverter()
 
@@ -146,7 +151,7 @@ class AllNotesView():
 
                         self.row_deletion_btn = self.job_note_lables[end_index]
                         self.row_deletion_btn.grid(row = self.note_row_placement, column = end_index, padx=5, pady=5, sticky=W+E)
-                        self.row_deletion_btn.configure(command = lambda:print("row deletion"))
+                        self.row_deletion_btn.configure(command = self.delete_row)
 
                     for label in self.job_note_lables[start_index:end_index]:
                         label.grid(row = self.note_row_placement, column = self.column_placement, padx=5, pady=5, sticky=W+E)
@@ -208,6 +213,26 @@ class AllNotesView():
 
                     # print message to user that new note instance has been added to list (not saved in db)
                     Messagebox.show_info(message='Note has been updated')
+
+                def delete_row(self):
+
+                    # Create A deletion warning window (set No as default option)
+                    deletion_box = MessageDialog(title="Permanent Deletion Warning", 
+                                     message="Deletion cannot be undone\nAre you sure you want to delete?", 
+                                    parent=None, buttons=["Yes","No:Primary"])
+                    deletion_box.show()
+
+                    # Check for Deletion Confirmation
+                    if deletion_box.result== "Yes":
+
+                        # delete row
+                        self.db_controller.delete_only_job_note([self.job_note_id])
+
+                        # call for reload of job notes screen
+                        self.retrieve_note_data(incomplete_only=False, is_data_present=True)
+                        self.load_note_window()
+                        # reload outer screen to remove deleted notes from screen view
+                        self.outer_window_reload_func()
 
 
             # retrieve single data columns for summary display of note data
@@ -322,7 +347,8 @@ class AllNotesView():
                 JobRow(job_note_instance[0], current_note, notes_row_placement, 
                        self.notes_all_data['categorized_column_names'], self.notes_all_data['all_column_names'], 
                        self.db_controller, self.outer_buttons_list, self.outer_window_reload_func, 
-                       None, job_note_instance, self.deletion_functionality).load_row()
+                       None, job_note_instance, self.deletion_functionality, self.retrieve_note_data,
+                       self.load_all_to_do_notes).load_row()
                 notes_row_placement += 1
 
                 # # clear current note list for next job note instance
@@ -364,8 +390,8 @@ class AllNotesView():
     def delete_selected_job_notes(self):
 
         # Create A deletion warning window (set No as default option)
-        deletion_box = MessageDialog(title="Deletion Warning", 
-                                     message="Deletion cannot be undone\nAre you sure you want to delete", 
+        deletion_box = MessageDialog(title="Permanent Deletion Warning", 
+                                     message="Deletion cannot be undone\nAre you sure you want to delete?", 
                                     parent=None, buttons=["Yes","No:Primary"])
         deletion_box.show()
 
