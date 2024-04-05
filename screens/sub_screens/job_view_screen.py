@@ -491,7 +491,7 @@ class JobView(FullScreen):
         self.deletion_view_instance = AllNotesView(self.job_info_frame, self.db_controller, self.job_id, 
                                                self.job_notes_button_disable_list, 
                                                lambda: self.reload_all_notes(call_location="all_notes_view"),
-                                                True, True)
+                                                True, True, self.clear_boxes_btn, self.delete_selected_btn)
     
         # call for load of screen widgets, retrieving last set main row count
         main_row_count = self.load_over_lay_top()

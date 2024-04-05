@@ -49,6 +49,11 @@ class AllNotesView():
 
         self.incomplete_notes_present = None
 
+        # if deletion of job notes functionality is required, create list to house all job notes
+        # checkbuttons and variables
+        if deletion_functionality:
+            self.all_notes_deletion_check_data = []
+
         
 
     def retrieve_note_data(self, incomplete_only = False, is_data_present=False):
@@ -85,7 +90,7 @@ class AllNotesView():
 
                 def __init__(self, job_note_id, job_note_labels, note_row_placement, 
                              categorized_columns, all_columns, db_controller, outer_buttons_list, 
-                             outer_window_reload_func, retrieve_data_func, set_data):
+                             outer_window_reload_func, retrieve_data_func, set_data, delete_window = False):
                     self.job_note_id = job_note_id
                     self.job_note_lables = job_note_labels
                     self.note_row_placement = note_row_placement
@@ -112,11 +117,25 @@ class AllNotesView():
                     # current values for job note
                     self.set_data = set_data
 
+                    # boolean specifying if row includes deletion functionality
+                    self.delete_window = delete_window
+
                     # converter for menu based data
                     self.data_converter = DataConverter()
 
                 def load_row(self):
-                    for label in self.job_note_lables:
+
+                    # index to start loading data labels
+                    start_index = 0
+                    
+                    # check if job_note deletion functionality is required
+                    if self.delete_window:
+                        # place checkbutton
+                        self.job_note_lables[0][1].grid(row = self.note_row_placement, column = self.column_placement, padx=5, pady=5, sticky=W+E)
+                        self.column_placement += 1
+                        start_index += 1
+
+                    for label in self.job_note_lables[start_index:]:
                         label.grid(row = self.note_row_placement, column = self.column_placement, padx=5, pady=5, sticky=W+E)
                         label.bind("<Button-1>", lambda e: self.open_job_view_window(e))
                         self.column_placement += 1
@@ -246,6 +265,16 @@ class AllNotesView():
                     continue
 
                 current_note = []
+
+                # check if row needs to include checkbox for multiple row deletions
+                if self.deletion_functionality:
+
+                    checked = IntVar()
+                    checkBox = Checkbutton(self.outer_container, variable=checked, onvalue=1, offvalue=0, 
+                                           command=self.enable_disable_clear_deleted_btns)
+                    current_note.append((checked, checkBox))
+                    self.all_notes_deletion_check_data.append([checked, checkBox])
+
                 # Add row count column value
                 current_label = Label(self.outer_container, text=str(count))
                 current_note.append(current_label)
@@ -274,7 +303,8 @@ class AllNotesView():
                 # needed to load job note detailed view window, and call for placement of row labels 
                 JobRow(job_note_instance[0], current_note, notes_row_placement, 
                        self.notes_all_data['categorized_column_names'], self.notes_all_data['all_column_names'], 
-                       self.db_controller, self.outer_buttons_list, self.outer_window_reload_func, None, job_note_instance).load_row()
+                       self.db_controller, self.outer_buttons_list, self.outer_window_reload_func, 
+                       None, job_note_instance, self.deletion_functionality).load_row()
                 notes_row_placement += 1
 
                 # # clear current note list for next job note instance
@@ -282,6 +312,26 @@ class AllNotesView():
 
             # return final row placement for possible additional widgets after job rows
             return notes_row_placement
+
+
+    def enable_disable_clear_deleted_btns(self):
+
+        btns_enable = False
+
+        # perform check if any note deletion checkbuttons have been selected
+        for deletion_item in self.all_notes_deletion_check_data:
+            if deletion_item[0].get() == 1:
+                btns_enable = True
+                break
+        
+        # if at least one note has been selected, enable clear and delete_selected btns
+        if btns_enable:
+            self.clr_boxes_btn.configure(state='active')
+            self.delete_all_btn.configure(state='active')
+        else:
+            self.clr_boxes_btn.configure(state='disabled')
+            self.delete_all_btn.configure(state='disabled')
+
 
 
     def toggle_view_all(self):
