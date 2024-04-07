@@ -64,7 +64,8 @@ class ScreenController():
 
         # set each main screen as a radiobutton
         for menu_option in self.main_menu_keys:
-            self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.option_variable, command=lambda: self.change_main_screen(self.option_variable))
+            self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.option_variable,
+                                       command=lambda: self.change_main_screen(self.option_variable))
 
         # allows association of menu containing radio buttons for screen to MenuButton Widget
         self.main_menu['menu'] = self.menu
