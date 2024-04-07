@@ -42,15 +42,26 @@ class ViewAllApplicationsScreen(FullScreen):
         # retrieve column names adding 'number' column (ignoring id column)
         self.column_titles = None
 
-    def get_data(self):
-        print(self.db_controller.retrieve_all_job_data())
+        # list storing possible orders
+        self.results_order = ['recent', 'oldest']
 
-        
+        # variable to track selected main screen
+        self.application_order = StringVar()
+        # set default order type as first in results_order
+        self.application_order.set(self.results_order[0])
+
+
+
+
+    def load_sort_menu(self, selected_order):
+        self.application_order.set(selected_order)
+        self.order_box.config(text=selected_order)
+        self.load_window()
+
     def load_window(self):
-        
-        # retrieve job_application_data
-        current_applications = self.db_controller.retrieve_job_display_cols()
 
+        # retrieve job_application_data
+        current_applications = self.db_controller.retrieve_job_application_date_ordered(self.application_order.get())
 
         if len(current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
@@ -97,9 +108,33 @@ class ViewAllApplicationsScreen(FullScreen):
                     for col_count, job_instance in enumerate(self.job_data_values):
                         job_instance.grid(row = row_count, column=col_count, padx=10, pady=10)
 
+            # track row_count
+            row_placement_count = 0
+
+            # add combo box label
+            ordering_label = Label(self.container, text="Sort By:")
+            ordering_label.grid(row=row_placement_count, column=0, pady=5)
+
+            # add MenuButton for sorting options
+            self.order_box = Menubutton(self.container, style='primary', text=self.application_order.get())
+            self.menu = Menu(self.order_box)
+
+
+            # set each ordering option as a radiobutton
+            for menu_option in self.results_order:
+                self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.application_order, 
+                                          command=lambda: self.load_sort_menu(self.application_order.get()))
+                
+            # allows association of menu containing radio buttons for screen to MenuButton Widget
+            self.order_box['menu'] = self.menu
+
+            # set display to current selected ordering method
+            self.order_box.grid(row=row_placement_count, column=1, pady=5)
+            row_placement_count += 1
+
             for count, application in enumerate(current_applications):
                 # Add Column Titles
-                if count == 0:
+                if row_placement_count == 1:
                     for col_count, title in enumerate(self.column_titles):
                         # Set reduced width for row count
                         if col_count == 0:
@@ -107,11 +142,12 @@ class ViewAllApplicationsScreen(FullScreen):
                         else:
                         # Set longer width for other rows (company, position, etc.)
                             current_label = Label(self.container, text=title, width=20, anchor=W)
-                        current_label.grid(row=0, column=col_count, pady=2)
+                        current_label.grid(row=row_placement_count, column=col_count, pady=2)
+                row_placement_count += 1
 
                 # Create Job Instance (with job data) and place on screen
                 current_job = Job_Instance(count+1, application, self.container, self.left_sub_window, self.db_controller)
-                current_job.place_on_screen(count+1)
+                current_job.place_on_screen(row_placement_count+1)
 
 # View Specific Job
 class JobView(FullScreen):

@@ -307,16 +307,17 @@ class DatabaseController():
     
 
     # -------------------------------------------------------------------------------------------------
-    def retrieve_job_display_cols(self):
+    def retrieve_job_application_date_ordered(self, date_order):
 
         # Set Default Values
         # Specify columns to be displayed when displaying all applications (summary)
-        title_columns = ['company, position']
+        title_columns = ['date, company, position']
         table_name = 'job_applications'
+        date_order = date_order
         
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
-        data = self.db_reader.retrieve_col_specific(self.cursor, title_columns, table_name)
+        data = self.db_reader.retrieve_job_application_date_ordered(self.cursor, title_columns, table_name, date_order)
         self.connection.close()
 
         return data

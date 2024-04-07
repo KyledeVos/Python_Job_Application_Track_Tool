@@ -40,6 +40,12 @@ class DbReader():
     # ----------------------------------------------------------------------------------
     # Data Specific Functions
 
+    def retrieve_job_application_date_ordered(self, cursor, columns, table_name, date_order):
+        if date_order == "recent":
+            return cursor.execute(f"SELECT id, {', '.join(columns)} FROM {table_name} ORDER BY date DESC").fetchall()
+        elif date_order == "oldest":
+            return cursor.execute(f"SELECT id, {', '.join(columns)} FROM {table_name} ORDER BY date ASC").fetchall()
+
     def retrieve_configured_job_data(self, cursor, table_name, single_data, large_box_data, fk_data, id=None):
         
         combined_data = {}
