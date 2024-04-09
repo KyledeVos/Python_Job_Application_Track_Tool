@@ -7,4 +7,4 @@ def start_application():
     app_control = ApplicationController(database)
     app_control.start_app()
 
-start_application()
+start_application() 

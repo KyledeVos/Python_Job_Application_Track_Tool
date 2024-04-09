@@ -52,11 +52,19 @@ class ViewAllApplicationsScreen(FullScreen):
 
 
 
-
     def load_sort_menu(self, selected_order):
+
+        # clear old applications from screen
+        for widget in self.container.grid_slaves():
+            widget.grid_forget()
+        
+        # update track of ordering value
         self.application_order.set(selected_order)
+        # set menu text to current ordering selection
         self.order_box.config(text=selected_order)
+        # reload job applications
         self.load_window()
+
 
     def load_window(self):
 

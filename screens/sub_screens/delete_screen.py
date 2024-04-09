@@ -91,14 +91,36 @@ class DeleteApplication(FullScreen):
         # ---------------------------------------------------------------
         # DATA RETRIEVAL
         # retrieve all application data - id and desired columns specified by database controller
-        current_applications = self.db_controller.retrieve_job_application_date_ordered("recent")
+        current_applications = self.db_controller.retrieve_job_application_date_ordered(self.application_order.get())
         
 
         if len(current_applications) == 0:
             Label(self.container, text="No Job Applications").grid(row=0, column=0)
         
         else:
-            # retrieve column titles
+            # Application Sort Order Elements --------------------------------------------
+
+            # Frame to house sorting label and menubutton
+            sort_frame = Frame(self.container, bootstyle='default')
+
+        
+            # add combo box label
+            ordering_label = Label(sort_frame, text="Sort By:", anchor=W)
+            
+
+            # add MenuButton for sorting options
+            self.order_box = Menubutton(sort_frame, style='primary', text=self.application_order.get())
+            self.menu = Menu(self.order_box)
+
+            # set each ordering option as a radiobutton
+            for menu_option in self.results_order:
+                self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.application_order, 
+                                          command=lambda: self.load_sort_menu(self.application_order.get()))
+                
+            # allows association of menu containing radio buttons for screen to MenuButton Widget
+            self.order_box['menu'] = self.menu
+
+            # Column Titles --------------------------------------------------------------
             self.column_titles = [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names()[1:len(current_applications[0])]]
 
             # ---------------------------------------------------------------
@@ -174,13 +196,21 @@ class DeleteApplication(FullScreen):
             # ---------------------------------------------------------------
             # ELEMENT PLACEMENT ON SCREEN
 
+            # Track row placements
+            row_count = 0
+
+            # Application Ordering Label and Menu
+            sort_frame.grid(row=row_count, column=0, columnspan=4, sticky = W+E)
+            ordering_label.grid(row=0, column=0, pady=5)
+            self.order_box.grid(row=0, column=1, pady=5)
+            row_count += 1
+
+
             # load top-level buttons
-            self.top_level_holder.grid(row=0, column=0, pady=10, sticky = W+E)
+            self.top_level_holder.grid(row=row_count, column=0, pady=10, sticky = W+E)
+            row_count += 1
             self.clear_boxes_btn.grid(row=0, column=0)
             self.delete_selected_btn.grid(row=0, column=1, padx=5)
-
-            # Job Instance Placements
-            row_count = 2
 
             # column count track for titles
             column_count = 0
@@ -208,3 +238,17 @@ class DeleteApplication(FullScreen):
                 item.place_on_screen(row_count)
                 self.deletion_items.append(item)
                 row_count+=1
+
+
+    def load_sort_menu(self, selected_order):
+
+        # clear old applications from screen
+        for widget in self.container.grid_slaves():
+            widget.grid_forget()
+        
+        # update track of ordering value
+        self.application_order.set(selected_order)
+        # set menu text to current ordering selection
+        self.order_box.config(text=selected_order)
+        # reload job applications
+        self.load_window()
