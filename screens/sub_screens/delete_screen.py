@@ -11,12 +11,22 @@ class DeleteApplication(FullScreen):
         self.db_controller = db_controller
         self.empty_label = Label(container)
 
+        self.container.grid_columnconfigure(0, weight=1)
+
         self.deletion_items = []
 
         # top-level buttons
         self.top_level_holder = Frame(container, bootstyle = 'default')
         self.clear_boxes_btn = Button(self.top_level_holder, text="Clear Boxes", bootstyle='primary')
         self.delete_selected_btn = Button(self.top_level_holder, text = 'Delete Selected', bootstyle='danger')
+
+        # list storing possible orders
+        self.results_order = ['recent', 'oldest']
+
+        # variable to track selected main screen
+        self.application_order = StringVar()
+        # set default order type as first in results_order
+        self.application_order.set(self.results_order[0])
 
     def deselect_all(self):
         for item in self.deletion_items:
@@ -81,7 +91,7 @@ class DeleteApplication(FullScreen):
         # ---------------------------------------------------------------
         # DATA RETRIEVAL
         # retrieve all application data - id and desired columns specified by database controller
-        current_applications = self.db_controller.retrieve_job_display_cols()
+        current_applications = self.db_controller.retrieve_job_application_date_ordered("recent")
         
 
         if len(current_applications) == 0:
@@ -114,13 +124,13 @@ class DeleteApplication(FullScreen):
                         self.label_list.append(Label(self.containing_box, text = job_entry, width=20, anchor=W))
 
                     
-                def place_on_screen(self, row, column):
+                def place_on_screen(self, row):
 
                     # configure individual deletion button command
                     self.delete_job_btn.config(command=self.delete_job)
 
                     self.containing_box.grid(row=row, column=0, pady=5)
-                    column_count = column
+                    column_count = 0
                     self.checkBox.grid(row=row, column=column_count, pady=2)
                     column_count += 1
 
@@ -165,17 +175,36 @@ class DeleteApplication(FullScreen):
             # ELEMENT PLACEMENT ON SCREEN
 
             # load top-level buttons
-            self.top_level_holder.grid(row=0, column=0, pady=10)
+            self.top_level_holder.grid(row=0, column=0, pady=10, sticky = W+E)
             self.clear_boxes_btn.grid(row=0, column=0)
             self.delete_selected_btn.grid(row=0, column=1, padx=5)
 
             # Job Instance Placements
             row_count = 2
-            
+
+            # column count track for titles
+            column_count = 0
+
+            # container for column title
+            titles_container = Frame(self.container, bootstyle='default')
+            titles_container.grid(row=row_count, column=0, columnspan=4, sticky = W+E)
+            row_count += 1
+
+            # place column titles
+            for title in self.column_titles:
+
+                # add empty label as space for checkbox buttons
+                if column_count == 0:
+                    Label(titles_container, text="", width=5).grid(row=0, column=0)
+                    column_count += 1
+                Label(titles_container, text=title, width=20, anchor=W).grid(row=0, column = column_count)
+                column_count += 1
+
+                    
             # clear deletion items from potential previous screen load
             self.deletion_items.clear()
             for application in current_applications:
                 item = DeletionItem(self.container, application, self.db_controller, self.load_window, self.delete_clear_box_disable)
-                item.place_on_screen(row_count, 0)
+                item.place_on_screen(row_count)
                 self.deletion_items.append(item)
                 row_count+=1
