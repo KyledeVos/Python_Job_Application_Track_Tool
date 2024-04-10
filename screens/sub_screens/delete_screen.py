@@ -107,7 +107,6 @@ class DeleteApplication(FullScreen):
             # add combo box label
             ordering_label = Label(sort_frame, text="Sort By:", anchor=W)
             
-
             # add MenuButton for sorting options
             self.order_box = Menubutton(sort_frame, style='primary', text=self.application_order.get())
             self.menu = Menu(self.order_box)
