@@ -241,6 +241,15 @@ class JobView(FullScreen):
         self.top_btns_container = Frame(container)
         self.view_all_btn = Button(self.top_btns_container, text="View All", command=self.view_all_job_progress)
         self.add_progress_btn = Button(self.top_btns_container, text="Add Progress", command=self.add_job_progress)
+
+        # SORTING ORDER OF APPPLICATIONS
+        # list storing possible orders
+        self.results_order = ['recent', 'oldest']
+        # variable to track selected ordering method
+        self.application_order = StringVar()
+        # set default (first) order type as first in results_order
+        self.application_order.set(self.results_order[0])
+
         # check if current job has job progress data
         if self.recent_job_progress != None:
             # Create recent job progress instance
@@ -440,7 +449,7 @@ class JobView(FullScreen):
 
         # reset page title for view all job applications
         self.left_minor_subscreen.window_title.config(text="Job Application Details")
-        
+
             
     def view_all_job_progress(self):
 
@@ -459,11 +468,31 @@ class JobView(FullScreen):
         # setting "return_one" to False and "display_only" to False
         # "display_only" as False returns full fk data with complete row id's and column data
         # NOTE: implementation is designed to work with return_one set to False
-        self.all_job_progress_data = self.db_controller.retrieve_job_progress_data(self.job_id, False, False)
+        self.all_job_progress_data = self.db_controller.retrieve_job_progress_data(self.job_id, 
+                                                                                   return_one = False,
+                                                                                   display_only = False,
+                                                                                   order_by = self.application_order.get())
         # print(self.all_job_progress_data)
 
         # BUTTON to return to job view screen - removes covering frame
         self.back_btn = Button(self.cover_frame, text= "<- Back to Application", command=self.back_to_applications)
+
+        # sort order holder
+        self.sort_container = Frame(self.cover_frame, bootstyle='default')
+        # Sort Description label
+        self.sort_label = Label(self.sort_container, text="Sort By:",anchor=W)
+        # add MenuButton for sorting options
+        self.order_box = Menubutton(self.sort_container, style='primary', text=self.application_order.get())
+        self.menu = Menu(self.order_box)
+
+        # set each ordering option as a radiobutton
+        for menu_option in self.results_order:
+            self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.application_order, 
+                                        command = lambda:self.reload_window(reload_view_all=True))
+            
+         # allows association of menu containing radio buttons for screen to MenuButton Widget
+        self.order_box['menu'] = self.menu
+
 
         # clear boxes and delete selected job progress button
         self.top_level_holder = Frame(self.cover_frame, bootstyle = 'default')
@@ -490,13 +519,17 @@ class JobView(FullScreen):
         self.back_btn.grid(row = main_row_count, column=0, padx=2, pady=5)
         main_row_count += 1
 
+        # load sorting order frame - housing label and sort menu
+        self.sort_container.grid(row=main_row_count, column=0, padx=10, pady=10, sticky='W')
+        self.sort_label.grid(row=0, column=0)
+        self.order_box.grid(row=0, column=1)
+
         # load top holder holding clear boxes and delete selected buttons
-        self.top_level_holder.grid(row=main_row_count, column=1, padx=10, pady=10, sticky='e')
+        container.grid(row=main_row_count, column=1, padx=10, pady=10, sticky='e')
         main_row_count += 1
         clear_box_btn.grid(row=0, column=0)
         delete_selected_btn.grid(row=0, column=1, padx=5)
 
-        container.grid(row=main_row_count, column=0, columnspan=2, padx=5)
         main_row_count += 1
 
          # configure functions for clear_boxes and delete_selected as disabled on window load up
