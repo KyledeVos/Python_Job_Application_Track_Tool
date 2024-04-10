@@ -211,13 +211,13 @@ class DatabaseController():
         return data
     
 
-    def retrieve_job_progress_data(self, search_id, return_one, display_only):
+    def retrieve_job_progress_data(self, search_id, return_one, display_only, order_by="recent"):
 
         progress_instance = JobProgressDefaults()
 
         # set column used as most recent reference 
         # will use the most recent (highest) id
-        search_column = "id"
+        search_column = "date"
         identify_column = "job_id"
 
         self.connection = sqlite3.connect(self.database)
@@ -226,7 +226,7 @@ class DatabaseController():
         data = self.db_reader.retrieve_progress_rows_complex(self.cursor, progress_instance.table_name, 
                                                     identify_column, search_id, progress_instance.fk_tables,
                                                     progress_instance.larger_data_inputs, progress_instance.col_not_display,
-                                                    return_one, display_only, order_by_col = search_column)
+                                                    return_one, display_only, order_by_col = search_column, order = order_by)
 
         self.connection.close()
         return data
