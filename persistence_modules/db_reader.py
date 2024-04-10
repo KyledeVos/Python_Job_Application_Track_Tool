@@ -136,7 +136,8 @@ class DbReader():
 
 
     def retrieve_progress_rows_complex(self, cursor, table_name, identification_column, identification_value,
-                              fk_tables, large_box_cols, remove_cols, return_one, display_only, order_by_col = None):
+                              fk_tables, large_box_cols, remove_cols, return_one, display_only, 
+                              order_by_col = None, order = None):
         
         # retrieve column names
         column_names = self.retrieve_column_names(cursor,  table_name)
@@ -147,7 +148,14 @@ class DbReader():
 
         # Check for data order specification
         if order_by_col != None:
-            query += f" ORDER BY {order_by_col} DESC"
+            query += f" ORDER BY {order_by_col}"
+
+        # determine order 
+        if order != None:
+            if order == "recent":
+                query += " DESC"
+            elif order == "oldest":
+                query += " ASC"
 
         if return_one:
             query += " LIMIT 1"
