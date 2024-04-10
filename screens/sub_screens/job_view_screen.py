@@ -46,9 +46,9 @@ class ViewAllApplicationsScreen(FullScreen):
         self.results_order = ['recent', 'oldest']
 
         # variable to track selected main screen
-        self.application_order = StringVar()
+        self.progress_application_order = StringVar()
         # set default order type as first in results_order
-        self.application_order.set(self.results_order[0])
+        self.progress_application_order.set(self.results_order[0])
 
 
 
@@ -59,7 +59,7 @@ class ViewAllApplicationsScreen(FullScreen):
             widget.grid_forget()
         
         # update track of ordering value
-        self.application_order.set(selected_order)
+        self.progress_application_order.set(selected_order)
         # set menu text to current ordering selection
         self.order_box.config(text=selected_order)
         # reload job applications
@@ -69,7 +69,7 @@ class ViewAllApplicationsScreen(FullScreen):
     def load_window(self):
 
         # retrieve job_application_data
-        current_applications = self.db_controller.retrieve_job_application_date_ordered(self.application_order.get())
+        current_applications = self.db_controller.retrieve_job_application_date_ordered(self.progress_application_order.get())
 
         if len(current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
@@ -124,14 +124,14 @@ class ViewAllApplicationsScreen(FullScreen):
             ordering_label.grid(row=row_placement_count, column=0, pady=5)
 
             # add MenuButton for sorting options
-            self.order_box = Menubutton(self.container, style='primary', text=self.application_order.get())
+            self.order_box = Menubutton(self.container, style='primary', text=self.progress_application_order.get())
             self.menu = Menu(self.order_box)
 
 
             # set each ordering option as a radiobutton
             for menu_option in self.results_order:
-                self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.application_order, 
-                                          command=lambda: self.load_sort_menu(self.application_order.get()))
+                self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.progress_application_order, 
+                                          command=lambda: self.load_sort_menu(self.progress_application_order.get()))
                 
             # allows association of menu containing radio buttons for screen to MenuButton Widget
             self.order_box['menu'] = self.menu
@@ -246,9 +246,9 @@ class JobView(FullScreen):
         # list storing possible orders
         self.results_order = ['recent', 'oldest']
         # variable to track selected ordering method
-        self.application_order = StringVar()
+        self.progress_application_order = StringVar()
         # set default (first) order type as first in results_order
-        self.application_order.set(self.results_order[0])
+        self.progress_application_order.set(self.results_order[0])
 
         # check if current job has job progress data
         if self.recent_job_progress != None:
@@ -276,9 +276,9 @@ class JobView(FullScreen):
 
         # Initialize AllNotesView instance
         self.all_notes_instance = AllNotesView(self.to_do_notes_container, self.db_controller, self.job_id, 
-                                               self.job_notes_button_disable_list, 
+                                               self.job_notes_button_disable_list,
                                                lambda: self.reload_all_notes(), include_all=False,
-                                                deletion_functionality= False)
+                                                deletion_functionality= False, view_all_btn = self.view_all_notes_btn)
         self.all_notes_instance.retrieve_note_data(incomplete_only=True)
 
 
@@ -471,27 +471,27 @@ class JobView(FullScreen):
         self.all_job_progress_data = self.db_controller.retrieve_job_progress_data(self.job_id, 
                                                                                    return_one = False,
                                                                                    display_only = False,
-                                                                                   order_by = self.application_order.get())
+                                                                                   order_by = self.progress_application_order.get())
         # print(self.all_job_progress_data)
 
         # BUTTON to return to job view screen - removes covering frame
         self.back_btn = Button(self.cover_frame, text= "<- Back to Application", command=self.back_to_applications)
 
         # sort order holder
-        self.sort_container = Frame(self.cover_frame, bootstyle='default')
+        sort_container = Frame(self.cover_frame, bootstyle='default')
         # Sort Description label
-        self.sort_label = Label(self.sort_container, text="Sort By:",anchor=W)
+        sort_label = Label(sort_container, text="Sort By:",anchor=W)
         # add MenuButton for sorting options
-        self.order_box = Menubutton(self.sort_container, style='primary', text=self.application_order.get())
-        self.menu = Menu(self.order_box)
+        order_box = Menubutton(sort_container, style='primary', text=self.progress_application_order.get())
+        menu = Menu(self.order_box)
 
         # set each ordering option as a radiobutton
         for menu_option in self.results_order:
-            self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.application_order, 
+            self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.progress_application_order, 
                                         command = lambda:self.reload_window(reload_view_all=True))
             
          # allows association of menu containing radio buttons for screen to MenuButton Widget
-        self.order_box['menu'] = self.menu
+        order_box['menu'] = menu
 
 
         # clear boxes and delete selected job progress button
@@ -507,25 +507,35 @@ class JobView(FullScreen):
         self.all_job_progress_instance.view_all_job_progress_notes()
 
         # call for load of screen widgets, retrieving last set main row count
-        main_row_count = self.load_over_lay_top(self.clear_boxes_btn, self.delete_selected_btn, self.top_level_holder)
+        main_row_count = self.load_over_lay_top(self.clear_boxes_btn, self.delete_selected_btn, 
+                                                self.top_level_holder, sort_container, 
+                                                sort_label, order_box)
 
         # call for load of recent job progress section - column title and progress rows
         main_row_count = self.all_job_progress_instance.load_all_progress_window(main_row_count)
 
-    def load_over_lay_top(self, clear_box_btn, delete_selected_btn, container):
+    def load_over_lay_top(self, clear_box_btn, delete_selected_btn, container, 
+                          order_container = None, order_label = None, order_box = None):
         
         # load return to job view button
         main_row_count = 0
         self.back_btn.grid(row = main_row_count, column=0, padx=2, pady=5)
         main_row_count += 1
 
-        # load sorting order frame - housing label and sort menu
-        self.sort_container.grid(row=main_row_count, column=0, padx=10, pady=10, sticky='W')
-        self.sort_label.grid(row=0, column=0)
-        self.order_box.grid(row=0, column=1)
+        # load sorting order frame - housing label and sort menu (if supplied)
+        if order_container:
+            order_container.grid(row=main_row_count, column=0, padx=10, pady=10, sticky='W')
+        if order_label:
+            order_label.grid(row=0, column=0)
+        if order_box:
+            order_box.grid(row=0, column=1)
 
         # load top holder holding clear boxes and delete selected buttons
-        container.grid(row=main_row_count, column=1, padx=10, pady=10, sticky='e')
+        # check for presence of sort feature - determines column placement of clear and deletion buttons
+        if order_container:
+            container.grid(row=main_row_count, column=1, padx=10, pady=10, sticky='e')
+        else:
+            container.grid(row=main_row_count, column=0, padx=10, pady=10, sticky='e')
         main_row_count += 1
         clear_box_btn.grid(row=0, column=0)
         delete_selected_btn.grid(row=0, column=1, padx=5)
@@ -568,7 +578,8 @@ class JobView(FullScreen):
         self.deletion_view_instance = AllNotesView(self.job_info_frame, self.db_controller, self.job_id, 
                                                self.job_notes_button_disable_list, 
                                                lambda: self.reload_all_notes(call_location="all_notes_view"),
-                                                True, True, self.clear_notes_btn, self.delete_selected_notes_btn)
+                                                True, True, self.clear_notes_btn, self.delete_selected_notes_btn, 
+                                                self.view_all_notes_btn)
     
         # call for load of screen widgets, retrieving last set main row count
         main_row_count = self.load_over_lay_top(self.clear_notes_btn, self.delete_selected_notes_btn, self.job_info_frame)

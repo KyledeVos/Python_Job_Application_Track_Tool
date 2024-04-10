@@ -30,7 +30,7 @@ class AllNotesView():
 
     def __init__(self, outer_container, db_controller, job_id, outer_buttons_list, 
                  outer_window_reload_func, include_all = True, deletion_functionality = False,
-                 clear_boxes_btn = None, delete_all_btn = None) -> None:
+                 clear_boxes_btn = None, delete_all_btn = None, view_all_btn = None) -> None:
 
         self.outer_container = outer_container
         self.db_controller = db_controller
@@ -44,6 +44,9 @@ class AllNotesView():
         self.deletion_functionality = deletion_functionality
         self.clear_boxes_btn = clear_boxes_btn
         self.delete_all_btn = delete_all_btn
+
+        # possible outer button for view of all notes
+        self.view_all_btn = view_all_btn
 
         self.notes_all_data = None
 
@@ -81,12 +84,19 @@ class AllNotesView():
             # No present note data, display message
             Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
 
+            # check for view all button - disable if there are no notes to display
+            if self.view_all_btn is not None:
+                self.view_all_btn.configure(state='disabled')
+
         # if only incomplete notes display is desired, check if there were incomplete notes present
         elif self.include_all and self.notes_all_data is None:
-                Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
-
+            Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
         # 
         else:
+
+            # check for view all button - ensure button is enabled if there are notes to display
+            if self.view_all_btn is not None:
+                self.view_all_btn.configure(state='active')
             
             class JobRow():
                 """Inner Class housing row labels and controls load of labels to window. Configures click event handle
