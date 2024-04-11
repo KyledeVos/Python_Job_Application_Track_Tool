@@ -233,6 +233,9 @@ class JobView(FullScreen):
             
         self.update_application_btn = Button(self.basic_info_frame, text="Save Changes", command=self.update_basic_data)
 
+
+        # list storing possible orders - for use by progress notes and job notes
+        self.results_order = ['recent', 'oldest']
         # ----------------------------------------------------------------------------
         # JOB PROGRESS SECTION - MOST RECENT PROGRESS   
         self.progress_title = Label(container, text = "Job Progress Info", anchor='w')
@@ -243,8 +246,6 @@ class JobView(FullScreen):
         self.add_progress_btn = Button(self.top_btns_container, text="Add Progress", command=self.add_job_progress)
 
         # SORTING ORDER OF APPPLICATIONS
-        # list storing possible orders
-        self.results_order = ['recent', 'oldest']
         # variable to track selected ordering method
         self.progress_application_order = StringVar()
         # set default (first) order type as first in results_order
@@ -266,6 +267,12 @@ class JobView(FullScreen):
         self.notes_top_btn_container = Frame(container)
         self.add_note_btn = Button(self.notes_top_btn_container, text="Add Note", command=self.add_job_note)
         self.view_all_notes_btn = Button(self.notes_top_btn_container, text="Notes Management", command=self.view_all_to_do_notes)
+
+        # SORTING ORDER OF APPPLICATIONS
+        # variable to track selected ordering method
+        self.notes_application_order = StringVar()
+        # set default (first) order type as first in results_order
+        self.notes_application_order.set(self.results_order[0])
 
         # container housing to do notes (summarized)
         self.to_do_notes_container = Frame(container)
@@ -483,11 +490,11 @@ class JobView(FullScreen):
         sort_label = Label(sort_container, text="Sort By:",anchor=W)
         # add MenuButton for sorting options
         order_box = Menubutton(sort_container, style='primary', text=self.progress_application_order.get())
-        menu = Menu(self.order_box)
+        menu = Menu(order_box)
 
         # set each ordering option as a radiobutton
         for menu_option in self.results_order:
-            self.menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.progress_application_order, 
+            menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.progress_application_order, 
                                         command = lambda:self.reload_window(reload_view_all=True))
             
          # allows association of menu containing radio buttons for screen to MenuButton Widget
