@@ -74,11 +74,10 @@ class AllNotesView():
         # Attempt Retrieval of all job to_do notes data -> None indicates no present job notes data
         self.notes_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id, is_data_present)
 
-    def load_all_to_do_notes(self, row_count =0):
+    def load_all_to_do_notes(self, row_count = 0):
 
         for label in self.outer_container.grid_slaves():
             label.grid_remove()
-
 
         if self.notes_all_data is None:
             # No present note data, display message
@@ -94,9 +93,20 @@ class AllNotesView():
         # 
         else:
 
+            # track placement of rows
+            notes_row_placement = row_count
+
+            # if load of notes in done in a seperate window (deletion_functionality is True),
+            # outer container must be placed here
+            if self.deletion_functionality:
+                self.outer_container.grid(row=row_count, column = 0)
+                # reset row placement for placement within outer container
+                notes_row_placement = 0
+
             # check for view all button - ensure button is enabled if there are notes to display
             if self.view_all_btn is not None:
                 self.view_all_btn.configure(state='active')
+                
             
             class JobRow():
                 """Inner Class housing row labels and controls load of labels to window. Configures click event handle
@@ -248,8 +258,6 @@ class AllNotesView():
             # retrieve single data columns for summary display of note data
             self.single_data_cols = [val.lower().replace("_", "_") for val in self.notes_all_data['categorized_column_names']['single_data']]
 
-            # track placement of rows
-            notes_row_placement = row_count
             # track column placements for each rows
             column_placement = 0
 

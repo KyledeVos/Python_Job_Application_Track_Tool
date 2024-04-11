@@ -521,12 +521,13 @@ class JobView(FullScreen):
         # call for load of recent job progress section - column title and progress rows
         main_row_count = self.all_job_progress_instance.load_all_progress_window(main_row_count)
 
+
     def load_over_lay_top(self, clear_box_btn, delete_selected_btn, container, 
                           order_container = None, order_label = None, order_box = None):
         
         # load return to job view button
         main_row_count = 0
-        self.back_btn.grid(row = main_row_count, column=0, padx=2, pady=5)
+        self.back_btn.grid(row = main_row_count, column=0, padx=2, pady=5, sticky=W)
         main_row_count += 1
 
         # load sorting order frame - housing label and sort menu (if supplied)
@@ -539,7 +540,7 @@ class JobView(FullScreen):
 
         # load top holder holding clear boxes and delete selected buttons
         # check for presence of sort feature - determines column placement of clear and deletion buttons
-        if order_container:
+        if container:
             container.grid(row=main_row_count, column=1, padx=10, pady=10, sticky='e')
         else:
             container.grid(row=main_row_count, column=0, padx=10, pady=10, sticky='e')
@@ -547,7 +548,6 @@ class JobView(FullScreen):
         clear_box_btn.grid(row=0, column=0)
         delete_selected_btn.grid(row=0, column=1, padx=5)
 
-        main_row_count += 1
 
          # configure functions for clear_boxes and delete_selected as disabled on window load up
         clear_box_btn.config(state=DISABLED)
@@ -573,6 +573,22 @@ class JobView(FullScreen):
         # BUTTON to return to job view screen - removes covering frame
         self.back_btn = Button(self.cover_frame, text= "<- Back to Application", command=self.back_to_applications)
 
+        # sort order holder
+        sort_container = Frame(self.cover_frame, bootstyle='default')
+        # Sort Description label
+        sort_label = Label(sort_container, text="Sort By:",anchor=W)
+        # add MenuButton for sorting options
+        order_box = Menubutton(sort_container, style='primary', text=self.progress_application_order.get())
+        menu = Menu(order_box)
+
+        # set each ordering option as a radiobutton
+        for menu_option in self.results_order:
+            menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.progress_application_order, 
+                                        command = lambda:self.reload_all_notes(call_location='all_notes_view'))
+            
+         # allows association of menu containing radio buttons for screen to MenuButton Widget
+        order_box['menu'] = menu
+
         # clear boxes and delete selected job progress button
         self.top_level_holder = Frame(self.cover_frame, bootstyle = 'default')
         self.clear_notes_btn = Button(self.top_level_holder, text="Clear Boxes")
@@ -589,7 +605,8 @@ class JobView(FullScreen):
                                                 self.view_all_notes_btn)
     
         # call for load of screen widgets, retrieving last set main row count
-        main_row_count = self.load_over_lay_top(self.clear_notes_btn, self.delete_selected_notes_btn, self.job_info_frame)
+        main_row_count = self.load_over_lay_top(self.clear_notes_btn, self.delete_selected_notes_btn, self.top_level_holder, 
+                                                sort_container, sort_label, order_box)
 
         self.deletion_view_instance.retrieve_note_data(incomplete_only=False, is_data_present=True)
         self.deletion_view_instance.load_all_to_do_notes(row_count=main_row_count)
