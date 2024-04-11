@@ -30,7 +30,8 @@ class AllNotesView():
 
     def __init__(self, outer_container, db_controller, job_id, outer_buttons_list, 
                  outer_window_reload_func, include_all = True, deletion_functionality = False,
-                 clear_boxes_btn = None, delete_all_btn = None, view_all_btn = None) -> None:
+                 clear_boxes_btn = None, delete_all_btn = None, view_all_btn = None,
+                 application_order_var = None) -> None:
 
         self.outer_container = outer_container
         self.db_controller = db_controller
@@ -47,6 +48,8 @@ class AllNotesView():
 
         # possible outer button for view of all notes
         self.view_all_btn = view_all_btn
+        # possible variable tracking application order specification
+        self.application_order_var = application_order_var
 
         self.notes_all_data = None
 
@@ -70,9 +73,9 @@ class AllNotesView():
         if self.incomplete_notes_present is False and incomplete_only is True:
             self.notes_all_data == None
             return
-
+        
         # Attempt Retrieval of all job to_do notes data -> None indicates no present job notes data
-        self.notes_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id, is_data_present)
+        self.notes_all_data = self.db_controller.retrieve_all_job_note_data(self.job_id, is_data_present, self.application_order_var )
 
     def load_all_to_do_notes(self, row_count = 0):
 

@@ -45,11 +45,15 @@ class ViewAllApplicationsScreen(FullScreen):
         # list storing possible orders
         self.results_order = ['recent', 'oldest']
 
-        # variable to track selected main screen
+        # variable to track selected order option for job progress
         self.progress_application_order = StringVar()
         # set default order type as first in results_order
         self.progress_application_order.set(self.results_order[0])
 
+        # variable to track selected order option for job notes
+        self.notes_application_order = StringVar()
+        # set default order type as first in results_order
+        self.notes_application_order.set(self.results_order[0])
 
 
     def load_sort_menu(self, selected_order):
@@ -578,12 +582,12 @@ class JobView(FullScreen):
         # Sort Description label
         sort_label = Label(sort_container, text="Sort By:",anchor=W)
         # add MenuButton for sorting options
-        order_box = Menubutton(sort_container, style='primary', text=self.progress_application_order.get())
+        order_box = Menubutton(sort_container, style='primary', text=self.notes_application_order.get())
         menu = Menu(order_box)
 
         # set each ordering option as a radiobutton
         for menu_option in self.results_order:
-            menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.progress_application_order, 
+            menu.add_radiobutton(label=menu_option, value=menu_option, variable=self.notes_application_order, 
                                         command = lambda:self.reload_all_notes(call_location='all_notes_view'))
             
          # allows association of menu containing radio buttons for screen to MenuButton Widget
@@ -602,7 +606,7 @@ class JobView(FullScreen):
                                                self.job_notes_button_disable_list, 
                                                lambda: self.reload_all_notes(call_location="all_notes_view"),
                                                 True, True, self.clear_notes_btn, self.delete_selected_notes_btn, 
-                                                self.view_all_notes_btn)
+                                                self.view_all_notes_btn, self.notes_application_order)
     
         # call for load of screen widgets, retrieving last set main row count
         main_row_count = self.load_over_lay_top(self.clear_notes_btn, self.delete_selected_notes_btn, self.top_level_holder, 

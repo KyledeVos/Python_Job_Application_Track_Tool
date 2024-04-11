@@ -227,9 +227,14 @@ class DbReader():
         return remaining_data
     
 
-    def retrieve_job_notes_data(self, cursor, table_name, search_column, search_val):
-
-        return cursor.execute(f"SELECT * FROM {table_name} where {search_column} = {search_val}").fetchall()
+    def retrieve_job_notes_data(self, cursor, table_name, search_column, search_val, 
+                                order_col = None, order = None):
+        if order is None:
+            query = f"SELECT * FROM {table_name} WHERE {search_column} = {search_val} ORDER BY {order_col} DESC"
+        else:
+            query = f"SELECT * FROM {table_name} WHERE {search_column} = {search_val} ORDER BY {order_col} {order}"
+        
+        return cursor.execute(query).fetchall()
 
 
     def check_incomplete_notes(self, cursor, table_name, status_field, search_field, search_val):

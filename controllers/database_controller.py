@@ -71,6 +71,8 @@ class JobNotesDefaults():
         self.col_not_display = ["job_id"]
         # Data Update - set columns that can be updated
         self.update_cols = ['date',  'due_date', 'title', 'description']
+        # Column to perform order by
+        self.order_by_col = 'date'
         
 
 class DatabaseController():
@@ -251,19 +253,29 @@ class DatabaseController():
 
         return column_names_dict
     
-    def retrieve_all_job_note_data(self, job_id, is_data_present = False):
+    def retrieve_all_job_note_data(self, job_id, is_data_present = False, order=None):
         # Default values
         table_name = "job_notes"
         # data dict to hold column names and associated values
         col_val_data = {}
+        # initialize Job Notes Default instance
+        notes_default = JobNotesDefaults()
         # columns to not include in display
-        cols_not_display = JobNotesDefaults().col_not_display
+        cols_not_display = notes_default.col_not_display
+        # column to use for ordering of results
+        order_col = notes_default.order_by_col
+
+        if order is not None:
+            if order.get() == "recent":
+                order = "DESC"
+            elif order.get() == "oldest":
+                order = "ASC"
 
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
 
         # retrieve and check if note data exists for job application
-        note_data = self.db_reader.retrieve_job_notes_data(self.cursor, table_name, 'job_id', job_id)
+        note_data = self.db_reader.retrieve_job_notes_data(self.cursor, table_name, 'job_id', job_id, order_col, order)
 
        
         if is_data_present is True and not note_data:
