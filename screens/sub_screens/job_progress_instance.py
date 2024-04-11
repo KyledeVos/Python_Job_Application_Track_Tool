@@ -390,7 +390,7 @@ class AllJobProgress():
             # only provide id and single line data fields to instance
             self.progress_rows.append(JobInstanceQuickViewDeletion(self.job_progress_frame, self.all_job_progress_data, progress_instance,  
                                                                    quick_display_count, self.all_job_progress_data['col_list'],
-                                                                   self.all_job_progress_data['column_info'],self.db_controller, count,
+                                                                   self.all_job_progress_data['column_info'],self.db_controller, count+1,
                                                                    self.clear_boxes_btn, self.delete_selected_btn, self.return_to_all_jobs_btn,
                                                                    self.check_box_full_deselection, self.outer_window_reload_func))
 
