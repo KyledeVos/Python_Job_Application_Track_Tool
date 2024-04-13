@@ -1,4 +1,5 @@
-
+# Regex needed for search of applications
+import re
 
 class DbReader():
 
@@ -38,6 +39,7 @@ class DbReader():
 
     
     # ----------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # Data Specific Functions
 
     def retrieve_job_application_date_ordered(self, cursor, columns, table_name, date_order):
@@ -45,7 +47,49 @@ class DbReader():
             return cursor.execute(f"SELECT id, {', '.join(columns)} FROM {table_name} ORDER BY date DESC").fetchall()
         elif date_order == "oldest":
             return cursor.execute(f"SELECT id, {', '.join(columns)} FROM {table_name} ORDER BY date ASC").fetchall()
+        
 
+     # ----------------------------------------------------------------------------------
+    def retrieve_search_job_applications_date_ordered(self, cursor, table_name, title_cols, search_cols, search_text, date_order):
+        # retrieve all job application data
+        if date_order == "recent":
+            all_data = cursor.execute(f"SELECT id, {', '.join(search_cols)} FROM {table_name}").fetchall()
+        elif date_order == "oldest":
+            all_data = cursor.execute(f"SELECT id, {', '.join(search_cols)} FROM {table_name}").fetchall()
+
+        # list to store application id's with desired field data matching (or partially matching) search text
+        match_id_list = []
+
+        # check each application
+        for job_tup in all_data:
+            # hold id of current application
+            id = job_tup[0]
+            # check each field value
+            for val in job_tup[1:]:
+                # confirm field has data
+                if val.strip()!= "":
+                    # remove case limitations and any whitespace when performing search
+                    if val.strip().lower().replace(" ", "").find(search_text.lower().strip().replace(" ", "") ) != -1:
+                        match_id_list.append(id)
+
+        if len(match_id_list) == 0:
+            # return none for no matches
+            return None
+        
+        else:
+            # list to store matching applications
+            matched_applications = []
+
+            for id in match_id_list:
+                query = f"SELECT id, {', '.join(title_cols)} FROM {table_name} WHERE id = {id}"
+                matched_applications.append(cursor.execute(query).fetchone())
+
+            return matched_applications
+
+        
+
+
+     # ----------------------------------------------------------------------------------
     def retrieve_configured_job_data(self, cursor, table_name, single_data, large_box_data, fk_data, id=None):
         
         combined_data = {}

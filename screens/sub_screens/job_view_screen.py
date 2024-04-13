@@ -55,6 +55,8 @@ class ViewAllApplicationsScreen(FullScreen):
         # set default order type as first in results_order
         self.notes_application_order.set(self.results_order[0])
 
+        self.current_applications = None
+
 
     def load_sort_menu(self, selected_order):
 
@@ -70,18 +72,20 @@ class ViewAllApplicationsScreen(FullScreen):
         self.load_window()
 
 
-    def load_window(self):
+    def load_window(self, load_currrent = True):
 
-        # retrieve job_application_data
-        current_applications = self.db_controller.retrieve_job_application_date_ordered(self.progress_application_order.get())
+        if load_currrent:
+            # retrieve job_application_data
+            self.current_applications = self.db_controller.retrieve_job_application_date_ordered(self.progress_application_order.get())
+        
 
-        if len(current_applications) == 0:
+        if len(self.current_applications) == 0:
             self.empty_label.config(text="No Job Applications")
             self.empty_label.grid(row=0, column=0)
         else:
             self.column_titles = ['Number']
 
-            self.column_titles += [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names()[1:len(current_applications[0])]]
+            self.column_titles += [name.title().replace("_", " ") for name in self.db_controller.retrieve_job_column_names()[1:len(self.current_applications[0])]]
 
             class Job_Instance():
 
@@ -123,6 +127,22 @@ class ViewAllApplicationsScreen(FullScreen):
             # track row_count
             row_placement_count = 0
 
+            # container holding search input field and start search button
+            self.search_container = Frame(self.container)
+            # search input field
+            self.search_field = Entry(self.search_container, width=50)
+            # start search button
+            self.start_search_btn = Button(self.search_container, text="Search", bootstyle='default', 
+                                           command=self.search_applications)
+
+            # place search container and inner fields
+            self.search_container.grid(row = row_placement_count, column=0, columnspan=5, sticky=W)
+            self.search_field.grid(row=0, column=0, padx=2, pady=5)
+            self.start_search_btn.grid(row=0, column=1, padx=2, pady=5)
+
+            row_placement_count += 1
+
+
             # add combo box label
             ordering_label = Label(self.container, text="Sort By:")
             ordering_label.grid(row=row_placement_count, column=0, pady=5)
@@ -144,9 +164,9 @@ class ViewAllApplicationsScreen(FullScreen):
             self.order_box.grid(row=row_placement_count, column=1, pady=5)
             row_placement_count += 1
 
-            for count, application in enumerate(current_applications):
+            for count, application in enumerate(self.current_applications):
                 # Add Column Titles
-                if row_placement_count == 1:
+                if row_placement_count == 2:
                     for col_count, title in enumerate(self.column_titles):
                         # Set reduced width for row count
                         if col_count == 0:
@@ -160,6 +180,21 @@ class ViewAllApplicationsScreen(FullScreen):
                 # Create Job Instance (with job data) and place on screen
                 current_job = Job_Instance(count+1, application, self.container, self.left_sub_window, self.db_controller)
                 current_job.place_on_screen(row_placement_count+1)
+
+    def search_applications(self):
+        # Only perform search if search_field contains values
+        if self.search_field.get().strip() != "":
+            self.current_applications = self.db_controller.search_job_applications(self.progress_application_order.get(), self.search_field.get())
+
+            for widget in self.container.grid_slaves():
+                widget.grid_remove()
+                
+            self.load_window(load_currrent=False)
+        
+        
+            
+
+
 
 # View Specific Job
 class JobView(FullScreen):

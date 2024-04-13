@@ -24,6 +24,8 @@ class JobApplicationDefault():
         # Data Update - set columns that can be updated
         self.update_cols = ['date', 'company', 'position', 'salary', 'location', 'description',
                             'type_id', 'period_id', 'status_id']
+        # Defined Column Titles to be used for searching
+        self.search_cols = ['company', 'position', 'location', 'description']
 
 
 class JobProgressDefaults():
@@ -348,6 +350,24 @@ class DatabaseController():
         self.connection.close()
 
         return data
+    
+    # -------------------------------------------------------------------------------------------------
+    def search_job_applications(self, date_order, search_text ):
+
+        # Set Default Values
+        table_name = 'job_applications'
+        # retrieve list of specified columns to use for search
+        search_cols = JobApplicationDefault().search_cols
+        # Specify columns to be displayed when displaying all applications (summary)
+        title_columns = ['date, company, position']
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        data = self.db_reader.retrieve_search_job_applications_date_ordered(self.cursor, table_name, title_columns, search_cols, search_text, date_order)
+        self.connection.close()
+
+        return data
+
 
 
     def retrieve_all_job_data(self):
