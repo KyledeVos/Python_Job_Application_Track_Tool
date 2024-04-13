@@ -245,6 +245,14 @@ class DbReader():
                 return True
             
         return False
+    
+
+    def check_note_data(self, cursor, table_name, search_field, search_val):
+                if cursor.execute(f"SELECT * from {table_name} where {search_field} == {search_val}").fetchone() is None:
+                    return False
+                else:
+                    return True
+
 
 
 

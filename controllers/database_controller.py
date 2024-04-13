@@ -299,6 +299,21 @@ class DatabaseController():
             self.connection.close()
 
             return col_val_data
+        
+    def is_note_data_present(self, job_id):
+
+        # Set Defaults
+        table_name = "job_notes"
+
+        self.connection = sqlite3.connect(self.database)
+        self.cursor = self.connection.cursor()
+        
+        data_present =  self.db_reader.check_note_data(self.cursor, table_name, "job_id", job_id)
+
+        self.connection.close()
+
+        return data_present
+
 
 
     def is_incomplete_notes(self, job_id):

@@ -70,6 +70,9 @@ class AllNotesView():
 
         # update state of incomplete notes present
         self.incomplete_notes_present = self.db_controller.is_incomplete_notes(self.job_id)
+        # update state of any job notes present
+        self.note_data_present = self.db_controller.is_note_data_present(self.job_id)
+
         if self.incomplete_notes_present is False and incomplete_only is True:
             self.notes_all_data == None
             return
@@ -79,16 +82,18 @@ class AllNotesView():
 
     def load_all_to_do_notes(self, row_count = 0):
 
+
         for label in self.outer_container.grid_slaves():
             label.grid_remove()
+            
+        # check for view all button - disable if there are no notes to display
+        if self.view_all_btn is not None:
+                if self.note_data_present is False:
+                    self.view_all_btn.configure(state='disabled')
 
         if self.notes_all_data is None:
             # No present note data, display message
             Label(self.outer_container, text="No To-Do Items").grid(row=row_count, column=0, padx=5, pady=5, sticky=W+E)
-
-            # check for view all button - disable if there are no notes to display
-            if self.view_all_btn is not None:
-                self.view_all_btn.configure(state='disabled')
 
         # if only incomplete notes display is desired, check if there were incomplete notes present
         elif self.include_all and self.notes_all_data is None:
